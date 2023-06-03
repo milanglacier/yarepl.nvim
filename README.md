@@ -315,7 +315,7 @@ Here are examples of how to use this command:
 3. `REPLSendMotion ipython` sends the motion to the closest ipython REPL
    relative to id `1`.
 
-4h `3REPLSendMotion ipython` sends the motion to the closest ipython REPL
+4. `3REPLSendMotion ipython` sends the motion to the closest ipython REPL
    relative to id `3`.
 
 `REPLSendMotion` is **dot-repeatable**, you do not need to install
