@@ -139,13 +139,13 @@ Here is a list of available commands:
 Creates a REPL with id `i` from the list of available REPLs.
 
 You can create a REPL with a specific id by providing a count, such as
-`3REPLStart` for a REPL with id `3`. If no count is provided, REPL 1 will be cr
-eated. You can also provide a name as an argument. If no argument is given,
+`3REPLStart` for a REPL with id `3`. If no count is provided, REPL 1 will be
+created. You can also provide a name as an argument. If no argument is given,
 you'll be prompted to select a REPL from the list of available ones. If the id
 is already in use, it will focus on the REPL with that id. If you append a `!`
 to the command, the current buffer will attach to the newly created REPL, for
-instance, `REPLStart!` or `3REPLStart!`. Note that attachment o nly happens
-when a new REPL is created.
+instance, `REPLStart!` or `3REPLStart!`. Note that attachment only happens when
+a new REPL is created.
 
 ### REPLAttachBufferToREPL
 
@@ -153,7 +153,7 @@ Attaches the current buffer to REPL `i`, for instance,
 `3REPLAttachBufferToREPL` will attach the current buffer to REPL 3. If no count
 is provided, you'll be prompted to select the REPL you want to attach the
 current buffer to. If you add a trailing `!`, it will attempt to detach the
-current buffer fr om any REPL.
+current buffer from any REPL.
 
 ### REPLDetachBufferToREPL
 
