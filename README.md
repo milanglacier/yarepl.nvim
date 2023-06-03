@@ -1,5 +1,6 @@
 - [yarepl.nvim](#yareplnvim)
 - [What is yarepl.nvim?](#what-is-yareplnvim-)
+- [Why yarepl.nvim?](#why-yareplnvim-)
 - [Installation](#installation)
 - [Configuration](#configuration)
   * [Setup](#setup)
@@ -19,8 +20,11 @@
 - [Add your own REPLs](#add-your-own-repls)
 - [Example keybinding setup](#example-keybinding-setup)
 - [Telescope Integration](#telescope-integration)
-- [Limitation](#limitation)
-- [Shout out](#shout-out)
+- [FAQ](#faq)
+  * [How do I avoid clutter from the bufferline plugin?](#how-do-i-avoid-clutter-from-the-bufferline-plugin-)
+  * [REPLSendVisual is not functioning properly](#replsendvisual-is-not-functioning-properly)
+- [Limitations](#limitations)
+- [Acknowledgements](#acknowledgements)
 
 # yarepl.nvim
 
@@ -537,7 +541,7 @@ clutter your bufferline, pass `buflisted = false` in the `setup` function.
 In case you have unlisted the REPLs and need to view the running ones, use
 `Telescope REPLShow`.
 
-## `REPLSendVisual` is not functioning properly
+## REPLSendVisual is not functioning properly
 
 Refer to [REPLSendVisual](#replsendvisual)
 
