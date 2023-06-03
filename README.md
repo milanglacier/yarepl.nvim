@@ -51,7 +51,7 @@ workflow. I almost spending lifes in communicating with various REPLs, like R,
 Python, and Bash.
 
 With multiple projects at hand, I require the ability to send text from
-different files to REPLs with the same type (such as multiple i python REPLs).
+different files to REPLs with the same type (such as multiple ipython REPLs).
 
 In instances where I'm performing time-consuming tasks, but need to conduct
 further experimentation on the current file, I also require the capability to
@@ -128,8 +128,8 @@ yarepl.setup {
 
 ## Commands
 
-`yarepl` doesn't provide any keybindings. Instead, it offers a variety of c
-ommands that you can use to create your own keybindings. We'll also provide an
+`yarepl` doesn't provide any keybindings. Instead, it offers a variety of
+commands that you can use to create your own keybindings. We'll also provide an
 example configuration for keybindings based on these commands.
 
 Here is a list of available commands:
@@ -138,8 +138,8 @@ Here is a list of available commands:
 
 Creates a REPL with id `i` from the list of available REPLs.
 
-You can create a REPL with a specific id by providing a count, such as `3RE
-PLStart` for a REPL with id `3`. If no count is provided, REPL 1 will be cr
+You can create a REPL with a specific id by providing a count, such as
+`3REPLStart` for a REPL with id `3`. If no count is provided, REPL 1 will be cr
 eated. You can also provide a name as an argument. If no argument is given,
 you'll be prompted to select a REPL from the list of available ones. If the id
 is already in use, it will focus on the REPL with that id. If you append a `!`
@@ -182,12 +182,12 @@ Here are some examples of how to use this command:
    REPL 1.
 
 2. `REPLFocus ipython` will try to focus on the closest REPL with the name
-   'ipython' starting from id `1`.
+   `ipython` starting from id `1`.
 
 3. `3REPLFocus` will focus on REPL 3.
 
 4. `3REPLFocus ipython` will try to focus on the closest REPL with the name
-   'ipython' starting from id `3`.
+   `ipython` starting from id `3`.
 
 ### REPLHide
 
@@ -530,6 +530,9 @@ buffers. If you are using the default Telescope configuration, `<C-t>` opens a
 new tab for the selected REPL, `<C-v>` generates a vertical split window for
 the chosen REPL, and `<C-x>` creates a horizontal split window for your
 selected REPL.
+
+`yarepl` heavily uses `vim.ui.select`, we recommend use a `select` frontend
+like `dressing.nvim` or `telescope-ui-select.nvim` for best experience.
 
 # FAQ
 
