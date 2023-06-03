@@ -414,6 +414,36 @@ Create REPL `i` from the list of available REPLs.
 ]],
 })
 
+---@param id number the id of the repl,
+---@param name string the name of the closest repl that will try to find
+---@param strings table[string] a list of strings
+---@param use_formatter boolean whether use formatter (e.g. bracketed_pasting)? Default: true
+-- Send a list of strings to the repl specified by `id` and `name`. If `id` is
+-- 0, then will try to find the REPL that current buffer is attached to, if not
+-- find, will use `id = 1`. If `name` is not nil or not an empty string, then
+-- will try to find the REPL with `name` relative to `id`.
+M._send_strings = function(id, name, strings, use_formatter)
+    use_formatter = use_formatter == nil and true or use_formatter
+    local current_bufnr = api.nvim_get_current_buf()
+
+    local repl = get_repl(id, name, current_bufnr)
+
+    if not repl then
+        vim.notify [[REPL doesn't exist!]]
+        return
+    end
+
+    if use_formatter then
+        strings = M._config.metas[repl.name].formatter(strings)
+    end
+
+    fn.chansend(repl.term, strings)
+
+    if M._config.scroll_to_bottom_after_sending then
+        repl_win_scroll_to_bottom(repl)
+    end
+end
+
 api.nvim_create_user_command(
     'REPLCleanup',
     repl_cleanup,
