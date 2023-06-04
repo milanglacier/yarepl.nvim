@@ -421,14 +421,14 @@ keymap('v', '<Leader>cr', '', {
 })
 keymap('n', '<Leader>crr', '', {
     callback = run_cmd_with_count 'REPLSendLine aichat',
-    desc = 'Send motion to Aichat',
+    desc = 'Send current line to Aichat',
 })
 -- `<Leader>crap` will send a paragraph to the first aichat REPL.
 -- `2<Leader>crap` will send a paragraph to the second aichat REPL. Note that
 -- `ap` is just an example and can be replaced with any text object or motion.
 keymap('n', '<Leader>cr', '', {
     callback = run_cmd_with_count 'REPLSendMotion aichat',
-    desc = 'Send current line to Aichat',
+    desc = 'Send motion to Aichat',
 })
 keymap('n', '<Leader>cq', '', {
     callback = run_cmd_with_count 'REPLClose aichat',
@@ -470,21 +470,21 @@ autocmd('FileType', {
             callback = run_cmd_with_count 'REPLHide',
             desc = 'Hide REPL',
         })
-        -- `<LocalLeader>sap` will send the current paragraph to the
-        -- buffer-attached REPL, or REPL 1 if there is no REPL attached.
-        -- `2<Leader>sap` will send the paragraph to REPL 2. Note that `ap` is
-        -- just an example and can be replaced with any text object or motion.
         bufmap(0, 'v', '<LocalLeader>s', '', {
             callback = run_cmd_with_count 'REPLSendVisual',
             desc = 'Send visual region to REPL',
         })
         bufmap(0, 'n', '<LocalLeader>ss', '', {
             callback = run_cmd_with_count 'REPLSendLine',
-            desc = 'Send line to REPL',
+            desc = 'Send current line to REPL',
         })
+        -- `<LocalLeader>sap` will send the current paragraph to the
+        -- buffer-attached REPL, or REPL 1 if there is no REPL attached.
+        -- `2<Leader>sap` will send the paragraph to REPL 2. Note that `ap` is
+        -- just an example and can be replaced with any text object or motion.
         bufmap(0, 'n', '<LocalLeader>s', '', {
             callback = run_cmd_with_count 'REPLSendMotion',
-            desc = 'Send current line to REPL',
+            desc = 'Send motion to REPL',
         })
         bufmap(0, 'n', '<LocalLeader>rq', '', {
             callback = run_cmd_with_count 'REPLClose',
