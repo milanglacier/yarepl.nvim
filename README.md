@@ -399,10 +399,14 @@ end
 local keymap = vim.api.nvim_set_keymap
 local bufmap = vim.api.nvim_buf_set_keymap
 
+-- <Leader>cs will be equivalent to `REPLStart aichat`
+-- 2<Leader>cs will be equivalent to `2REPLStart aichat`, etc.
 keymap('n', '<Leader>cs', '', {
     callback = run_cmd_with_count 'REPLStart aichat',
     desc = 'Start an Aichat REPL',
 })
+-- <Leader>cf will be equivalent to `REPLFocus aichat`
+-- 2<Leader>cf will be equivalent to `2REPLFocus aichat`, etc.
 keymap('n', '<Leader>cf', '', {
     callback = run_cmd_with_count 'REPLFocus aichat',
     desc = 'Focus on Aichat REPL',
@@ -419,6 +423,9 @@ keymap('n', '<Leader>crr', '', {
     callback = run_cmd_with_count 'REPLSendLine aichat',
     desc = 'Send motion to Aichat',
 })
+-- `<Leader>crap` will send a paragraph to the first aichat REPL.
+-- `2<Leader>crap` will send a paragraph to the second aichat REPL. Note that
+-- `ap` is just an example and can be replaced with any text object or motion.
 keymap('n', '<Leader>cr', '', {
     callback = run_cmd_with_count 'REPLSendMotion aichat',
     desc = 'Send current line to Aichat',
@@ -463,6 +470,10 @@ autocmd('FileType', {
             callback = run_cmd_with_count 'REPLHide',
             desc = 'Hide REPL',
         })
+        -- `<LocalLeader>sap` will send the current paragraph to the
+        -- buffer-attached REPL, or REPL 1 if there is no REPL attached.
+        -- `2<Leader>sap` will send the paragraph to REPL 2. Note that `ap` is
+        -- just an example and can be replaced with any text object or motion.
         bufmap(0, 'v', '<LocalLeader>s', '', {
             callback = run_cmd_with_count 'REPLSendVisual',
             desc = 'Send visual region to REPL',
