@@ -179,6 +179,38 @@ M.bufnr_is_attached_to_repl = function(bufnr)
     end
 end
 
+---@param id number the id of the repl,
+---@param name string the name of the closest repl that will try to find
+---@param bufnr number the buffer number of the buffer
+---@return table|nil repl the repl object or nil if not found
+-- get the repl specified by `id` and `name`. If `id` is 0, then will try to
+-- find the REPL `bufnr` is attached to, if not find, will use `id = 1`. If
+-- `name` is not nil or not an empty string, then will try to find the REPL
+-- with `name` relative to `id`.
+local function get_repl(id, name, bufnr)
+    local repl
+    if id == nil or id == 0 then
+        repl = M._bufnrs_to_repls[bufnr]
+        id = 1
+        if not repl_is_valid(repl) then
+            repl = M._repls[id]
+        end
+    else
+        repl = M._repls[id]
+    end
+
+    if name ~= nil and name ~= '' then
+        id = find_closest_repl_from_id_with_name(id, name)
+        repl = M._repls[id]
+    end
+
+    if not repl_is_valid(repl) then
+        return nil
+    end
+
+    return repl
+end
+
 -- currently only support line-wise sending in both visual and operator mode.
 local function get_lines(mode)
     local begin_mark = mode == 'operator' and "'[" or "'<"
@@ -230,27 +262,14 @@ M._send_motion_internal = function(motion)
         vim.go.operatorfunc = [[v:lua.require'yarepl'._send_motion_internal]]
         api.nvim_feedkeys('g@', 'ni', false)
     end
-    local repl
 
     local id = vim.b[0].repl_id
+    local name = vim.b[0].closest_repl_name
     local current_bufnr = api.nvim_get_current_buf()
 
-    if not id then
-        repl = M._bufnrs_to_repls[current_bufnr]
-        id = 1
-        if not repl_is_valid(repl) then
-            repl = M._repls[id]
-        end
-    else
-        repl = M._repls[id]
-    end
+    local repl = get_repl(id, name, current_bufnr)
 
-    if vim.b[0].closest_repl_name then
-        id = find_closest_repl_from_id_with_name(id, vim.b[0].closest_repl_name)
-        repl = M._repls[id]
-    end
-
-    if not repl_is_valid(repl) then
+    if not repl then
         vim.notify [[REPL doesn't exist!]]
         return
     end
@@ -322,22 +341,14 @@ api.nvim_create_user_command(
 
 api.nvim_create_user_command('REPLFocus', function(opts)
     local id = opts.count
+    local name = opts.args
     local current_buffer = api.nvim_get_current_buf()
-    local repl
 
-    if id == 0 then
-        repl = M._bufnrs_to_repls[current_buffer]
-        id = 1
-        if not repl_is_valid(repl) then
-            repl = M._repls[id]
-        end
-    else
-        repl = M._repls[id]
-    end
+    local repl = get_repl(id, name, current_buffer)
 
-    if opts.args ~= '' then
-        id = find_closest_repl_from_id_with_name(id, opts.args)
-        repl = M._repls[id]
+    if not repl then
+        vim.notify [[REPL doesn't exist!]]
+        return
     end
 
     focus_repl(repl)
@@ -350,26 +361,13 @@ Focus on REPL `i` or the REPL that current buffer is attached to.
 })
 
 api.nvim_create_user_command('REPLHide', function(opts)
-    local repl
     local id = opts.count
+    local name = opts.args
     local current_buffer = api.nvim_get_current_buf()
 
-    if id == 0 then
-        repl = M._bufnrs_to_repls[current_buffer]
-        id = 1
-        if not repl_is_valid(repl) then
-            repl = M._repls[id]
-        end
-    else
-        repl = M._repls[id]
-    end
+    local repl = get_repl(id, name, current_buffer)
 
-    if opts.args ~= '' then
-        id = find_closest_repl_from_id_with_name(id, opts.args)
-        repl = M._repls[id]
-    end
-
-    if not repl_is_valid(repl) then
+    if not repl then
         vim.notify [[REPL doesn't exist!]]
         return
     end
@@ -389,26 +387,13 @@ Hide REPL `i` or the REPL that current buffer is attached to.
 })
 
 api.nvim_create_user_command('REPLClose', function(opts)
-    local repl
     local id = opts.count
+    local name = opts.args
     local current_buffer = api.nvim_get_current_buf()
 
-    if id == 0 then
-        id = 1
-        repl = M._bufnrs_to_repls[current_buffer]
-        if not repl_is_valid(repl) then
-            repl = M._repls[id]
-        end
-    else
-        repl = M._repls[id]
-    end
+    local repl = get_repl(id, name, current_buffer)
 
-    if opts.args ~= '' then
-        id = find_closest_repl_from_id_with_name(id, opts.args)
-        repl = M._repls[id]
-    end
-
-    if not repl_is_valid(repl) then
+    if not repl then
         vim.notify [[REPL doesn't exist!]]
         return
     end
@@ -511,29 +496,17 @@ end, {
 })
 
 api.nvim_create_user_command('REPLSendVisual', function(opts)
-    local repl
     local id = opts.count
+    local name = opts.args
     local current_buffer = api.nvim_get_current_buf()
 
-    if id == 0 then
-        repl = M._bufnrs_to_repls[current_buffer]
-        id = 1
-        if not repl_is_valid(repl) then
-            repl = M._repls[id]
-        end
-    else
-        repl = M._repls[id]
-    end
+    local repl = get_repl(id, name, current_buffer)
 
-    if opts.args ~= '' then
-        id = find_closest_repl_from_id_with_name(id, opts.args)
-        repl = M._repls[id]
-    end
-
-    if not repl_is_valid(repl) then
+    if not repl then
         vim.notify [[REPL doesn't exist!]]
         return
     end
+
     -- we must use `<ESC>` to clear those marks to mark '> and '> to be able to
     -- access the updated visual range. Those magic letters 'nx' are coming
     -- from Vigemus/iron.nvim and I am not quiet understand the effect of those
@@ -552,26 +525,13 @@ Send visual range to REPL `i` or the REPL that current buffer is attached to.
 })
 
 api.nvim_create_user_command('REPLSendLine', function(opts)
-    local repl
     local id = opts.count
+    local name = opts.args
     local current_buffer = api.nvim_get_current_buf()
 
-    if id == 0 then
-        repl = M._bufnrs_to_repls[current_buffer]
-        id = 1
-        if not repl_is_valid(repl) then
-            repl = M._repls[id]
-        end
-    else
-        repl = M._repls[id]
-    end
+    local repl = get_repl(id, name, current_buffer)
 
-    if opts.args ~= '' then
-        id = find_closest_repl_from_id_with_name(id, opts.args)
-        repl = M._repls[id]
-    end
-
-    if not repl_is_valid(repl) then
+    if not repl then
         vim.notify [[REPL doesn't exist!]]
         return
     end
