@@ -584,7 +584,7 @@ vim.o.exrc = 1
 Then, configure `yarepl` like so:
 
 ```lua
-vim.g.ipython_paths = vim.g.ipython_paths or {}
+vim.g.yarepl_ipython_paths = vim.g.yarepl_ipython_paths or {}
 local yarepl = require 'yarepl'
 
 require('yarepl').setup {
