@@ -102,6 +102,14 @@ local function create_repl(id, repl_name)
     local bufnr = api.nvim_create_buf(M._config.buflisted, M._config.scratch)
     api.nvim_buf_set_option(bufnr, 'filetype', M._config.ft)
 
+    local cmd
+
+    if type(M._config.metas[repl_name].cmd) == 'function' then
+        cmd = M._config.metas[repl_name].cmd()
+    else
+        cmd = M._config.metas[repl_name].cmd
+    end
+
     if type(M._config.wincmd) == 'function' then
         M._config.wincmd(bufnr, repl_name)
     else
@@ -126,7 +134,7 @@ local function create_repl(id, repl_name)
         repl_cleanup()
     end
 
-    local term = fn.termopen(M._config.metas[repl_name].cmd, opts)
+    local term = fn.termopen(cmd, opts)
     api.nvim_buf_set_name(bufnr, string.format('#%s#%d', repl_name, id))
     M._repls[id] = { bufnr = bufnr, term = term, name = repl_name }
 end
