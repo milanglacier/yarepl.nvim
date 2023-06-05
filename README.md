@@ -20,6 +20,7 @@
 - [Add your own REPLs](#add-your-own-repls)
 - [Example keybinding setup](#example-keybinding-setup)
 - [Telescope Integration](#telescope-integration)
+- [Set up project-level REPLs](#set-up-project-level-repls)
 - [FAQ](#faq)
   * [How do I avoid clutter from the bufferline plugin?](#how-do-i-avoid-clutter-from-the-bufferline-plugin-)
   * [REPLSendVisual is not functioning properly](#replsendvisual-is-not-functioning-properly)
@@ -373,13 +374,31 @@ function send_line_verbatim(lines)
     return lines
 end
 
+function ipython_or_python()
+    if vim.fn.executable 'ipython' == 1 then
+        return { 'ipython', '--simple-prompt' }
+    else
+        return 'python'
+    end
+end
+
+function ipython_or_python_formatter(lines)
+    if vim.fn.executable 'ipython' == 1 then
+        return yarepl.formatter.bracketed_pasting(lines)
+    else
+        return yarepl.formatter.trim_empty_lines(lines)
+    end
+end
+
 metas = {
     ipython_new = { cmd = { 'ipython', '--simple-prompt' }, formatter = send_line_verbatim },
+    ipython_or_python = { cmd = ipython_or_python, formatter = ipython_or_python_formatter },
 }
 
--- cmd can accept either a list or a string. formatter accepts a function that
--- takes a list of string and returns a list of lines. See `:h chansend` to see
--- the specification for the list of string
+-- cmd can be three types: a string, a list of strings, or a function that
+-- returns either a string or list of strings. formatter is a function takes a
+-- list of string and returns a list of strings. See `:h chansend` to see the
+-- specification for the list of string
 ```
 
 For modern REPLs with bracketed pasting support (which is usually the case), it
@@ -544,6 +563,69 @@ selected REPL.
 
 `yarepl` heavily uses `vim.ui.select`, we recommend use a `select` frontend
 like `dressing.nvim` or `telescope-ui-select.nvim` for best experience.
+
+# Set up project-level REPLs
+
+You may want to have the ability to control the REPL metas at the project
+level. For example, you may want to open `ipython` installed in a conda
+environment for one project and a different `ipython` installed in another
+conda environment for another project. 
+
+One way to achieve this is to:
+
+- Enable the built-in `exrc`, which requires `nvim 0.9` for security reasons.
+
+To enable `exrc`, add the following line to your Neovim config:
+
+```lua
+vim.o.exrc = 1
+```
+
+Then, configure `yarepl` like so:
+
+```lua
+vim.g.ipython_paths = vim.g.ipython_paths or {}
+local yarepl = require 'yarepl'
+
+require('yarepl').setup {
+    metas = {
+        ipython = {
+            cmd = function()
+                local cwd = vim.fn.getcwd()
+                if vim.g.ipython_paths and vim.g.ipython_paths[cwd] then
+                    return vim.g.ipython_paths
+                else
+                    return 'ipython'
+                end
+            end,
+        },
+    },
+}
+```
+
+Now, in the project root directory `~/projects/project1`, create a file
+called `.nvim.lua` with the following lines:
+
+```lua
+local cwd = vim.fn.getcwd()
+
+if vim.g.yarepl_ipython_paths then
+    vim.g.yarepl_ipython_paths[cwd] = '~/mambaforge/envs/a-conda-env/bin/ipyhon'
+else
+    vim.g.yarepl_ipython_paths = {
+        [cwd] = '~/mambaforge/envs/a-conda-env/bin/ipyhon',
+    }
+end
+```
+
+The first time you open `project1`, Neovim will prompt you to decide whether
+you want to load the `.nvim.lua` file. Please allow it.
+
+**Note:** The `.nvim.lua` file will be automatically loaded only once when
+Neovim starts. Thus, if you switch working directories during the time Neovim
+is running, the `.nvim.lua` file won't be loaded at the new working directory.
+To manually load the `.nvim.lua` file after switching to a new working
+directory, try `:luafile .nvim.lua`.
 
 # FAQ
 
