@@ -11,6 +11,7 @@
     + [REPLCleanup](#replcleanup)
     + [REPLFocus](#replfocus)
     + [REPLHide](#replhide)
+    + [REPLHideOrFocus](#replhideorfocus)
     + [REPLClose](#replclose)
     + [REPLSwap](#replswap)
     + [REPLSendVisual](#replsendvisual)
@@ -168,7 +169,7 @@ automatically at the appropriate time.
 
 ### REPLFocus
 
-Focuses on REPL `i` or the REPL that the current buffer is attached to. 
+Focuses on REPL `i` or the REPL that the current buffer is attached to.
 
 You can provide an optional argument, and the function will attempt to focus on
 the closest REPL with the specified name. If no count is supplied, it will try
@@ -212,6 +213,31 @@ Here are examples of how to use this command:
 
 4. `3REPLHide ipython` will try to hide the closest REPL with the name
    `ipython` starting from id `3`.
+
+### REPLHideOrFocus
+
+Hides or focuses on REPL `i` or the REPL that the current buffer is attached
+to.
+
+If you provide an optional argument, the function will attempt to hide or focus
+on the closest REPL with the specified name. When no count is supplied, it will
+try to hide or focus on the REPL that the current buffer is attached to. If the
+current buffer isn't attached to any REPL, it will use REPL 1. If you add a
+count `i`, it will hide REPL `i`.
+
+Here are examples of how to use this command:
+
+1. `REPLHideOrFocus` will try to hide or focus on the REPL that the current
+   buffer is attached to. If the current buffer isn't attached to any REPL, it
+   will use REPL 1.
+
+2. `REPLHideOrFocus ipython` will try to hide or focus on the closest REPL with
+   the name `ipython` starting from id `1`.
+
+3. `3REPLHideOrFocus` will hide or focus on REPL 3.
+
+4. `3REPLHideOrFocus ipython` will try to hide or focus on the closest REPL
+   with the name `ipython` starting from id `3`.
 
 ### REPLClose
 
@@ -569,7 +595,7 @@ like `dressing.nvim` or `telescope-ui-select.nvim` for best experience.
 You may want to have the ability to control the REPL metas at the project
 level. For example, you may want to open `ipython` installed in a conda
 environment for one project and a different `ipython` installed in another
-conda environment for another project. 
+conda environment for another project.
 
 One way to achieve this is to:
 

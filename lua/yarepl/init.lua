@@ -394,6 +394,36 @@ Hide REPL `i` or the REPL that current buffer is attached to.
 ]],
 })
 
+api.nvim_create_user_command('REPLHideOrFocus', function(opts)
+    local id = opts.count
+    local name = opts.args
+    local current_buffer = api.nvim_get_current_buf()
+
+    local repl = get_repl(id, name, current_buffer)
+
+    if not repl then
+        vim.notify [[REPL doesn't exist!]]
+        return
+    end
+
+    local bufnr = repl.bufnr
+    local win = fn.bufwinid(bufnr)
+    if win ~= -1 then
+        while win ~= -1 do
+            api.nvim_win_close(win, true)
+            win = fn.bufwinid(bufnr)
+        end
+    else
+        focus_repl(repl)
+    end
+end, {
+    count = true,
+    nargs = '?',
+    desc = [[
+Hide or focus REPL `i` or the REPL that current buffer is attached to.
+]],
+})
+
 api.nvim_create_user_command('REPLClose', function(opts)
     local id = opts.count
     local name = opts.args
