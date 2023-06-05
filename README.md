@@ -593,7 +593,7 @@ require('yarepl').setup {
             cmd = function()
                 local cwd = vim.fn.getcwd()
                 if vim.g.ipython_paths and vim.g.ipython_paths[cwd] then
-                    return vim.g.ipython_paths
+                    return vim.g.ipython_paths[cwd]
                 else
                     return 'ipython'
                 end
