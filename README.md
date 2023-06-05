@@ -592,8 +592,8 @@ require('yarepl').setup {
         ipython = {
             cmd = function()
                 local cwd = vim.fn.getcwd()
-                if vim.g.ipython_paths and vim.g.ipython_paths[cwd] then
-                    return vim.g.ipython_paths[cwd]
+                if vim.g.yarepl_ipython_paths and vim.g.yarepl_ipython_paths[cwd] then
+                    return vim.g.yarepl_ipython_paths[cwd]
                 else
                     return 'ipython'
                 end
@@ -610,10 +610,10 @@ called `.nvim.lua` with the following lines:
 local cwd = vim.fn.getcwd()
 
 if vim.g.yarepl_ipython_paths then
-    vim.g.yarepl_ipython_paths[cwd] = '~/mambaforge/envs/a-conda-env/bin/ipyhon'
+    vim.g.yarepl_ipython_paths[cwd] = '~/mambaforge/envs/a-conda-env/bin/ipython'
 else
     vim.g.yarepl_ipython_paths = {
-        [cwd] = '~/mambaforge/envs/a-conda-env/bin/ipyhon',
+        [cwd] = '~/mambaforge/envs/a-conda-env/bin/ipython',
     }
 end
 ```
