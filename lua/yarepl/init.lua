@@ -110,8 +110,8 @@ local function create_repl(id, repl_name)
     end
 
     local opts = {}
-    if M._config.close_on_exit then
-        opts.on_exit = function()
+    opts.on_exit = function()
+        if M._config.close_on_exit then
             local bufwinid = fn.bufwinid(bufnr)
             while bufwinid ~= -1 do
                 api.nvim_win_close(bufwinid, true)
@@ -122,8 +122,8 @@ local function create_repl(id, repl_name)
             if api.nvim_buf_is_loaded(bufnr) then
                 api.nvim_buf_delete(bufnr, { force = true })
             end
-            repl_cleanup()
         end
+        repl_cleanup()
     end
 
     local term = fn.termopen(M._config.metas[repl_name].cmd, opts)
