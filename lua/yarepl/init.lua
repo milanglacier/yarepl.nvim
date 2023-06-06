@@ -226,12 +226,10 @@ local function repl_win_scroll_to_bottom(repl)
         return
     end
 
-    local current_win = api.nvim_get_current_win()
     local repl_win = fn.bufwinid(repl.bufnr)
     if repl_win ~= -1 then
-        api.nvim_set_current_win(repl_win)
-        vim.cmd [[normal! G]]
-        api.nvim_set_current_win(current_win)
+        local lines = api.nvim_buf_line_count(repl.bufnr)
+        api.nvim_win_set_cursor(repl_win, { lines, 0 })
     end
 end
 
