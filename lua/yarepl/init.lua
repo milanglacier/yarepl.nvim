@@ -22,6 +22,7 @@ local default_config = function()
             bash = { cmd = 'bash', formatter = M.formatter.trim_empty_lines },
         },
         close_on_exit = true,
+        scroll_to_bottom_after_sending = true,
     }
 end
 
@@ -219,6 +220,21 @@ local function get_repl(id, name, bufnr)
     return repl
 end
 
+local function repl_win_scroll_to_bottom(repl)
+    if not repl_is_valid(repl) then
+        vim.notify [[REPL doesn't exist!]]
+        return
+    end
+
+    local current_win = api.nvim_get_current_win()
+    local repl_win = fn.bufwinid(repl.bufnr)
+    if repl_win ~= -1 then
+        api.nvim_set_current_win(repl_win)
+        vim.cmd [[normal! G]]
+        api.nvim_set_current_win(current_win)
+    end
+end
+
 -- currently only support line-wise sending in both visual and operator mode.
 local function get_lines(mode)
     local begin_mark = mode == 'operator' and "'[" or "'<"
@@ -285,6 +301,10 @@ M._send_motion_internal = function(motion)
     local lines = get_lines 'operator'
     lines = M._config.metas[repl.name].formatter(lines)
     fn.chansend(repl.term, lines)
+
+    if M._config.scroll_to_bottom_after_sending then
+        repl_win_scroll_to_bottom(repl)
+    end
 end
 
 M.setup = function(opts)
@@ -315,14 +335,24 @@ api.nvim_create_user_command('REPLStart', function(opts)
         }, function(choice)
             repl_name = choice
             create_repl(id, repl_name)
+
             if opts.bang then
                 attach_buffer_to_repl(current_bufnr, M._repls[id])
+            end
+
+            if M._config.scroll_to_bottom_after_sending then
+                repl_win_scroll_to_bottom(M._repls[id])
             end
         end)
     else
         create_repl(id, repl_name)
+
         if opts.bang then
             attach_buffer_to_repl(current_bufnr, M._repls[id])
+        end
+
+        if M._config.scroll_to_bottom_after_sending then
+            repl_win_scroll_to_bottom(M._repls[id])
         end
     end
 end, {
@@ -554,6 +584,10 @@ api.nvim_create_user_command('REPLSendVisual', function(opts)
     local lines = get_lines 'visual'
     lines = M._config.metas[repl.name].formatter(lines)
     fn.chansend(repl.term, lines)
+
+    if M._config.scroll_to_bottom_after_sending then
+        repl_win_scroll_to_bottom(M._repls[id])
+    end
 end, {
     count = true,
     nargs = '?',
@@ -577,6 +611,10 @@ api.nvim_create_user_command('REPLSendLine', function(opts)
     local line = api.nvim_get_current_line()
     local lines = M._config.metas[repl.name].formatter { line }
     fn.chansend(repl.term, lines)
+
+    if M._config.scroll_to_bottom_after_sending then
+        repl_win_scroll_to_bottom(M._repls[id])
+    end
 end, {
     count = true,
     nargs = '?',
