@@ -426,13 +426,39 @@ metas = {
 }
 
 -- cmd can be three types: a string, a list of strings, or a function that
--- returns either a string or list of strings. formatter is a function takes a
--- list of string and returns a list of strings. See `:h chansend` to see the
--- specification for the list of string
+-- returns either a string or list of strings.
+
+-- formatter is a function takes a list of string as an argument and returns a
+-- list of strings.
 ```
 
+Some REPLs can distinguish between pasted text and text from the user manual
+input by using prefix and suffix sequences, such as bracketed paste.
+
 For modern REPLs with bracketed pasting support (which is usually the case), it
-is recommended to simply use `yarepl.formatter.bracketed_pasting`.
+is recommended to use `yarepl.formatter.bracketed_pasting`.
+
+Here are some tips for writing your own formatter function:
+
+1. If your REPL cannot distinguish between copy-pasted text and text from user
+   manual input, you may want to append a `\r` at the end of each line to
+   signal a new line.
+
+2. If your REPL cannot distinguish between copy-pasted text and text from user
+   manual input, you may want to replace `\t` with 4 or 8 spaces since sending
+   a raw `\t` may be interpreted as invoking completion.
+
+3. Do not include `\n` in any line as the `chansend` function will
+   automatically replace it with `\0`.
+
+4. You may want to remove any empty lines from the input (a list of strings)
+   since `chansend` function translates an empty string `""` into `"\n"`. For
+   some REPLs without bracketed pasting support (such as Python), a plain
+   `"\n"` may be treated as the end of input, blocking the rest of the code in
+   the same function.
+
+5. The returned list of strings will be sent to the `chansend` function for
+   reference.
 
 # Example keybinding setup
 
