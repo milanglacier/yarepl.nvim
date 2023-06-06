@@ -586,7 +586,7 @@ api.nvim_create_user_command('REPLSendVisual', function(opts)
     fn.chansend(repl.term, lines)
 
     if M._config.scroll_to_bottom_after_sending then
-        repl_win_scroll_to_bottom(M._repls[id])
+        repl_win_scroll_to_bottom(repl)
     end
 end, {
     count = true,
@@ -613,7 +613,7 @@ api.nvim_create_user_command('REPLSendLine', function(opts)
     fn.chansend(repl.term, lines)
 
     if M._config.scroll_to_bottom_after_sending then
-        repl_win_scroll_to_bottom(M._repls[id])
+        repl_win_scroll_to_bottom(repl)
     end
 end, {
     count = true,
