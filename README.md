@@ -125,6 +125,10 @@ yarepl.setup {
     },
     -- when a REPL process exits, should the window associated with those REPLs closed?
     close_on_exit = true,
+    -- whether automatically scroll to the bottom of the REPL window after sending
+    -- text? This feature would be helpful if you want to ensure that your view
+    -- stays updated with the latest REPL output.
+    scroll_to_bottom_after_sending = true,
 }
 ```
 
