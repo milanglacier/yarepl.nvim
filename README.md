@@ -440,8 +440,8 @@ is recommended to use `yarepl.formatter.bracketed_pasting`.
 
 Here are some tips for writing your own formatter function:
 
-1. You may want to append a `\r` at the end of the final line to signal a new
-   line as the end of input.
+1. You may want to add a new entry `"\r"` at the end of the list to indicate
+   the end of input.
 
 2. If your REPL cannot distinguish between copy-pasted text and text from user
    manual input, you may want to replace `\t` with 4 or 8 spaces since sending
@@ -456,8 +456,67 @@ Here are some tips for writing your own formatter function:
    `"\n"` may be treated as the end of input, blocking the rest of the code in
    the same function.
 
-5. The returned list of strings will be sent to the `chansend` function for
+5. If your REPL cannot distinguish between copy-pasted text and text from user
+   manual input and your REPL will do auto-indent for you, you may want to
+   remove any leading spaces from each line to prevent double indentation.
+   
+6. The returned list of strings will be sent to the `chansend` function for
    reference.
+
+There's a `yarepl` helper function that allows you to quickly build a formatter
+function without having to write everything from scratch.
+
+```lua
+-- Calling this function will return a function that takes a list of strings as
+-- input and returns a list of strings. This can be used as the formatter function
+-- of meta.
+
+-- these are the default config
+yarepl.formatter.factory {
+    -- Specifies whether to return tabs in the string as spaces.
+    replace_tab_by_space = false,
+    -- Specifies the number of spaces to replace the tab (if enabled).
+    number_of_spaces_to_replace_tab = 8,
+    -- For a list of strings containing more than one string:
+    when_multi_lines = {
+        -- The prefixing code sent to the repl firstly.
+        open_code = '',
+        -- The suffixing code sent to the repl finally.
+        end_code = '\r',
+        -- Whether to remove empty lines from the list of strings.
+        trim_empty_lines = false,
+        -- Whether to remove leading spaces at the beginning of each line.
+        remove_leading_spaces = false,
+    },
+    -- For a list containing only one string:
+    when_single_line = {
+        -- The prefixing code sent to the repl firstly.
+        open_code = '',
+        -- The suffixing code sent to the repl finally.
+        end_code = '\r',
+    },
+}
+
+-- `yarepl` provides two default formatters, which can be constructed by
+-- calling `yarepl.formatter.factory` with different arguments, like this:
+
+yarepl.formatter.trim_empty_lines = yarepl.formatter.factory {
+    when_multi_lines = {
+        trim_empty_lines = true,
+        remove_leading_spaces = false,
+    },
+}
+
+yarepl.formatter.bracketed_pasting = yarepl.formatter.factory {
+    when_multi_lines = {
+        open_code = '\27[200~',
+        end_code = '\27[201~\r',
+        trim_empty_lines = false,
+        remove_leading_spaces = false,
+    },
+}
+```
+
 
 # Example keybinding setup
 

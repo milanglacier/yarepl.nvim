@@ -243,6 +243,64 @@ local function get_lines(mode)
     return api.nvim_buf_get_lines(0, begin_line - 1, end_line, false)
 end
 
+function M.formatter.factory(opts)
+    if type(opts) ~= 'table' then
+        error 'opts must be a table'
+    end
+
+    local config = {
+        replace_tab_by_space = false,
+        number_of_spaces_to_replace_tab = 8,
+        when_multi_lines = {
+            open_code = '',
+            end_code = '\r',
+            trim_empty_lines = false,
+            remove_leading_spaces = false,
+        },
+        when_single_line = {
+            open_code = '',
+            end_code = '\r',
+        },
+    }
+
+    config = vim.tbl_deep_extend('force', config, opts)
+
+    return function(lines)
+        if #lines == 1 then
+            if config.replace_tab_by_space then
+                lines[1] = lines[1]:gsub('\t', string.rep(' ', config.number_of_spaces_to_replace_tab))
+            end
+            lines[1] = config.when_single_line.open_code .. lines[1] .. config.when_single_line.end_code
+            return lines
+        end
+
+        local formatted_lines = { config.when_multi_lines.open_code .. lines[1] }
+        local current_line_need_to_be_dropped
+        local line
+
+        for i = 2, #lines - 1 do
+            line = lines[i]
+            current_line_need_to_be_dropped = config.trim_empty_lines and line == ''
+
+            if not current_line_need_to_be_dropped then
+                if config.when_multi_lines.remove_leading_spaces then
+                    line = line:gsub('^%s+', '')
+                end
+
+                if config.replace_tab_by_space then
+                    line = line:gsub('\t', string.rep(' ', config.number_of_spaces_to_replace_tab))
+                end
+
+                table.insert(formatted_lines, line)
+            end
+        end
+
+        table.insert(formatted_lines, config.when_multi_lines.end_code)
+
+        return formatted_lines
+    end
+end
+
 function M.formatter.bracketed_pasting(lines)
     local open_code = '\27[200~'
     local close_code = '\27[201~'
@@ -261,22 +319,29 @@ function M.formatter.bracketed_pasting(lines)
     end
 end
 
-function M.formatter.trim_empty_lines(lines)
-    local cr = '\13'
-    if #lines == 1 then
-        return { lines[1] .. cr }
-    else
-        local new = {}
-        for _, line in ipairs(lines) do
-            if line ~= '' then
-                table.insert(new, line)
-            end
-        end
+M.formatter.trim_empty_lines = M.formatter.factory {
+    when_multi_lines = {
+        trim_empty_lines = true,
+        remove_leading_spaces = false,
+    },
+}
 
-        table.insert(new, cr)
-        return new
-    end
-end
+-- function M.formatter.trim_empty_lines(lines)
+--     local cr = '\13'
+--     if #lines == 1 then
+--         return { lines[1] .. cr }
+--     else
+--         local new = {}
+--         for _, line in ipairs(lines) do
+--             if line ~= '' then
+--                 table.insert(new, line)
+--             end
+--         end
+--
+--         table.insert(new, cr)
+--         return new
+--     end
+-- end
 
 M._send_motion_internal = function(motion)
     -- hack: allow dot-repeat
