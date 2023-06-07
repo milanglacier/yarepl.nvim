@@ -280,7 +280,7 @@ function M.formatter.factory(opts)
 
         for i = 2, #lines do
             line = lines[i]
-            current_line_need_to_be_dropped = config.trim_empty_lines and line == ''
+            current_line_need_to_be_dropped = config.when_multi_lines.trim_empty_lines and line == ''
 
             if not current_line_need_to_be_dropped then
                 if config.when_multi_lines.remove_leading_spaces then
