@@ -278,7 +278,7 @@ function M.formatter.factory(opts)
         local current_line_need_to_be_dropped
         local line
 
-        for i = 2, #lines - 1 do
+        for i = 2, #lines do
             line = lines[i]
             current_line_need_to_be_dropped = config.trim_empty_lines and line == ''
 
