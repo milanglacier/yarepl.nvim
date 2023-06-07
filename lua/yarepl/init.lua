@@ -304,7 +304,6 @@ end
 M.formatter.trim_empty_lines = M.formatter.factory {
     when_multi_lines = {
         trim_empty_lines = true,
-        remove_leading_spaces = false,
     },
 }
 
@@ -312,8 +311,6 @@ M.formatter.bracketed_pasting = M.formatter.factory {
     when_multi_lines = {
         open_code = '\27[200~',
         end_code = '\27[201~\r',
-        trim_empty_lines = false,
-        remove_leading_spaces = false,
     },
 }
 
