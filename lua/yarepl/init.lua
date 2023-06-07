@@ -301,24 +301,6 @@ function M.formatter.factory(opts)
     end
 end
 
-function M.formatter.bracketed_pasting(lines)
-    local open_code = '\27[200~'
-    local close_code = '\27[201~'
-    local cr = '\13'
-    if #lines == 1 then
-        return { lines[1] .. cr }
-    else
-        local new = { open_code .. lines[1] }
-        for line = 2, #lines do
-            table.insert(new, lines[line])
-        end
-
-        table.insert(new, close_code .. cr)
-
-        return new
-    end
-end
-
 M.formatter.trim_empty_lines = M.formatter.factory {
     when_multi_lines = {
         trim_empty_lines = true,
@@ -326,22 +308,14 @@ M.formatter.trim_empty_lines = M.formatter.factory {
     },
 }
 
--- function M.formatter.trim_empty_lines(lines)
---     local cr = '\13'
---     if #lines == 1 then
---         return { lines[1] .. cr }
---     else
---         local new = {}
---         for _, line in ipairs(lines) do
---             if line ~= '' then
---                 table.insert(new, line)
---             end
---         end
---
---         table.insert(new, cr)
---         return new
---     end
--- end
+M.formatter.bracketed_pasting = M.formatter.factory {
+    when_multi_lines = {
+        open_code = '\27[200~',
+        end_code = '\27[201~\r',
+        trim_empty_lines = false,
+        remove_leading_spaces = false,
+    },
+}
 
 M._send_motion_internal = function(motion)
     -- hack: allow dot-repeat
