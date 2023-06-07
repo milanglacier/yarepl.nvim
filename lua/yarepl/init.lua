@@ -275,24 +275,26 @@ function M.formatter.factory(opts)
         end
 
         local formatted_lines = { config.when_multi_lines.open_code .. lines[1] }
-        local current_line_need_to_be_dropped
         local line
 
         for i = 2, #lines do
             line = lines[i]
-            current_line_need_to_be_dropped = config.when_multi_lines.trim_empty_lines and line == ''
 
-            if not current_line_need_to_be_dropped then
-                if config.when_multi_lines.remove_leading_spaces then
-                    line = line:gsub('^%s+', '')
-                end
-
-                if config.replace_tab_by_space then
-                    line = line:gsub('\t', string.rep(' ', config.number_of_spaces_to_replace_tab))
-                end
-
-                table.insert(formatted_lines, line)
+            if config.when_multi_lines.trim_empty_lines and line == '' then
+                goto continue
             end
+
+            if config.when_multi_lines.remove_leading_spaces then
+                line = line:gsub('^%s+', '')
+            end
+
+            if config.replace_tab_by_space then
+                line = line:gsub('\t', string.rep(' ', config.number_of_spaces_to_replace_tab))
+            end
+
+            table.insert(formatted_lines, line)
+
+            ::continue::
         end
 
         table.insert(formatted_lines, config.when_multi_lines.end_code)
