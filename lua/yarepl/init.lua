@@ -12,7 +12,7 @@ local default_config = function()
         wincmd = 'belowright 15 split',
         metas = {
             aichat = { cmd = 'aichat', formatter = M.formatter.bracketed_pasting },
-            radian = { cmd = 'radian', formatter = M.formatter.bracketed_pasting },
+            radian = { cmd = 'radian', formatter = M.formatter.bracketed_pasting_no_final_new_line },
             ipython = { cmd = 'ipython', formatter = M.formatter.bracketed_pasting },
             python = { cmd = 'python', formatter = M.formatter.trim_empty_lines },
             R = { cmd = 'R', formatter = M.formatter.trim_empty_lines },
@@ -313,6 +313,13 @@ M.formatter.bracketed_pasting = M.formatter.factory {
     when_multi_lines = {
         open_code = '\27[200~',
         end_code = '\27[201~\r',
+    },
+}
+
+M.formatter.bracketed_pasting_no_final_new_line = M.formatter.factory {
+    when_multi_lines = {
+        open_code = '\27[200~',
+        end_code = '\27[201~',
     },
 }
 
