@@ -440,9 +440,8 @@ is recommended to use `yarepl.formatter.bracketed_pasting`.
 
 Here are some tips for writing your own formatter function:
 
-1. If your REPL cannot distinguish between copy-pasted text and text from user
-   manual input, you may want to append a `\r` at the end of each line to
-   signal a new line.
+1. You may want to append a `\r` at the end of the final line to signal a new
+   line as the end of input.
 
 2. If your REPL cannot distinguish between copy-pasted text and text from user
    manual input, you may want to replace `\t` with 4 or 8 spaces since sending
