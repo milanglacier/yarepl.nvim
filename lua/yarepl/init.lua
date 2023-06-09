@@ -256,10 +256,21 @@ function M.formatter.factory(opts)
             end_code = '\r',
             trim_empty_lines = false,
             remove_leading_spaces = false,
+            -- If gsub_pattern and gsub_repl are not empty, `string.gsub` will
+            -- be called with `gsub_pattern` and `gsub_repl` on each line. Note
+            -- that you should use Lua pattern instead of Vim regex pattern.
+            -- The gsub calls happen after `trim_empty_lines`,
+            -- `remove_leading_spaces`, and `replace_tab_by_space`, and before
+            -- prepending and appending `open_code` and `end_code`.
+            gsub_pattern = '',
+            gsub_repl = '',
         },
         when_single_line = {
             open_code = '',
             end_code = '\r',
+            -- the same as the specs of `when_multi_lines`
+            gsub_pattern = '',
+            gsub_repl = '',
         },
     }
 
@@ -270,12 +281,20 @@ function M.formatter.factory(opts)
             if config.replace_tab_by_space then
                 lines[1] = lines[1]:gsub('\t', string.rep(' ', config.number_of_spaces_to_replace_tab))
             end
+
+            lines[1] = lines[1]:gsub(config.when_single_line.gsub_pattern, config.when_single_line.gsub_repl)
+
             lines[1] = config.when_single_line.open_code .. lines[1] .. config.when_single_line.end_code
             return lines
         end
 
-        local formatted_lines = { config.when_multi_lines.open_code .. lines[1] }
-        local line
+        local formatted_lines = {}
+        local line = lines[1]
+
+        line = line:gsub(config.when_multi_lines.gsub_pattern, config.when_multi_lines.gsub_repl)
+        line = config.when_multi_lines.open_code .. line
+
+        table.insert(formatted_lines, line)
 
         for i = 2, #lines do
             line = lines[i]
@@ -291,6 +310,8 @@ function M.formatter.factory(opts)
             if config.replace_tab_by_space then
                 line = line:gsub('\t', string.rep(' ', config.number_of_spaces_to_replace_tab))
             end
+
+            line = line:gsub(config.when_multi_lines.gsub_pattern, config.when_multi_lines.gsub_repl)
 
             table.insert(formatted_lines, line)
 

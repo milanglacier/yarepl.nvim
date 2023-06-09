@@ -459,7 +459,7 @@ Here are some tips for writing your own formatter function:
 5. If your REPL cannot distinguish between copy-pasted text and text from user
    manual input and your REPL will do auto-indent for you, you may want to
    remove any leading spaces from each line to prevent double indentation.
-   
+
 6. The returned list of strings will be sent to the `chansend` function for
    reference.
 
@@ -487,6 +487,14 @@ yarepl.formatter.factory {
         trim_empty_lines = false,
         -- Whether to remove leading spaces at the beginning of each line.
         remove_leading_spaces = false,
+        -- If gsub_pattern and gsub_repl are not empty, `string.gsub` will
+        -- be called with `gsub_pattern` and `gsub_repl` on each line. Note
+        -- that you should use Lua pattern instead of Vim regex pattern.
+        -- The gsub calls happen after `trim_empty_lines`,
+        -- `remove_leading_spaces`, and `replace_tab_by_space`, and before
+        -- prepending and appending `open_code` and `end_code`.
+        gsub_pattern = '',
+        gsub_repl = '',
     },
     -- For a list containing only one string:
     when_single_line = {
@@ -494,6 +502,9 @@ yarepl.formatter.factory {
         open_code = '',
         -- The suffixing code sent to the repl finally.
         end_code = '\r',
+        -- the same as the specs of `when_multi_lines`
+        gsub_pattern = '',
+        gsub_repl = '',
     },
 }
 
