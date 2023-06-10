@@ -573,6 +573,11 @@ api.nvim_create_user_command('REPLSwap', function(opts)
     local id_1 = tonumber(opts.fargs[1])
     local id_2 = tonumber(opts.fargs[2])
 
+    if id_1 ~= nil and id_2 ~= nil then
+        repl_swap(id_1, id_2)
+        return
+    end
+
     local repl_ids = {}
     for id, _ in pairs(M._repls) do
         table.insert(repl_ids, id)
@@ -605,8 +610,6 @@ api.nvim_create_user_command('REPLSwap', function(opts)
         }, function(id2)
             repl_swap(id_1, id2)
         end)
-    else
-        repl_swap(id_1, id_2)
     end
 end, {
     desc = [[Swap two REPLs]],
