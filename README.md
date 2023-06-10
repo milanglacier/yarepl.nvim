@@ -542,6 +542,7 @@ end
 
 local keymap = vim.api.nvim_set_keymap
 local bufmap = vim.api.nvim_buf_set_keymap
+local autocmd = vim.api.nvim_create_autocmd
 
 -- <Leader>cs will be equivalent to `REPLStart aichat`
 -- 2<Leader>cs will be equivalent to `2REPLStart aichat`, etc.
@@ -595,7 +596,6 @@ local ft_to_repl = {
 
 autocmd('FileType', {
     pattern = { 'quarto', 'markdown', 'markdown.pandoc', 'rmd', 'python', 'sh', 'REPL' },
-    group = my_augroup,
     desc = 'set up REPL keymap',
     callback = function()
         local repl = ft_to_repl[vim.bo.filetype]
@@ -653,6 +653,12 @@ autocmd('FileType', {
     end,
 })
 ```
+
+The `run_cmd_with_count` function ensures that any numeric prefix given to a
+keybinding, such as `3<LocalLeader>rs`, `2<LocalLeader>s`, and `5<Leader>cr`,
+is passed to the corresponding command. For instance, `2REPLStart aichat` is
+equivalent to `2<Leader>cs`, and `3REPLSendMotion` is equivalent to
+`3<LocalLeader>s`.
 
 With the keybinding setup, prefixing keybindings with `<Leader>c` ensures that
 the text is always sent to the `aichat` REPL, a REPL for chatgpt. The
