@@ -285,7 +285,7 @@ function M.formatter.factory(opts)
         },
         os = {
             windows = {
-                join_line_with_cr = true,
+                join_lines_with_cr = true,
             },
         },
     }
@@ -338,7 +338,7 @@ function M.formatter.factory(opts)
             table.insert(formatted_lines, config.when_multi_lines.end_code)
         end
 
-        if is_win32 and config.os.windows.join_line_with_cr then
+        if is_win32 and config.os.windows.join_lines_with_cr then
             formatted_lines = { table.concat(formatted_lines, '\r') }
         end
 
