@@ -188,9 +188,9 @@ M.bufnr_is_attached_to_repl = function(bufnr)
     end
 end
 
----@param id number the id of the repl,
----@param name string the name of the closest repl that will try to find
----@param bufnr number the buffer number of the buffer
+---@param id number|nil the id of the repl,
+---@param name string|nil the name of the closest repl that will try to find
+---@param bufnr number|nil the buffer number of the buffer
 ---@return table|nil repl the repl object or nil if not found
 -- get the repl specified by `id` and `name`. If `id` is 0, then will try to
 -- find the REPL `bufnr` is attached to, if not find, will use `id = 1`. If
