@@ -379,7 +379,7 @@ Here are examples of how to use this command:
 
 5. `REPLExec print("hello world")<Enter>print("hello world again")` will send
    the following two lines to the REPL current buffer is attached to or the
-   `REPL` It is **important** that To type a **literal `<Enter>`** in
+   `REPL`. Note that to type a **literal `<Enter>`** in
    `cmdline`, you must press `Ctrl-v Enter` rather than directly type `Enter`.
 
 ```python
