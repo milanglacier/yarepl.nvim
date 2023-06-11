@@ -377,19 +377,22 @@ Here are examples of how to use this command:
 4. `REPLExec $ipython %whos` will send the command `%whos` to the closest
    ipython REPL relative to id 3.
 
-5. `REPLExec print("hello world")<Enter>print("hello world again")` will send
-   the following two lines to the REPL current buffer is attached to or the
-   `REPL`. Note that to type a **literal `<Enter>`** in
-   `cmdline`, you must press `Ctrl-v Enter` rather than directly type `Enter`.
+5. `REPLExec print("hello world")^Mprint("hello world again")` will send the
+   following two lines to the REPL current buffer is attached to or REPL 1.
 
 ```python
 print("hello world")
 print("hello world again")
 ```
 
-Note that some neovim command will interpolate `%` to the file name of current
-buffer. But `REPLExec` will not do this for you. The interpolation only happens
-for the first `$` to get the desired `REPL` name.
+Note:
+
+1. To type a **literal** `<Enter>` (`^M`) in `cmdline`, you must press
+   `<Ctrl-v> <Enter>` rather than directly type `Enter`.
+
+2. Some neovim command will interpolate `%` to the file name of current buffer.
+   But `REPLExec` will not do this for you. The interpolation only happens for
+   the first `$` to get the desired `REPL` name.
 
 # Window configuration
 
