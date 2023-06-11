@@ -355,20 +355,9 @@ M._send_motion_internal = function(motion)
     local name = vim.b[0].closest_repl_name
     local current_bufnr = api.nvim_get_current_buf()
 
-    local repl = get_repl(id, name, current_bufnr)
-
-    if not repl then
-        vim.notify [[REPL doesn't exist!]]
-        return
-    end
-
     local lines = get_lines 'operator'
-    lines = M._config.metas[repl.name].formatter(lines)
-    fn.chansend(repl.term, lines)
 
-    if M._config.scroll_to_bottom_after_sending then
-        repl_win_scroll_to_bottom(repl)
-    end
+    M._send_strings(id, name, current_bufnr, lines)
 end
 
 M.setup = function(opts)
@@ -436,18 +425,22 @@ Create REPL `i` from the list of available REPLs.
 })
 
 ---@param id number the id of the repl,
----@param name string the name of the closest repl that will try to find
+---@param name string|nil the name of the closest repl that will try to find
+---@param bufnr number|nil the buffer number from which to find the attached REPL.
 ---@param strings table[string] a list of strings
----@param use_formatter boolean whether use formatter (e.g. bracketed_pasting)? Default: true
--- Send a list of strings to the repl specified by `id` and `name`. If `id` is
--- 0, then will try to find the REPL that current buffer is attached to, if not
--- find, will use `id = 1`. If `name` is not nil or not an empty string, then
--- will try to find the REPL with `name` relative to `id`.
-M._send_strings = function(id, name, strings, use_formatter)
+---@param use_formatter boolean|nil whether use formatter (e.g. bracketed_pasting)? Default: true
+-- Send a list of strings to the repl specified by `id` and `name` and `bufnr`.
+-- If `id` is 0, then will try to find the REPL that `bufnr` is attached to, if
+-- not find, will use `id = 1`. If `name` is not nil or not an empty string,
+-- then will try to find the REPL with `name` relative to `id`. If `bufnr` is
+-- nil or `bufnr` = 0, will find the REPL that current buffer is attached to.
+M._send_strings = function(id, name, bufnr, strings, use_formatter)
     use_formatter = use_formatter == nil and true or use_formatter
-    local current_bufnr = api.nvim_get_current_buf()
+    if bufnr == nil or bufnr == 0 then
+        bufnr = api.nvim_get_current_buf()
+    end
 
-    local repl = get_repl(id, name, current_bufnr)
+    local repl = get_repl(id, name, bufnr)
 
     if not repl then
         vim.notify [[REPL doesn't exist!]]
@@ -665,13 +658,6 @@ api.nvim_create_user_command('REPLSendVisual', function(opts)
     local name = opts.args
     local current_buffer = api.nvim_get_current_buf()
 
-    local repl = get_repl(id, name, current_buffer)
-
-    if not repl then
-        vim.notify [[REPL doesn't exist!]]
-        return
-    end
-
     -- we must use `<ESC>` to clear those marks to mark '> and '> to be able to
     -- access the updated visual range. Those magic letters 'nx' are coming
     -- from Vigemus/iron.nvim and I am not quiet understand the effect of those
@@ -679,12 +665,8 @@ api.nvim_create_user_command('REPLSendVisual', function(opts)
     api.nvim_feedkeys('\27', 'nx', false)
 
     local lines = get_lines 'visual'
-    lines = M._config.metas[repl.name].formatter(lines)
-    fn.chansend(repl.term, lines)
 
-    if M._config.scroll_to_bottom_after_sending then
-        repl_win_scroll_to_bottom(repl)
-    end
+    M._send_strings(id, name, current_buffer, lines)
 end, {
     count = true,
     nargs = '?',
@@ -698,20 +680,9 @@ api.nvim_create_user_command('REPLSendLine', function(opts)
     local name = opts.args
     local current_buffer = api.nvim_get_current_buf()
 
-    local repl = get_repl(id, name, current_buffer)
-
-    if not repl then
-        vim.notify [[REPL doesn't exist!]]
-        return
-    end
-
     local line = api.nvim_get_current_line()
-    local lines = M._config.metas[repl.name].formatter { line }
-    fn.chansend(repl.term, lines)
 
-    if M._config.scroll_to_bottom_after_sending then
-        repl_win_scroll_to_bottom(repl)
-    end
+    M._send_strings(id, name, current_buffer, { line })
 end, {
     count = true,
     nargs = '?',
