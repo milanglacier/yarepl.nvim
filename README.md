@@ -130,6 +130,15 @@ yarepl.setup {
     -- text? This feature would be helpful if you want to ensure that your view
     -- stays updated with the latest REPL output.
     scroll_to_bottom_after_sending = true,
+    os = {
+        -- some hacks on Windows. macOS and Linux users can
+        -- simply ignore them, and the default options are recommended for
+        -- Windows user.
+        windows = {
+            -- Send a final `\r` to the REPL with delay,
+            send_delayed_cr_after_sending = true,
+        },
+    },
 }
 ```
 
@@ -524,7 +533,7 @@ yarepl.formatter.factory {
         -- The prefixing code sent to the repl firstly.
         open_code = '',
         -- The suffixing code sent to the repl finally.
-        end_code = '\r',
+        end_code = '\r', -- on Windows the default is ''
         -- Whether to remove empty lines from the list of strings.
         trim_empty_lines = false,
         -- Whether to remove leading spaces at the beginning of each line.
@@ -543,10 +552,19 @@ yarepl.formatter.factory {
         -- The prefixing code sent to the repl firstly.
         open_code = '',
         -- The suffixing code sent to the repl finally.
-        end_code = '\r',
+        end_code = '\r', -- on Windows the default is ''
         -- the same as the specs of `when_multi_lines`
         gsub_pattern = '',
         gsub_repl = '',
+    },
+    os = {
+        -- Some hacks on Windows. MacOS and Linux users can
+        -- simply ignore them, and the default options are recommended for
+        -- Windows user.
+        windows = {
+            -- Join the lines with `\r` before sending to REPL.
+            join_line_with_cr = true,
+        },
     },
 }
 
