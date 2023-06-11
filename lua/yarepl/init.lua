@@ -1,6 +1,7 @@
 local M = {}
 local api = vim.api
 local fn = vim.fn
+local is_win32 = vim.fn.has 'win32' == 1 and true or false
 
 M.formatter = {}
 
@@ -13,7 +14,11 @@ local default_config = function()
         metas = {
             aichat = { cmd = 'aichat', formatter = M.formatter.bracketed_pasting },
             radian = { cmd = 'radian', formatter = M.formatter.bracketed_pasting_no_final_new_line },
-            ipython = { cmd = 'ipython', formatter = M.formatter.bracketed_pasting },
+            ipython = {
+                cmd = 'ipython',
+                formatter = is_win32 and M.formatter.bracketed_pasting_no_final_new_line
+                    or M.formatter.bracketed_pasting,
+            },
             python = { cmd = 'python', formatter = M.formatter.trim_empty_lines },
             R = { cmd = 'R', formatter = M.formatter.trim_empty_lines },
             -- bash version >= 4.4 supports bracketed paste mode. but macos
@@ -23,6 +28,11 @@ local default_config = function()
         },
         close_on_exit = true,
         scroll_to_bottom_after_sending = true,
+        os = {
+            windows = {
+                send_delayed_cr_after_sending = true,
+            },
+        },
     }
 end
 
@@ -248,12 +258,14 @@ function M.formatter.factory(opts)
         error 'opts must be a table'
     end
 
+    local end_code = is_win32 and '' or '\r'
+
     local config = {
         replace_tab_by_space = false,
         number_of_spaces_to_replace_tab = 8,
         when_multi_lines = {
             open_code = '',
-            end_code = '\r',
+            end_code = end_code,
             trim_empty_lines = false,
             remove_leading_spaces = false,
             -- If gsub_pattern and gsub_repl are not empty, `string.gsub` will
@@ -267,10 +279,14 @@ function M.formatter.factory(opts)
         },
         when_single_line = {
             open_code = '',
-            end_code = '\r',
-            -- the same as the specs of `when_multi_lines`
+            end_code = end_code,
             gsub_pattern = '',
             gsub_repl = '',
+        },
+        os = {
+            windows = {
+                join_line_with_cr = true,
+            },
         },
     }
 
@@ -318,7 +334,13 @@ function M.formatter.factory(opts)
             ::continue::
         end
 
-        table.insert(formatted_lines, config.when_multi_lines.end_code)
+        if config.when_multi_lines.end_code ~= '' then
+            table.insert(formatted_lines, config.when_multi_lines.end_code)
+        end
+
+        if is_win32 and config.os.windows.join_line_with_cr then
+            formatted_lines = { table.concat(formatted_lines, '\r') }
+        end
 
         return formatted_lines
     end
@@ -452,6 +474,12 @@ M._send_strings = function(id, name, bufnr, strings, use_formatter)
     end
 
     fn.chansend(repl.term, strings)
+
+    if is_win32 and M._config.os.windows.send_delayed_cr_after_sending then
+        vim.defer_fn(function()
+            fn.chansend(repl.term, '\r')
+        end, 100)
+    end
 
     if M._config.scroll_to_bottom_after_sending then
         repl_win_scroll_to_bottom(repl)
