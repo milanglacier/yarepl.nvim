@@ -721,6 +721,7 @@ Send motion to REPL `i` or the REPL that current buffer is attached to.
 
 api.nvim_create_user_command('REPLExec', function(opts)
     local first_arg = opts.fargs[1]
+    local current_buffer = api.nvim_get_current_buf()
     local name = ''
     local command = opts.args
 
@@ -738,7 +739,7 @@ api.nvim_create_user_command('REPLExec', function(opts)
     local id = opts.count
     local command_list = vim.split(command, '\r')
 
-    M._send_strings(id, name, command_list)
+    M._send_strings(id, name, current_buffer, command_list)
 end, {
     count = true,
     nargs = '*',
