@@ -17,6 +17,7 @@
     + [REPLSendVisual](#replsendvisual)
     + [REPLSendLine](#replsendline)
     + [REPLSendMotion](#replsendmotion)
+    + [REPLExec](#replexec)
 - [Window configuration](#window-configuration)
 - [Add your own REPLs](#add-your-own-repls)
 - [Example keybinding setup](#example-keybinding-setup)
@@ -351,6 +352,44 @@ Here are examples of how to use this command:
 
 `REPLSendMotion` is **dot-repeatable**, you do not need to install
 vim-repeat to make it work.
+
+### REPLExec
+
+Sends the command typed in the cmdline to REPL `i` or the REPL that the current
+buffer is attached to.
+
+If the first argument of this command is `$NAME`, the function will attempt to
+send to the closest REPL with the specified `NAME`. If no count is supplied, it
+will try to send to the REPL that the current buffer is attached to. If the
+current buffer isn't attached to any REPL, it will use REPL 1. If you add a
+count `i`, it will send to REPL `i`.
+
+Here are examples of how to use this command:
+
+1. `REPLExec %run a_file.py` will send the command `%run a_file.py` to the REPL 1.
+
+2. `3REPLExec print("hello world")` will send the command `print("hello
+   world")` to the REPL 3.
+
+3. `REPLExec $ipython %whos` will send the command `%whos` to the closest
+   ipython REPL relative to id 1.
+
+4. `REPLExec $ipython %whos` will send the command `%whos` to the closest
+   ipython REPL relative to id 3.
+
+5. `REPLExec print("hello world")<Enter>print("hello world again")` will send
+   the following two lines to the REPL current buffer is attached to or the
+   `REPL` It is **important** that To type a **literal `<Enter>`** in
+   `cmdline`, you must press `Ctrl-v Enter` rather than directly type `Enter`.
+
+```python
+print("hello world")
+print("hello world again")
+```
+
+Note that some neovim command will interpolate `%` to the file name of current
+buffer. But `REPLExec` will not do this for you. The interpolation only happens
+for the first `$` to get the desired `REPL` name.
 
 # Window configuration
 

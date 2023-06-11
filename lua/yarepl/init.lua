@@ -748,4 +748,32 @@ Send motion to REPL `i` or the REPL that current buffer is attached to.
 ]],
 })
 
+api.nvim_create_user_command('REPLExec', function(opts)
+    local first_arg = opts.fargs[1]
+    local name = ''
+    local command = opts.args
+
+    for repl_name, _ in pairs(M._config.metas) do
+        if '$' .. repl_name == first_arg then
+            name = first_arg:sub(2)
+            break
+        end
+    end
+
+    if name ~= '' then
+        command = command:gsub('^%$' .. name .. '%s+', '')
+    end
+
+    local id = opts.count
+    local command_list = vim.split(command, '\r')
+
+    M._send_strings(id, name, command_list)
+end, {
+    count = true,
+    nargs = '*',
+    desc = [[
+Execute a command in REPL `i` or the REPL that current buffer is attached to.
+]],
+})
+
 return M
