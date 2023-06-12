@@ -1,6 +1,7 @@
 local M = {}
 local api = vim.api
 local fn = vim.fn
+local is_win32 = vim.fn.has 'win32' == 1 and true or false
 
 M.formatter = {}
 
@@ -23,6 +24,11 @@ local default_config = function()
         },
         close_on_exit = true,
         scroll_to_bottom_after_sending = true,
+        os = {
+            windows = {
+                send_delayed_cr_after_sending = true,
+            },
+        },
     }
 end
 
@@ -268,9 +274,13 @@ function M.formatter.factory(opts)
         when_single_line = {
             open_code = '',
             end_code = '\r',
-            -- the same as the specs of `when_multi_lines`
             gsub_pattern = '',
             gsub_repl = '',
+        },
+        os = {
+            windows = {
+                join_lines_with_cr = true,
+            },
         },
     }
 
@@ -318,7 +328,27 @@ function M.formatter.factory(opts)
             ::continue::
         end
 
-        table.insert(formatted_lines, config.when_multi_lines.end_code)
+        if config.when_multi_lines.end_code ~= '' then
+            table.insert(formatted_lines, config.when_multi_lines.end_code)
+        end
+
+        -- The `chansend` function joins lines with `\n`, which can result in a
+        -- large number of unnecessary blank lines being sent to the REPL. For
+        -- example, `{ "hello", "world", "again!" }` would be sent to the REPL
+        -- as:
+
+        -- ```
+        -- hello
+        --
+        -- world
+        --
+        -- again!
+        -- ```
+
+        -- To prevent this issue, we manually join lines with `\r` on Windows.
+        if is_win32 and config.os.windows.join_lines_with_cr then
+            formatted_lines = { table.concat(formatted_lines, '\r') }
+        end
 
         return formatted_lines
     end
@@ -452,6 +482,16 @@ M._send_strings = function(id, name, bufnr, strings, use_formatter)
     end
 
     fn.chansend(repl.term, strings)
+
+    -- See https://github.com/milanglacier/yarepl.nvim/issues/12 and
+    -- https://github.com/urbainvaes/vim-ripple/issues/12 for more information.
+    -- It may be necessary to use a delayed `<CR>` on Windows to ensure that
+    -- the code is executed in the REPL.
+    if is_win32 and M._config.os.windows.send_delayed_cr_after_sending then
+        vim.defer_fn(function()
+            fn.chansend(repl.term, '\r')
+        end, 100)
+    end
 
     if M._config.scroll_to_bottom_after_sending then
         repl_win_scroll_to_bottom(repl)

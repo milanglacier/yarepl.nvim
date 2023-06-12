@@ -130,6 +130,14 @@ yarepl.setup {
     -- text? This feature would be helpful if you want to ensure that your view
     -- stays updated with the latest REPL output.
     scroll_to_bottom_after_sending = true,
+    os = {
+        -- Some hacks for Windows. macOS and Linux users can simply ignore
+        -- them. The default options are recommended for Windows user.
+        windows = {
+            -- Send a final `\r` to the REPL with delay,
+            send_delayed_cr_after_sending = true,
+        },
+    },
 }
 ```
 
@@ -547,6 +555,14 @@ yarepl.formatter.factory {
         -- the same as the specs of `when_multi_lines`
         gsub_pattern = '',
         gsub_repl = '',
+    },
+    os = {
+        -- Some hacks for Windows. macOS and Linux users can simply ignore
+        -- them. The default options are recommended for Windows user.
+        windows = {
+            -- Join the lines with `\r` before sending to REPL.
+            join_lines_with_cr = true,
+        },
     },
 }
 
