@@ -23,6 +23,7 @@
 - [Example keybinding setup](#example-keybinding-setup)
 - [Telescope Integration](#telescope-integration)
 - [Set up project-level REPLs](#set-up-project-level-repls)
+- [Create persistent REPLs in tmux](#create-persistent-repls-in-tmux)
 - [FAQ](#faq)
   * [How do I avoid clutter from the bufferline plugin?](#how-do-i-avoid-clutter-from-the-bufferline-plugin-)
   * [REPLSendVisual is not functioning properly](#replsendvisual-is-not-functioning-properly)
@@ -31,8 +32,10 @@
 
 # yarepl.nvim
 
-Yet Another REPL for Neovim, flexible, supporting multiple paradigms to
-interact with REPLs, and native dot repeat (without `vim-repeat`).
+Yet Another REPL is a flexible REPL (Read-Eval-Print Loop) management tool that
+supports multiple paradigms for interacting with REPLs. It offers project-level
+configurations, works with tmux, integrates with Telescope, and provides a
+native dot repeat feature, without requiring vim-repeat.
 
 # What is yarepl.nvim?
 
@@ -815,6 +818,23 @@ Neovim starts. Thus, if you switch working directories during the time Neovim
 is running, the `.nvim.lua` file won't be loaded at the new working directory.
 To manually load the `.nvim.lua` file after switching to a new working
 directory, try `:luafile .nvim.lua`.
+
+# Create persistent REPLs in tmux
+
+If you would like to maintain a persistent REPL process even after exiting
+neovim, you can utilize tmux. To achieve this, the following configuration
+creates a REPL meta named `ipy_tmux` that attaches to a tmux session named
+`ipython`. If the session does not exist, a new tmux session named `ipython` is
+created, and an `ipython` REPL is started.
+
+```lua
+metas = {
+    ipy_tmux = {
+        cmd = 'tmux attach -t ipython || tmux new -s ipython ipython',
+        formatter = yarepl.formatter.bracketed_pasting,
+    },
+}
+```
 
 # FAQ
 
