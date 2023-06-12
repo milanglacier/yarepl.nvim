@@ -14,11 +14,7 @@ local default_config = function()
         metas = {
             aichat = { cmd = 'aichat', formatter = M.formatter.bracketed_pasting },
             radian = { cmd = 'radian', formatter = M.formatter.bracketed_pasting_no_final_new_line },
-            ipython = {
-                cmd = 'ipython',
-                formatter = is_win32 and M.formatter.bracketed_pasting_no_final_new_line
-                    or M.formatter.bracketed_pasting,
-            },
+            ipython = { cmd = 'ipython', formatter = M.formatter.bracketed_pasting },
             python = { cmd = 'python', formatter = M.formatter.trim_empty_lines },
             R = { cmd = 'R', formatter = M.formatter.trim_empty_lines },
             -- bash version >= 4.4 supports bracketed paste mode. but macos
@@ -258,14 +254,12 @@ function M.formatter.factory(opts)
         error 'opts must be a table'
     end
 
-    local end_code = is_win32 and '' or '\r'
-
     local config = {
         replace_tab_by_space = false,
         number_of_spaces_to_replace_tab = 8,
         when_multi_lines = {
             open_code = '',
-            end_code = end_code,
+            end_code = '\r',
             trim_empty_lines = false,
             remove_leading_spaces = false,
             -- If gsub_pattern and gsub_repl are not empty, `string.gsub` will
@@ -279,7 +273,7 @@ function M.formatter.factory(opts)
         },
         when_single_line = {
             open_code = '',
-            end_code = end_code,
+            end_code = '\r',
             gsub_pattern = '',
             gsub_repl = '',
         },

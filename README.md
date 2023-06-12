@@ -532,7 +532,7 @@ yarepl.formatter.factory {
         -- The prefixing code sent to the repl firstly.
         open_code = '',
         -- The suffixing code sent to the repl finally.
-        end_code = '\r', -- on Windows the default is ''
+        end_code = '\r',
         -- Whether to remove empty lines from the list of strings.
         trim_empty_lines = false,
         -- Whether to remove leading spaces at the beginning of each line.
@@ -551,7 +551,7 @@ yarepl.formatter.factory {
         -- The prefixing code sent to the repl firstly.
         open_code = '',
         -- The suffixing code sent to the repl finally.
-        end_code = '\r', -- on Windows the default is ''
+        end_code = '\r',
         -- the same as the specs of `when_multi_lines`
         gsub_pattern = '',
         gsub_repl = '',
