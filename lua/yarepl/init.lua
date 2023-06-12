@@ -328,7 +328,7 @@ function M.formatter.factory(opts)
             ::continue::
         end
 
-        if config.when_multi_lines.end_code ~= '' then
+        if config.when_multi_lines.end_code then
             table.insert(formatted_lines, config.when_multi_lines.end_code)
         end
 
