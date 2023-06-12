@@ -595,9 +595,24 @@ yarepl.formatter.bracketed_pasting = yarepl.formatter.factory {
 Here is the keybindings setup from the maintainer:
 
 ```lua
+-- The `run_cmd_with_count` function enables a user to execute a command with
+-- count values in keymaps. This is particularly useful for `yarepl.nvim`,
+-- which heavily uses count values as the identifier for REPL IDs.
 local function run_cmd_with_count(cmd)
     return function()
         vim.cmd(string.format('%d%s', vim.v.count, cmd))
+    end
+end
+
+-- The `partial_cmd_with_count_expr` function enables users to enter partially
+-- complete commands with a count value, and specify where the cursor should be
+-- placed. This function is mainly designed to bind `REPLExec` command into a
+-- keymap.
+local function partial_cmd_with_count_expr(cmd)
+    return function()
+        -- <C-U> is equivalent to \21, we want to clear the range before next input
+        -- to ensure the count is recognized correctly.
+        return ':\21' .. vim.v.count .. cmd
     end
 end
 
@@ -642,6 +657,14 @@ keymap('n', '<Leader>cq', '', {
 })
 keymap('n', '<Leader>cc', '<CMD>REPLCleanup<CR>', {
     desc = 'Clear aichat REPLs.',
+})
+
+-- `<Leader>ce How to current win id in neovim?`: This keymap executes a
+-- command in `aichat` with the specified count value.
+keymap('n', '<Leader>ce', '', {
+    callback = partial_cmd_with_count_expr 'REPLExec $aichat ',
+    desc = 'Execute command in aichat',
+    expr = true,
 })
 
 local ft_to_repl = {
@@ -710,6 +733,13 @@ autocmd('FileType', {
         })
         bufmap(0, 'n', '<LocalLeader>rd', '<CMD>REPLDetachBufferToREPL<CR>', {
             desc = 'Detach current buffer to any REPL',
+        })
+        -- `3<LocalLeader>re df.describe()`: This keymap executes the specified
+        -- command in REPL 3.
+        bufmap(0, 'n', '<LocalLeader>re', '', {
+            callback = partial_cmd_with_count_expr 'REPLExec ',
+            desc = 'Execute command in REPL',
+            expr = true,
         })
     end,
 })
