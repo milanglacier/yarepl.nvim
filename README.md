@@ -95,6 +95,15 @@ lazy.nvim:
 { 'milanglacier/yarepl.nvim', config = true }
 ```
 
+`yarepl.nvim` does not require any dependencies but functions better with the following plugins:
+
+1. `telescope.nvim`. `yarepl.nvim` provides a telescope extension for REPL
+   previewer.
+
+2. A UI frontend that provides an alternative frontend for `vim.ui.select`.
+   Some options are `dressing.nvim` or `telescope-ui-select.nvim` (only one of
+   them needs to be installed).
+
 # Configuration
 
 ## Setup
@@ -782,9 +791,6 @@ buffers. If you are using the default Telescope configuration, `<C-t>` opens a
 new tab for the selected REPL, `<C-v>` generates a vertical split window for
 the chosen REPL, and `<C-x>` creates a horizontal split window for your
 selected REPL.
-
-`yarepl` heavily uses `vim.ui.select`, we recommend use a `select` frontend
-like `dressing.nvim` or `telescope-ui-select.nvim` for best experience.
 
 # Set up project-level REPLs
 
