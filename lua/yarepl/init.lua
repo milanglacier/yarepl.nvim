@@ -21,6 +21,7 @@ local default_config = function()
             -- shipped with bash 3.2, so we don't use bracketed paste mode for
             -- bash.
             bash = { cmd = 'bash', formatter = M.formatter.trim_empty_lines },
+            zsh = { cmd = 'zsh', formatter = M.formatter.bracketed_pasting },
         },
         close_on_exit = true,
         scroll_to_bottom_after_sending = true,

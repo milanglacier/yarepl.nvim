@@ -131,10 +131,8 @@ yarepl.setup {
         ipython = { cmd = 'ipython', formatter = yarepl.formatter.bracketed_pasting },
         python = { cmd = 'python', formatter = yarepl.formatter.trim_empty_lines },
         R = { cmd = 'R', formatter = yarepl.formatter.trim_empty_lines },
-        -- bash version >= 4.4 supports bracketed paste mode. but macos
-        -- shipped with bash 3.2, so we don't use bracketed paste mode for
-        -- bash.
         bash = { cmd = 'bash', formatter = yarepl.formatter.trim_empty_lines },
+        zsh = { cmd = 'zsh', formatter = yarepl.formatter.bracketed_pasting },
     },
     -- when a REPL process exits, should the window associated with those REPLs closed?
     close_on_exit = true,
