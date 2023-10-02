@@ -388,6 +388,11 @@ M._send_motion_internal = function(motion)
 
     local lines = get_lines 'operator'
 
+    if #lines == 0 then
+        vim.notify 'No motion!'
+        return
+    end
+
     M._send_strings(id, name, current_bufnr, lines)
 end
 
@@ -706,6 +711,11 @@ api.nvim_create_user_command('REPLSendVisual', function(opts)
     api.nvim_feedkeys('\27', 'nx', false)
 
     local lines = get_lines 'visual'
+
+    if #lines == 0 then
+        vim.notify 'No visual range!'
+        return
+    end
 
     M._send_strings(id, name, current_buffer, lines)
 end, {
