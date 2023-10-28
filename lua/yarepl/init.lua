@@ -203,7 +203,7 @@ end
 -- find the REPL `bufnr` is attached to, if not find, will use `id = 1`. If
 -- `name` is not nil or not an empty string, then will try to find the REPL
 -- with `name` relative to `id`.
-local function get_repl(id, name, bufnr)
+function M._get_repl(id, name, bufnr)
     local repl
     if id == nil or id == 0 then
         repl = M._bufnrs_to_repls[bufnr]
@@ -476,7 +476,7 @@ M._send_strings = function(id, name, bufnr, strings, use_formatter)
         bufnr = api.nvim_get_current_buf()
     end
 
-    local repl = get_repl(id, name, bufnr)
+    local repl = M._get_repl(id, name, bufnr)
 
     if not repl then
         vim.notify [[REPL doesn't exist!]]
@@ -515,7 +515,7 @@ api.nvim_create_user_command('REPLFocus', function(opts)
     local name = opts.args
     local current_buffer = api.nvim_get_current_buf()
 
-    local repl = get_repl(id, name, current_buffer)
+    local repl = M._get_repl(id, name, current_buffer)
 
     if not repl then
         vim.notify [[REPL doesn't exist!]]
@@ -536,7 +536,7 @@ api.nvim_create_user_command('REPLHide', function(opts)
     local name = opts.args
     local current_buffer = api.nvim_get_current_buf()
 
-    local repl = get_repl(id, name, current_buffer)
+    local repl = M._get_repl(id, name, current_buffer)
 
     if not repl then
         vim.notify [[REPL doesn't exist!]]
@@ -562,7 +562,7 @@ api.nvim_create_user_command('REPLHideOrFocus', function(opts)
     local name = opts.args
     local current_buffer = api.nvim_get_current_buf()
 
-    local repl = get_repl(id, name, current_buffer)
+    local repl = M._get_repl(id, name, current_buffer)
 
     if not repl then
         vim.notify [[REPL doesn't exist!]]
@@ -592,7 +592,7 @@ api.nvim_create_user_command('REPLClose', function(opts)
     local name = opts.args
     local current_buffer = api.nvim_get_current_buf()
 
-    local repl = get_repl(id, name, current_buffer)
+    local repl = M._get_repl(id, name, current_buffer)
 
     if not repl then
         vim.notify [[REPL doesn't exist!]]
