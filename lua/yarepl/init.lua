@@ -375,10 +375,10 @@ M.formatter.bracketed_pasting_no_final_new_line = M.formatter.factory {
     },
 }
 
-M._send_motion_internal = function(motion)
+M._send_operator_internal = function(motion)
     -- hack: allow dot-repeat
     if motion == nil then
-        vim.go.operatorfunc = [[v:lua.require'yarepl'._send_motion_internal]]
+        vim.go.operatorfunc = [[v:lua.require'yarepl'._send_operator_internal]]
         api.nvim_feedkeys('g@', 'ni', false)
     end
 
@@ -742,7 +742,7 @@ Send current line to REPL `i` or the REPL that current buffer is attached to.
 ]],
 })
 
-api.nvim_create_user_command('REPLSendMotion', function(opts)
+api.nvim_create_user_command('REPLSendOperator', function(opts)
     local repl_name = opts.args
     local id = opts.count
 
@@ -758,7 +758,7 @@ api.nvim_create_user_command('REPLSendMotion', function(opts)
         vim.b[0].repl_id = nil
     end
 
-    vim.go.operatorfunc = [[v:lua.require'yarepl'._send_motion_internal]]
+    vim.go.operatorfunc = [[v:lua.require'yarepl'._send_operator_internal]]
     -- Those magic letters 'ni' are coming from Vigemus/iron.nvim and I am not
     -- quite understand the effect of those magic letters.
     api.nvim_feedkeys('g@', 'ni', false)
@@ -766,7 +766,37 @@ end, {
     count = true,
     nargs = '?',
     desc = [[
-Send motion to REPL `i` or the REPL that current buffer is attached to.
+The operator of send text to REPL `i` or the REPL that current buffer is attached to.
+]],
+})
+
+api.nvim_create_user_command('REPLSendMotion', function(opts)
+    vim.notify('REPLSendMotion is deprecated, please use the command REPLSendOperator', vim.log.levels.WARN)
+
+    local repl_name = opts.args
+    local id = opts.count
+
+    if repl_name ~= '' then
+        vim.b[0].closest_repl_name = repl_name
+    else
+        vim.b[0].closest_repl_name = nil
+    end
+
+    if id ~= 0 then
+        vim.b[0].repl_id = id
+    else
+        vim.b[0].repl_id = nil
+    end
+
+    vim.go.operatorfunc = [[v:lua.require'yarepl'._send_operator_internal]]
+    -- Those magic letters 'ni' are coming from Vigemus/iron.nvim and I am not
+    -- quite understand the effect of those magic letters.
+    api.nvim_feedkeys('g@', 'ni', false)
+end, {
+    count = true,
+    nargs = '?',
+    desc = [[
+The operator of send text to REPL `i` or the REPL that current buffer is attached to.
 ]],
 })
 

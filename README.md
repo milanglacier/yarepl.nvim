@@ -16,7 +16,7 @@
     + [REPLSwap](#replswap)
     + [REPLSendVisual](#replsendvisual)
     + [REPLSendLine](#replsendline)
-    + [REPLSendMotion](#replsendmotion)
+    + [REPLSendOperator](#replsendoperator)
     + [REPLExec](#replexec)
 - [Window configuration](#window-configuration)
 - [Add your own REPLs](#add-your-own-repls)
@@ -344,9 +344,9 @@ Here are examples of how to use this command:
 4. `3REPLSendLine ipython` sends the current line to the closest ipython REPL
    relative to id `3`.
 
-### REPLSendMotion
+### REPLSendOperator
 
-Sends the motion to REPL `i` or the REPL that the current buffer
+The opeerator to send the text to REPL `i` or the REPL that the current buffer
 is attached to.
 
 If you provide an optional argument, the function will attempt to send to the
@@ -357,18 +357,19 @@ send to REPL `i`.
 
 Here are examples of how to use this command:
 
-1. `REPLSendMotion` sends the motion to the REPL that the current buffer
-   is attached to. If the buffer is not attached to any REPL, it uses REPL 1.
+1. `REPLSendOperator` acts as the operator to send the text to the REPL that
+   the current buffer is attached to. If the buffer is not attached to any
+   REPL, it uses REPL 1.
 
-2. `3REPLSendMotion` sends the motion to REPL 3.
+2. `3REPLSendOperator` sends the motion to REPL 3.
 
-3. `REPLSendMotion ipython` sends the motion to the closest ipython REPL
+3. `REPLSendOperator ipython` sends the motion to the closest ipython REPL
    relative to id `1`.
 
-4. `3REPLSendMotion ipython` sends the motion to the closest ipython REPL
+4. `3REPLSendOperator ipython` sends the motion to the closest ipython REPL
    relative to id `3`.
 
-`REPLSendMotion` is **dot-repeatable**, you do not need to install
+`REPLSendOperator` is **dot-repeatable**, you do not need to install
 vim-repeat to make it work.
 
 ### REPLExec
@@ -655,8 +656,8 @@ keymap('n', '<Leader>crr', '', {
 -- `2<Leader>crap` will send a paragraph to the second aichat REPL. Note that
 -- `ap` is just an example and can be replaced with any text object or motion.
 keymap('n', '<Leader>cr', '', {
-    callback = run_cmd_with_count 'REPLSendMotion aichat',
-    desc = 'Send motion to Aichat',
+    callback = run_cmd_with_count 'REPLSendOperator aichat',
+    desc = 'Operator to Send text to Aichat',
 })
 keymap('n', '<Leader>cq', '', {
     callback = run_cmd_with_count 'REPLClose aichat',
@@ -718,8 +719,8 @@ autocmd('FileType', {
         -- `2<Leader>sap` will send the paragraph to REPL 2. Note that `ap` is
         -- just an example and can be replaced with any text object or motion.
         bufmap(0, 'n', '<LocalLeader>s', '', {
-            callback = run_cmd_with_count 'REPLSendMotion',
-            desc = 'Send motion to REPL',
+            callback = run_cmd_with_count 'REPLSendOperator',
+            desc = 'Operator to send to REPL',
         })
         bufmap(0, 'n', '<LocalLeader>rq', '', {
             callback = run_cmd_with_count 'REPLClose',
@@ -755,7 +756,7 @@ autocmd('FileType', {
 The `run_cmd_with_count` function ensures that any numeric prefix given to a
 keybinding, such as `3<LocalLeader>rs`, `2<LocalLeader>s`, and `5<Leader>cr`,
 is passed to the corresponding command. For instance, `2REPLStart aichat` is
-equivalent to `2<Leader>cs`, and `3REPLSendMotion` is equivalent to
+equivalent to `2<Leader>cs`, and `3REPLSendOperator` is equivalent to
 `3<LocalLeader>s`.
 
 With the keybinding setup, prefixing keybindings with `<Leader>c` ensures that
