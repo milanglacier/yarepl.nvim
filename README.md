@@ -492,6 +492,7 @@ metas = {
 -- formatter is a function takes a list of string as an argument and returns a
 -- list of strings.
 ```
+[Here is a more complex example for ghci, a haskell repl.](https://github.com/milanglacier/yarepl.nvim/issues/21)
 
 Some REPLs can distinguish between pasted text and text from the user manual
 input by using prefix and suffix sequences, such as bracketed paste.
