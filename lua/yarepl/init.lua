@@ -418,6 +418,7 @@ local function add_keymap(meta_name)
         { 'n', 'REPLStart' },
         { 'n', 'REPLFocus' },
         { 'n', 'REPLHide' },
+        { 'n', 'REPLHideOrFocus' },
         { 'n', 'REPLSendLine' },
         { 'n', 'REPLSendOperator' },
         { 'v', 'REPLSendVisual' },

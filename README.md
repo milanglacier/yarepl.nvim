@@ -423,6 +423,7 @@ Note:
 - `<Plug>(REPLStart)`
 - `<Plug>(REPLFocus)`
 - `<Plug>(REPLHide)`
+- `<Plug>(REPLHideOrFocus)`
 - `<Plug>(REPLSendLine)`
 - `<Plug>(REPLSendOperator)`
 - `<Plug>(REPLSendVisual)`
@@ -438,6 +439,7 @@ And for each meta you registered (say you have a meta named `ipython`), the foll
 - `<Plug>(REPLStart-ipython)`
 - `<Plug>(REPLFocus-ipython)`
 - `<Plug>(REPLHide-ipython)`
+- `<Plug>(REPLHideOrFocus-ipython)`
 - `<Plug>(REPLSendLine-ipython)`
 - `<Plug>(REPLSendOperator-ipython)`
 - `<Plug>(REPLSendVisual-ipython)`
