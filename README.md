@@ -1,23 +1,24 @@
 - [yarepl.nvim](#yareplnvim)
-- [What is yarepl.nvim?](#what-is-yareplnvim-)
-- [Why yarepl.nvim?](#why-yareplnvim-)
+- [What is yarepl.nvim?](#what-is-yareplnvim)
+- [Why yarepl.nvim?](#why-yareplnvim)
 - [Installation](#installation)
 - [Configuration](#configuration)
-  * [Setup](#setup)
-  * [Commands](#commands)
-    + [REPLStart](#replstart)
-    + [REPLAttachBufferToREPL](#replattachbuffertorepl)
-    + [REPLDetachBufferToREPL](#repldetachbuffertorepl)
-    + [REPLCleanup](#replcleanup)
-    + [REPLFocus](#replfocus)
-    + [REPLHide](#replhide)
-    + [REPLHideOrFocus](#replhideorfocus)
-    + [REPLClose](#replclose)
-    + [REPLSwap](#replswap)
-    + [REPLSendVisual](#replsendvisual)
-    + [REPLSendLine](#replsendline)
-    + [REPLSendOperator](#replsendoperator)
-    + [REPLExec](#replexec)
+  - [Setup](#setup)
+  - [Commands](#commands)
+    - [REPLStart](#replstart)
+    - [REPLAttachBufferToREPL](#replattachbuffertorepl)
+    - [REPLDetachBufferToREPL](#repldetachbuffertorepl)
+    - [REPLCleanup](#replcleanup)
+    - [REPLFocus](#replfocus)
+    - [REPLHide](#replhide)
+    - [REPLHideOrFocus](#replhideorfocus)
+    - [REPLClose](#replclose)
+    - [REPLSwap](#replswap)
+    - [REPLSendVisual](#replsendvisual)
+    - [REPLSendLine](#replsendline)
+    - [REPLSendOperator](#replsendoperator)
+    - [REPLExec](#replexec)
+  - [Keymaps](#keymaps)
 - [Window configuration](#window-configuration)
 - [Add your own REPLs](#add-your-own-repls)
 - [Example keybinding setup](#example-keybinding-setup)
@@ -25,8 +26,9 @@
 - [Set up project-level REPLs](#set-up-project-level-repls)
 - [Create persistent REPLs in tmux](#create-persistent-repls-in-tmux)
 - [FAQ](#faq)
-  * [How do I avoid clutter from the bufferline plugin?](#how-do-i-avoid-clutter-from-the-bufferline-plugin-)
-  * [REPLSendVisual is not functioning properly](#replsendvisual-is-not-functioning-properly)
+  - [Why lazy loading with `lazy.nvim` doesn't work?](#why-lazy-loading-with-lazynvim-doesnt-work)
+  - [How do I avoid clutter from the bufferline plugin?](#how-do-i-avoid-clutter-from-the-bufferline-plugin)
+  - [REPLSendVisual is not functioning properly](#replsendvisual-is-not-functioning-properly)
 - [Limitations](#limitations)
 - [Acknowledgements](#acknowledgements)
 
@@ -153,9 +155,11 @@ yarepl.setup {
 
 ## Commands
 
-`yarepl` doesn't provide any keybindings. Instead, it offers a variety of
+`yarepl` doesn't set any default keybindings. Instead, it offers a variety of
 commands that you can use to create your own keybindings. We'll also provide an
-example configuration for keybindings based on these commands.
+example configuration for keybindings based on these commands. Additionally,
+`yarepl` provides a collection of `<Plug>` keymaps, which you can bind them to
+your favorite mappings.
 
 Here is a list of available commands:
 
@@ -387,8 +391,7 @@ Here are examples of how to use this command:
 
 1. `REPLExec %run a_file.py` will send the command `%run a_file.py` to the REPL 1.
 
-2. `3REPLExec print("hello world")` will send the command `print("hello
-   world")` to the REPL 3.
+2. `3REPLExec print("hello world")` will send the command `print("hello world")` to the REPL 3.
 
 3. `REPLExec $ipython %whos` will send the command `%whos` to the closest
    ipython REPL relative to id 1.
@@ -412,6 +415,45 @@ Note:
 2. Some neovim command will interpolate `%` to the file name of current buffer.
    But `REPLExec` will not do this for you. The interpolation only happens for
    the first `$` to get the desired `REPL` name.
+
+## Keymaps
+
+`yarepl` provides the following keymaps:
+
+- `<Plug>(REPLStart)`
+- `<Plug>(REPLFocus)`
+- `<Plug>(REPLHide)`
+- `<Plug>(REPLSendLine)`
+- `<Plug>(REPLSendOperator)`
+- `<Plug>(REPLSendVisual)`
+- `<Plug>(REPLClose)`
+- `<Plug>(REPLExec)`
+
+The keymap variant behaves exactly the same as its command variant. For
+example, you map `<Leader>s` to `<Plug>(REPLStart)`, then type `<Leader>s` is
+equivalent to `:REPLStart`. Type `3<Leader>s` is equivalent to `:3REPLStart`.
+
+And for each meta you registered (say you have a meta named `ipython`), the following keymaps will be registered:
+
+- `<Plug>(REPLStart-ipython)`
+- `<Plug>(REPLFocus-ipython)`
+- `<Plug>(REPLHide-ipython)`
+- `<Plug>(REPLSendLine-ipython)`
+- `<Plug>(REPLSendOperator-ipython)`
+- `<Plug>(REPLSendVisual-ipython)`
+- `<Plug>(REPLClose-ipython)`
+- `<Plug>(REPLExec-ipython)`
+
+For keymaps with a meta, as you would expected, say you bind `<LocalLeader>s`
+to `<Plug>(REPLStart-ipython)`, then type `<LocalLeader>s` is equivalent to
+`:REPLStart ipython`. Type `3<LocalLeader>s` is equivalent to `:3REPLStart ipython`.
+
+Note that any letters that are not alphanumeric or `-`/`_` will be replaced
+with `-`. Say you have a meta named `python a`, the corresponding keymap to
+access them will be `<Plug>(REPLStart-python-a)`.
+
+When you are binding those plug keymaps to your own keybindings, make sure this is
+a recursive map. e.g. `vim.keymap.set('n', '<Plug>(REPLStart-ipython)', { noremap = false })`.
 
 # Window configuration
 
@@ -454,7 +496,6 @@ creates a floating window at the center of the Vim screen with specific size
 and styling. If not, it creates a horizontal split below the current window and
 takes up 15 lines for the new window.
 
-
 # Add your own REPLs
 
 You can add your own REPL meta by following this example:
@@ -492,6 +533,7 @@ metas = {
 -- formatter is a function takes a list of string as an argument and returns a
 -- list of strings.
 ```
+
 [Here is a more complex example for ghci, a haskell repl.](https://github.com/milanglacier/yarepl.nvim/issues/21)
 
 Some REPLs can distinguish between pasted text and text from the user manual
@@ -598,133 +640,77 @@ yarepl.formatter.bracketed_pasting = yarepl.formatter.factory {
 }
 ```
 
-
 # Example keybinding setup
+
+If you don't want to use those `<Plug>` keymaps provided by the plugin but
+instead want to build the keymaps by your own, please check the
+[wiki.](https://github.com/milanglacier/yarepl.nvim/wiki/Example-Keymap-setup-without-using-%60-Plug-%60)
 
 Here is the keybindings setup from the maintainer:
 
 ```lua
--- The `run_cmd_with_count` function enables a user to execute a command with
--- count values in keymaps. This is particularly useful for `yarepl.nvim`,
--- which heavily uses count values as the identifier for REPL IDs.
-local function run_cmd_with_count(cmd)
-    return function()
-        vim.cmd(string.format('%d%s', vim.v.count, cmd))
-    end
-end
-
--- The `partial_cmd_with_count_expr` function enables users to enter partially
--- complete commands with a count value, and specify where the cursor should be
--- placed. This function is mainly designed to bind `REPLExec` command into a
--- keymap.
-local function partial_cmd_with_count_expr(cmd)
-    return function()
-        -- <C-U> is equivalent to \21, we want to clear the range before next input
-        -- to ensure the count is recognized correctly.
-        return ':\21' .. vim.v.count .. cmd
-    end
-end
-
 local keymap = vim.api.nvim_set_keymap
 local bufmap = vim.api.nvim_buf_set_keymap
-local autocmd = vim.api.nvim_create_autocmd
 
--- <Leader>cs will be equivalent to `REPLStart aichat`
--- 2<Leader>cs will be equivalent to `2REPLStart aichat`, etc.
-keymap('n', '<Leader>cs', '', {
-    callback = run_cmd_with_count 'REPLStart aichat',
+keymap('n', '<Leader>cs', '<Plug>(REPLStart-aichat)', {
     desc = 'Start an Aichat REPL',
 })
--- <Leader>cf will be equivalent to `REPLFocus aichat`
--- 2<Leader>cf will be equivalent to `2REPLFocus aichat`, etc.
-keymap('n', '<Leader>cf', '', {
-    callback = run_cmd_with_count 'REPLFocus aichat',
+keymap('n', '<Leader>cf', '<Plug>(REPLFocus-aichat)', {
     desc = 'Focus on Aichat REPL',
 })
-keymap('n', '<Leader>ch', '', {
-    callback = run_cmd_with_count 'REPLHide aichat',
+keymap('n', '<Leader>ch', '<Plug>(REPLHide-aichat)', {
     desc = 'Hide Aichat REPL',
 })
-keymap('v', '<Leader>cr', '', {
-    callback = run_cmd_with_count 'REPLSendVisual aichat',
+keymap('v', '<Leader>cr', '<Plug>(REPLSendVisual-aichat)', {
     desc = 'Send visual region to Aichat',
 })
-keymap('n', '<Leader>crr', '', {
-    callback = run_cmd_with_count 'REPLSendLine aichat',
-    desc = 'Send current line to Aichat',
+keymap('n', '<Leader>crr', '<Plug>(REPLSendLine-aichat)', {
+    desc = 'Send lines to Aichat',
 })
--- `<Leader>crap` will send a paragraph to the first aichat REPL.
--- `2<Leader>crap` will send a paragraph to the second aichat REPL. Note that
--- `ap` is just an example and can be replaced with any text object or motion.
-keymap('n', '<Leader>cr', '', {
-    callback = run_cmd_with_count 'REPLSendOperator aichat',
-    desc = 'Operator to Send text to Aichat',
+keymap('n', '<Leader>cr', '<Plug>(REPLSendOperator-aichat)', {
+    desc = 'Send Operator to Aichat',
 })
-keymap('n', '<Leader>cq', '', {
-    callback = run_cmd_with_count 'REPLClose aichat',
+keymap('n', '<Leader>ce', '<Plug>(REPLExec-aichat)', {
+    desc = 'Execute command in aichat',
+})
+keymap('n', '<Leader>cq', '<Plug>(REPLClose-aichat)', {
     desc = 'Quit Aichat',
 })
-keymap('n', '<Leader>cc', '<CMD>REPLCleanup<CR>', {
-    desc = 'Clear aichat REPLs.',
-})
-
--- `<Leader>ce How to current win id in neovim?`: This keymap executes a
--- command in `aichat` with the specified count value.
-keymap('n', '<Leader>ce', '', {
-    callback = partial_cmd_with_count_expr 'REPLExec $aichat ',
-    desc = 'Execute command in aichat',
-    expr = true,
-})
-
-local ft_to_repl = {
-    r = 'radian',
-    rmd = 'radian',
-    quarto = 'radian',
-    markdown = 'radian',
-    ['markdown.pandoc'] = 'radian',
-    python = 'ipython',
-    sh = 'bash',
-    REPL = '',
-}
 
 autocmd('FileType', {
-    pattern = { 'quarto', 'markdown', 'markdown.pandoc', 'rmd', 'python', 'sh', 'REPL' },
+    pattern = { 'quarto', 'markdown', 'markdown.pandoc', 'rmd', 'python', 'sh', 'REPL', 'r' },
+    group = my_augroup,
     desc = 'set up REPL keymap',
     callback = function()
         local repl = ft_to_repl[vim.bo.filetype]
-        bufmap(0, 'n', '<LocalLeader>rs', '', {
-            callback = run_cmd_with_count('REPLStart ' .. repl),
+        repl = repl and ('-' .. repl) or ''
+
+        bufmap(0, 'n', '<LocalLeader>rs', string.format('<Plug>(REPLStart%s)', repl), {
             desc = 'Start an REPL',
         })
-        bufmap(0, 'n', '<LocalLeader>rf', '', {
-            callback = run_cmd_with_count 'REPLFocus',
+        bufmap(0, 'n', '<LocalLeader>rf', '<Plug>(REPLFocus)', {
             desc = 'Focus on REPL',
         })
         bufmap(0, 'n', '<LocalLeader>rv', '<CMD>Telescope REPLShow<CR>', {
             desc = 'View REPLs in telescope',
         })
-        bufmap(0, 'n', '<LocalLeader>rh', '', {
-            callback = run_cmd_with_count 'REPLHide',
+        bufmap(0, 'n', '<LocalLeader>rh', '<Plug>(REPLHide)', {
             desc = 'Hide REPL',
         })
-        bufmap(0, 'v', '<LocalLeader>s', '', {
-            callback = run_cmd_with_count 'REPLSendVisual',
+        bufmap(0, 'v', '<LocalLeader>s', '<Plug>(REPLSendVisual)', {
             desc = 'Send visual region to REPL',
         })
-        bufmap(0, 'n', '<LocalLeader>ss', '', {
-            callback = run_cmd_with_count 'REPLSendLine',
+        bufmap(0, 'n', '<LocalLeader>ss', '<Plug>(REPLSendLine)', {
+            desc = 'Send line to REPL',
+        })
+        bufmap(0, 'n', '<LocalLeader>s', '<Plug>(REPLSendOperator)', {
             desc = 'Send current line to REPL',
         })
-        -- `<LocalLeader>sap` will send the current paragraph to the
-        -- buffer-attached REPL, or REPL 1 if there is no REPL attached.
-        -- `2<Leader>sap` will send the paragraph to REPL 2. Note that `ap` is
-        -- just an example and can be replaced with any text object or motion.
-        bufmap(0, 'n', '<LocalLeader>s', '', {
-            callback = run_cmd_with_count 'REPLSendOperator',
-            desc = 'Operator to send to REPL',
+        bufmap(0, 'n', '<LocalLeader>re', '<Plug>(REPLExec)', {
+            desc = 'Execute command in REPL',
+            expr = true,
         })
-        bufmap(0, 'n', '<LocalLeader>rq', '', {
-            callback = run_cmd_with_count 'REPLClose',
+        bufmap(0, 'n', '<LocalLeader>rq', '<Plug>(REPLClose)', {
             desc = 'Quit REPL',
         })
         bufmap(0, 'n', '<LocalLeader>rc', '<CMD>REPLCleanup<CR>', {
@@ -733,8 +719,7 @@ autocmd('FileType', {
         bufmap(0, 'n', '<LocalLeader>rS', '<CMD>REPLSwap<CR>', {
             desc = 'Swap REPLs.',
         })
-        bufmap(0, 'n', '<LocalLeader>r?', '', {
-            callback = run_cmd_with_count 'REPLStart',
+        bufmap(0, 'n', '<LocalLeader>r?', '<Plug>(REPLStart)', {
             desc = 'Start an REPL from available REPL metas',
         })
         bufmap(0, 'n', '<LocalLeader>ra', '<CMD>REPLAttachBufferToREPL<CR>', {
@@ -743,26 +728,13 @@ autocmd('FileType', {
         bufmap(0, 'n', '<LocalLeader>rd', '<CMD>REPLDetachBufferToREPL<CR>', {
             desc = 'Detach current buffer to any REPL',
         })
-        -- `3<LocalLeader>re df.describe()`: This keymap executes the specified
-        -- command in REPL 3.
-        bufmap(0, 'n', '<LocalLeader>re', '', {
-            callback = partial_cmd_with_count_expr 'REPLExec ',
-            desc = 'Execute command in REPL',
-            expr = true,
-        })
     end,
 })
+
 ```
 
-The `run_cmd_with_count` function ensures that any numeric prefix given to a
-keybinding, such as `3<LocalLeader>rs`, `2<LocalLeader>s`, and `5<Leader>cr`,
-is passed to the corresponding command. For instance, `2REPLStart aichat` is
-equivalent to `2<Leader>cs`, and `3REPLSendOperator` is equivalent to
-`3<LocalLeader>s`.
-
-With the keybinding setup, prefixing keybindings with `<Leader>c` ensures that
-the text is always sent to the `aichat` REPL, a REPL for chatgpt. The
-maintainer requires a global hotkey for easily talking with chatgpt.
+With the keybinding setup, prefixing keybindings with <Leader>c ensures that
+the text is always sent to the aichat REPL, a REPL for chatgpt.
 
 For maximum flexibility with other programming languages, the maintainer
 desires the ability to easily switch between two modes:
@@ -806,7 +778,7 @@ One way to achieve this is to:
 To enable `exrc`, add the following line to your Neovim config:
 
 ```lua
-vim.o.exrc = 1
+vim.o.exrc = true
 ```
 
 Then, configure `yarepl` like so:
@@ -873,6 +845,34 @@ metas = {
 ```
 
 # FAQ
+
+## Why lazy loading with `lazy.nvim` doesn't work?
+
+We recommend using `event = 'VeryLazy'` to do the lazy loading. If you want to
+use `keys` to lazy load this plugin, make sure you are using recursive mapping:
+
+```lua
+-- Recommended
+return {
+    'milanglacier/yarepl.nvim',
+    event = 'VeryLazy',
+    config = function()
+        -- add your configs here
+    end,
+}
+
+-- Also works, but use with caution!
+return {
+    'milanglacier/yarepl.nvim',
+    keys = {
+        { '<Leader>s', '<Plug>(REPLStart)', noremap = false, mode = 'n' },
+        { '<LocalLeader>o', '<Plug>(REPLStart-ipython)', noremap = false, ft = 'python', mode = 'n' },
+    },
+    config = function()
+        -- your config here
+    end,
+}
+```
 
 ## How do I avoid clutter from the bufferline plugin?
 
