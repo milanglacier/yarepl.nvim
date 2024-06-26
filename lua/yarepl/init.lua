@@ -422,6 +422,10 @@ api.nvim_create_user_command('REPLStart', function(opts)
         vim.ui.select(repls, {
             prompt = 'Select REPL: ',
         }, function(choice)
+            if not choice then
+                return
+            end
+
             repl_name = choice
             create_repl(id, repl_name)
 
@@ -631,12 +635,20 @@ api.nvim_create_user_command('REPLSwap', function(opts)
                 return item .. ' ' .. M._repls[item].name
             end,
         }, function(id1)
+            if not id1 then
+                return
+            end
+
             vim.ui.select(repl_ids, {
                 prompt = 'select second REPL',
                 format_item = function(item)
                     return item .. ' ' .. M._repls[item].name
                 end,
             }, function(id2)
+                if not id2 then
+                    return
+                end
+
                 repl_swap(id1, id2)
             end)
         end)
@@ -647,6 +659,10 @@ api.nvim_create_user_command('REPLSwap', function(opts)
                 return item .. ' ' .. M._repls[item].name
             end,
         }, function(id2)
+            if not id2 then
+                return
+            end
+
             repl_swap(id_1, id2)
         end)
     end
