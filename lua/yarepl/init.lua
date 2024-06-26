@@ -396,8 +396,69 @@ M._send_operator_internal = function(motion)
     M._send_strings(id, name, current_bufnr, lines)
 end
 
+local function run_cmd_with_count(cmd)
+    vim.cmd(string.format('%d%s', vim.v.count, cmd))
+end
+
+local function partial_cmd_with_count_expr(cmd)
+    -- <C-U> is equivalent to \21, we want to clear the range before
+    -- next input to ensure the count is recognized correctly.
+    return ':\21' .. vim.v.count .. cmd
+end
+
+local function add_keymap(meta_name)
+    -- replace non alpha numeric and - _ keys to dash
+    if meta_name then
+        meta_name = meta_name:gsub('[^%w-_]', '-')
+    end
+
+    local suffix = meta_name and ('-' .. meta_name) or ''
+
+    local mode_commands = {
+        { 'n', 'REPLStart' },
+        { 'n', 'REPLFocus' },
+        { 'n', 'REPLHide' },
+        { 'n', 'REPLSendLine' },
+        { 'n', 'REPLSendOperator' },
+        { 'v', 'REPLSendVisual' },
+        { 'n', 'REPLClose' },
+        { 'n', 'REPLExec' },
+    }
+
+    for _, spec in ipairs(mode_commands) do
+        api.nvim_set_keymap(spec[1], string.format('<Plug>(%s%s)', spec[2], suffix), '', {
+            noremap = true,
+            callback = function()
+                if meta_name then
+                    run_cmd_with_count(spec[2] .. ' ' .. meta_name)
+                else
+                    run_cmd_with_count(spec[2])
+                end
+            end,
+        })
+    end
+
+    -- setting up keymaps for REPLExec is more complicated, setting it independently
+    api.nvim_set_keymap('n', string.format('<Plug>(%s%s)', 'REPLExec', suffix), '', {
+        noremap = true,
+        callback = function()
+            if meta_name then
+                return partial_cmd_with_count_expr('REPLExec $' .. meta_name)
+            else
+                return partial_cmd_with_count_expr 'REPLExec'
+            end
+        end,
+        expr = true,
+    })
+end
+
 M.setup = function(opts)
     M._config = vim.tbl_deep_extend('force', default_config(), opts or {})
+    add_keymap()
+
+    for meta_name, _ in pairs(M._config.metas) do
+        add_keymap(meta_name)
+    end
 end
 
 api.nvim_create_user_command('REPLStart', function(opts)
