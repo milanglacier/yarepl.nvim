@@ -755,6 +755,9 @@ api.nvim_create_user_command('REPLAttachBufferToREPL', function(opts)
                 return item .. ' ' .. M._repls[item].name
             end,
         }, function(id)
+            if not id then
+                return
+            end
             attach_buffer_to_repl(current_buffer, M._repls[id])
         end)
     else
