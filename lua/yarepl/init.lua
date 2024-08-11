@@ -108,7 +108,7 @@ local function create_repl(id, repl_name)
     end
 
     local bufnr = api.nvim_create_buf(M._config.buflisted, M._config.scratch)
-    api.nvim_buf_set_option(bufnr, 'filetype', M._config.ft)
+    vim.bo[bufnr].filetype = M._config.ft
 
     local cmd
 
