@@ -679,6 +679,17 @@ keymap('n', '<Leader>cq', '<Plug>(REPLClose-aichat)', {
     desc = 'Quit Aichat',
 })
 
+
+local ft_to_repl = {
+    r = 'radian',
+    R = 'radian',
+    rmd = 'radian',
+    quarto = 'radian',
+    markdown = 'radian',
+    python = 'ipython',
+    sh = 'bash',
+}
+
 autocmd('FileType', {
     pattern = { 'quarto', 'markdown', 'markdown.pandoc', 'rmd', 'python', 'sh', 'REPL', 'r' },
     group = my_augroup,
