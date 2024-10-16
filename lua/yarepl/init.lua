@@ -423,7 +423,6 @@ local function add_keymap(meta_name)
         { 'n', 'REPLSendOperator' },
         { 'v', 'REPLSendVisual' },
         { 'n', 'REPLClose' },
-        { 'n', 'REPLExec' },
     }
 
     for _, spec in ipairs(mode_commands) do
@@ -446,7 +445,7 @@ local function add_keymap(meta_name)
             if meta_name then
                 return partial_cmd_with_count_expr('REPLExec $' .. meta_name)
             else
-                return partial_cmd_with_count_expr 'REPLExec'
+                return partial_cmd_with_count_expr 'REPLExec '
             end
         end,
         expr = true,
