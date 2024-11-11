@@ -899,6 +899,25 @@ In case you have unlisted the REPLs and need to view the running ones, use
 
 Refer to [REPLSendVisual](#replsendvisual)
 
+## `<Plug>(REPLSendVisual)` Only Sends to First REPL
+
+When using which-key.nvim and binding `<Plug>(REPLSendVisual)` or its variants
+(like `<Plug>(REPLSendVisual-ipython)`) to keybindings that start with leader
+or local leader keys, visual selections will always be sent to the first REPL,
+regardless of any numeric prefix entered.
+
+This behavior occurs due to a conflict with which-key.nvim, as it consumes the
+count input before it reaches `<Plug>(REPLSendVisual)`, resulting in a count
+value of `0`.
+
+To resolve this issue, you have several options:
+
+1. Disable which-key.nvim in visual mode
+2. Bind `<Plug>(REPLSendVisual)` to key sequences that don't trigger which-key
+   (e.g., `<A-s>`)
+3. Use alternative methods such as `REPLAttachBufferToREPL` to connect the
+   current buffer to a REPL other than the first one
+
 # Limitations
 
 - Currently, `yarepl` only supports sending entire lines to REPL. This means
