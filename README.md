@@ -143,6 +143,8 @@ yarepl.setup {
     -- text? This feature would be helpful if you want to ensure that your view
     -- stays updated with the latest REPL output.
     scroll_to_bottom_after_sending = true,
+    -- Format REPL buffer names as #repl_name#n (e.g., #ipython#1) instead of using terminal defaults
+    format_repl_buffers_names = true,
     os = {
         -- Some hacks for Windows. macOS and Linux users can simply ignore
         -- them. The default options are recommended for Windows user.

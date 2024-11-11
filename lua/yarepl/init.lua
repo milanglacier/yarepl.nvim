@@ -25,6 +25,8 @@ local default_config = function()
         },
         close_on_exit = true,
         scroll_to_bottom_after_sending = true,
+        -- Format REPL buffer names as #repl_name#n (e.g., #ipython#1) instead of using terminal defaults
+        format_repl_buffers_names = true,
         os = {
             windows = {
                 send_delayed_cr_after_sending = true,
@@ -67,13 +69,15 @@ local function repl_cleanup()
     end
     M._repls = valid_repls
 
-    for id, repl in pairs(M._repls) do
-        -- to avoid name conflict, we add a temp prefix
-        api.nvim_buf_set_name(repl.bufnr, string.format('#%s#temp#%d', repl.name, id))
-    end
+    if M._config.format_repl_buffers_names then
+        for id, repl in pairs(M._repls) do
+            -- to avoid name conflict, we add a temp prefix
+            api.nvim_buf_set_name(repl.bufnr, string.format('#%s#temp#%d', repl.name, id))
+        end
 
-    for id, repl in pairs(M._repls) do
-        api.nvim_buf_set_name(repl.bufnr, string.format('#%s#%d', repl.name, id))
+        for id, repl in pairs(M._repls) do
+            api.nvim_buf_set_name(repl.bufnr, string.format('#%s#%d', repl.name, id))
+        end
     end
 end
 
@@ -143,7 +147,9 @@ local function create_repl(id, repl_name)
     end
 
     local term = fn.termopen(cmd, opts)
-    api.nvim_buf_set_name(bufnr, string.format('#%s#%d', repl_name, id))
+    if M._config.format_repl_buffers_names then
+        api.nvim_buf_set_name(bufnr, string.format('#%s#%d', repl_name, id))
+    end
     M._repls[id] = { bufnr = bufnr, term = term, name = repl_name }
 end
 
