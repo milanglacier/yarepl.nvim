@@ -29,6 +29,7 @@
   - [Why lazy loading with `lazy.nvim` doesn't work?](#why-lazy-loading-with-lazynvim-doesnt-work)
   - [How do I avoid clutter from the bufferline plugin?](#how-do-i-avoid-clutter-from-the-bufferline-plugin)
   - [REPLSendVisual is not functioning properly](#replsendvisual-is-not-functioning-properly)
+  - [`<Plug>(REPLSendVisual)` Only Sends to First REPL](#plugreplsendvisual-only-sends-to-first-repl)
 - [Limitations](#limitations)
 - [Acknowledgements](#acknowledgements)
 
