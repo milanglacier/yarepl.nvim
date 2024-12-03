@@ -518,9 +518,12 @@ end
 
 yarepl.setup {
     metas = {
+        -- REPL local settings
         ipython = { wincmd = 'topleft 25 split' },
         radian = { wincmd = float_wincmd },
     }
+    -- global settings
+    wincmd = 'belowright 15 split',
 }
 ```
 
