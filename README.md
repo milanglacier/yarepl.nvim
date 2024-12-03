@@ -477,22 +477,17 @@ the name of the REPL (the keys of `metas`).
 
 ```lua
 wincmd = function(bufnr, name)
-    if name == 'ipython' then
-        vim.api.nvim_open_win(bufnr, true, {
-            relative = 'editor',
-            row = math.floor(vim.o.lines * 0.25),
-            col = math.floor(vim.o.columns * 0.25),
-            width = math.floor(vim.o.columns * 0.5),
-            height = math.floor(vim.o.lines * 0.5),
-            style = 'minimal',
-            title = name,
-            border = 'rounded',
-            title_pos = 'center',
-        })
-    else
-        vim.cmd [[belowright 15 split]]
-        vim.api.nvim_set_current_buf(bufnr)
-    end
+    vim.api.nvim_open_win(bufnr, true, {
+        relative = 'editor',
+        row = math.floor(vim.o.lines * 0.25),
+        col = math.floor(vim.o.columns * 0.25),
+        width = math.floor(vim.o.columns * 0.5),
+        height = math.floor(vim.o.lines * 0.5),
+        style = 'minimal',
+        title = name,
+        border = 'rounded',
+        title_pos = 'center',
+    })
 end
 ```
 
@@ -500,6 +495,34 @@ This function checks if the REPL buffer has the name `ipython`. If it does, it
 creates a floating window at the center of the Vim screen with specific size
 and styling. If not, it creates a horizontal split below the current window and
 takes up 15 lines for the new window.
+
+You can further customize the behavior by applying the `wincmd` configuration
+to specific `meta` entries. When a `meta` includes its own `wincmd` setting, it
+overrides the global `wincmd`.
+
+```lua
+
+float_wincmd = function(bufnr, name)
+    vim.api.nvim_open_win(bufnr, true, {
+        relative = 'editor',
+        row = math.floor(vim.o.lines * 0.25),
+        col = math.floor(vim.o.columns * 0.25),
+        width = math.floor(vim.o.columns * 0.5),
+        height = math.floor(vim.o.lines * 0.5),
+        style = 'minimal',
+        title = name,
+        border = 'rounded',
+        title_pos = 'center',
+    })
+end
+
+yarepl.setup {
+    metas = {
+        ipython = { wincmd = 'topleft 25 split' },
+        radian = { wincmd = float_wincmd },
+    }
+}
+```
 
 # Add your own REPLs
 

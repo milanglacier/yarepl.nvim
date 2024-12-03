@@ -91,10 +91,12 @@ local function focus_repl(repl)
     if win ~= -1 then
         api.nvim_set_current_win(win)
     else
-        if type(M._config.wincmd) == 'function' then
-            M._config.wincmd(repl.bufnr, repl.name)
+        local wincmd = M._config.metas[repl.name].wincmd or M._config.wincmd
+
+        if type(wincmd) == 'function' then
+            wincmd(repl.bufnr, repl.name)
         else
-            vim.cmd(M._config.wincmd)
+            vim.cmd(wincmd)
             api.nvim_set_current_buf(repl.bufnr)
         end
     end
@@ -122,10 +124,12 @@ local function create_repl(id, repl_name)
         cmd = M._config.metas[repl_name].cmd
     end
 
-    if type(M._config.wincmd) == 'function' then
-        M._config.wincmd(bufnr, repl_name)
+    local wincmd = M._config.metas[repl_name].wincmd or M._config.wincmd
+
+    if type(wincmd) == 'function' then
+        wincmd(bufnr, repl_name)
     else
-        vim.cmd(M._config.wincmd)
+        vim.cmd(wincmd)
         api.nvim_set_current_buf(bufnr)
     end
 
