@@ -491,10 +491,8 @@ wincmd = function(bufnr, name)
 end
 ```
 
-This function checks if the REPL buffer has the name `ipython`. If it does, it
-creates a floating window at the center of the Vim screen with specific size
-and styling. If not, it creates a horizontal split below the current window and
-takes up 15 lines for the new window.
+This function creates a floating window at the center of the Vim screen with
+specific size and styling.
 
 You can further customize the behavior by applying the `wincmd` configuration
 to specific `meta` entries. When a `meta` includes its own `wincmd` setting, it
