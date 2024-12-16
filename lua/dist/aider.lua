@@ -46,6 +46,7 @@ local prefixes = {
 }
 
 local aider_args = {
+    '--watch-files',
     '--model',
     '--opus',
     '--sonnet',
@@ -134,6 +135,7 @@ local aider_args = {
     '--no-suggest-shell-commands',
     '--voice-format',
     '--voice-language',
+    '--multiline',
 }
 
 -- Create a closure for prefix handling
@@ -167,7 +169,7 @@ local prefix_handler = create_prefix_handler()
 -- Expose the sender function
 M.formatter = prefix_handler.formatter
 M.set_prefix = prefix_handler.set_prefix
-M.aider_args = {}
+M.aider_args = { '--watch-files' }
 M.aider_cmd = 'aider'
 
 M.setup = function(params)
