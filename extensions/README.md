@@ -129,9 +129,6 @@ require('yarepl.extensions.aider').setup {
 }
 ```
 
-If you want to open `aider` in a floating window, configure it in something
-like this:
-
 ## Note
 
 I recommend trying the `inline comment as instruction` feature in `aider`,
