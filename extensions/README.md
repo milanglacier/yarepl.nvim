@@ -21,15 +21,14 @@ coding within your editor.
 The `yarepl.extensions.aider` module offers command-line completions to help
 you configure Aider as needed.
 
-- `AiderSetArgs`: Set command-line arguments for aider
-- `AiderSetPrefix`: Specify a prefix for Aider commands, such as `/ask`,
+- `AiderSetPrefix`: Specify a `/` prefix for Aider commands, such as `/ask`,
   `/architect`, etc. When sending buffer content to the Aider REPL, the specified
-  prefix will be added to the buffer content.
+  prefix will be prepended to the buffer content.
 - `AiderRemovePrefix`: Remove the current prefix
 - `AiderSend<Action>`: Send specific actions to aider (e.g., `:AiderSendYes`,
   `:AiderSendNo`)
-- `AiderExec`: Send the prompt written in cmdline to aider (with autocompletion)
-- `AiderArgs`: set the additional args to launch aider with autocompletion (e.g. `AiderArgs --model gpt-4o`)
+- `AiderExec`: Send the prompt written in cmdline to aider with `/` prefix completion
+- `AiderSetArgs`: set the command line args to launch aider with autocompletion (e.g. `AiderSetArgs --model gpt-4o`)
 
 ## Keymaps
 
