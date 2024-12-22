@@ -23,6 +23,7 @@
 - [Add your own REPLs](#add-your-own-repls)
 - [Example keybinding setup](#example-keybinding-setup)
 - [Telescope Integration](#telescope-integration)
+- [Fzf-lua integration](#fzflua-integration)
 - [Set up project-level REPLs](#set-up-project-level-repls)
 - [Create persistent REPLs in tmux](#create-persistent-repls-in-tmux)
 - [FAQ](#faq)
@@ -803,6 +804,34 @@ buffers. If you are using the default Telescope configuration, `<C-t>` opens a
 new tab for the selected REPL, `<C-v>` generates a vertical split window for
 the chosen REPL, and `<C-x>` creates a horizontal split window for your
 selected REPL.
+
+# Fzf-lua Integration
+
+`yarepl` has integrated with `Fzf-lua` and can be enabled by adding the
+following line to your config:
+
+```lua
+vim.keymap.set('n', '<Leader>rv', function() require('yarepl.extensions.fzf').repl_show() end)
+```
+
+This integration allows you to preview active REPL buffers. Pressing `<CR>`
+will open the selected REPL buffer using `wincmd`, either with a meta-local
+`wincmd` or the global `wincmd`, depending on the context.
+
+For users familiar with `Fzf-lua`'s API, custom options can be passed to the
+function to tailor its behavior, similar to any other `Fzf-lua` pickers. For
+example:
+
+```lua
+require('yarepl.extensions.fzf').repl_show {
+    winopts = {
+        title = 'REPL>',
+        previewer = {
+            layout = 'horizontal'
+        }
+    }
+}
+```
 
 # Set up project-level REPLs
 
