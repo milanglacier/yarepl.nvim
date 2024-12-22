@@ -45,6 +45,7 @@ local repl_show = function(opts)
                 if get_buf_name_without_dir(repl.bufnr) == entry_str then
                     -- the default action is to open the REPL buffer with configured wincmd
                     vim.cmd(id .. 'REPLFocus')
+                    return
                 end
             end
         end,
