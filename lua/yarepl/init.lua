@@ -464,6 +464,14 @@ end
 
 M.setup = function(opts)
     M._config = vim.tbl_deep_extend('force', default_config(), opts or {})
+
+    for name, meta in pairs(M._config.metas) do
+        -- remove the disabled builtin meta passed from user config
+        if not meta then
+            M._config.metas[name] = nil
+        end
+    end
+
     add_keymap()
 
     for meta_name, _ in pairs(M._config.metas) do

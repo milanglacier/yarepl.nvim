@@ -21,7 +21,7 @@
     - [REPLExec](#replexec)
   - [Keymaps](#keymaps)
 - [Window configuration](#window-configuration)
-- [Add your own REPLs](#add-your-own-repls)
+- [Customizing REPLs](#customizing-repls)
 - [Example keybinding setup](#example-keybinding-setup)
 - [Extensions](#extensions)
 - [Telescope Integration](#telescope-integration)
@@ -140,7 +140,8 @@ yarepl.setup {
     -- How yarepl open the REPL window, can be a string or a lua function.
     -- See below example for how to configure this option
     wincmd = 'belowright 15 split',
-    -- The available REPL palattes that `yarepl` can create REPL based on
+    -- The available REPL palattes that `yarepl` can create REPL based on.
+    -- To disable a built-in meta, set its key to `false`, e.g., `metas = { R = false }`
     metas = {
         aichat = { cmd = 'aichat', formatter = yarepl.formatter.bracketed_pasting },
         radian = { cmd = 'radian', formatter = yarepl.formatter.bracketed_pasting },
@@ -538,7 +539,24 @@ yarepl.setup {
 }
 ```
 
-# Add your own REPLs
+# Customizing REPLs
+
+You can disable a built-in REPL meta by set the key to `false`:
+
+```lua
+metas = {
+    R = false
+}
+```
+
+To modify a built-in meta's settings, simply override the specific option.
+There's no need to copy the default values for other options:
+
+```lua
+metas = {
+    ipython = { cmd = { 'ipython', '--simple-prompt' } }
+}
+```
 
 You can add your own REPL meta by following this example:
 
