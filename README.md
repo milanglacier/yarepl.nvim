@@ -793,13 +793,15 @@ desires the ability to easily switch between two modes:
 
 # Extensions
 
-The `Extensinos` module contains extended functionalities built upon the core of
-yarepl.nvim. While not considered an integral part of yarepl, it offers
-valuable additional features. Currently, the module includes:
+The `Extensinos` module contains extended functionalities built upon the core
+of yarepl.nvim. While not considered as core part of yarepl, it offers valuable
+additional features. Currently, the module includes:
 
-- aider: This component enhances AI-assisted coding capabilities through
-  aider integration. For comprehensive information about the features, please
-  refer to [extensions/README.md](extensions/README.md).
+- `aider`: This component enhances AI-assisted coding capabilities through
+  [aider.chat](https://aider.chat) integration. For comprehensive information
+  about the features, please refer to
+  [extensions/README.md](extensions/README.md).
+- `fzf`: This module provides integration with `fzf-lua`.
 
 # Telescope Integration
 
