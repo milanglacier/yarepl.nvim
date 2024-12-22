@@ -26,7 +26,8 @@ you configure Aider as needed.
   prefix will be prepended to the buffer content.
 - `AiderRemovePrefix`: Remove the current prefix
 - `AiderSend<Action>`: Send specific actions to aider (e.g., `:AiderSendYes`,
-  `:AiderSendNo`)
+  `:AiderSendNo`). Available action: `Yes`, `No`, `Abort`, `Diff`, `Paste`,
+  `Clear`, `Undo`, `Reset`, `Drop`, `Ls`.
 - `AiderExec`: Send the prompt written in cmdline to aider with `/` prefix completion
 - `AiderSetArgs`: set the command line args to launch aider with autocompletion (e.g. `AiderSetArgs --model gpt-4o`)
 
@@ -42,6 +43,13 @@ available `<Plug>` mappings:
 - `<Plug>(AiderSendNo)`: Send 'n' (No) to aider
 - `<Plug>(AiderSendAbort)`: Send abort signal (C-c) to aider
 - `<Plug>(AiderSendExit)`: Send exit signal (C-d) to aider
+- `<Plug>(AiderSendDiff)`
+- `<Plug>(AiderSendPaste)`
+- `<Plug>(AiderSendClear)`
+- `<Plug>(AiderSendUndo)`
+- `<Plug>(AiderSendReset)`
+- `<Plug>(AiderSendDrop)`
+- `<Plug>(AiderSendLs)`
 
 ## Usage
 
