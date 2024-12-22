@@ -2,11 +2,18 @@ local keymap = vim.api.nvim_set_keymap
 
 local M = {}
 
-M.wincmd = function(bufnr)
-    vim.cmd 'tabedit'
-    vim.api.nvim_set_current_buf(bufnr)
-    vim.cmd 'setlocal signcolumn=no'
-    vim.cmd 'startinsert'
+M.wincmd = function(bufnr, name)
+    vim.api.nvim_open_win(bufnr, true, {
+        relative = 'editor',
+        row = math.floor(vim.o.lines * 0.05),
+        col = math.floor(vim.o.columns * 0.05),
+        width = math.floor(vim.o.columns * 0.9),
+        height = math.floor(vim.o.lines * 0.9),
+        style = 'minimal',
+        title = name,
+        border = 'rounded',
+        title_pos = 'center',
+    })
 end
 
 -- Predefined prefix setters

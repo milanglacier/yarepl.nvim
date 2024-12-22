@@ -124,31 +124,13 @@ require('yarepl.extensions.aider').setup {
     aider_cmd = 'aider',
     --NOTE: make sure you pass a list of string, not string,
     aider_args = { '--watch-files' },
-    -- The default wincmd is to open aider in a new tab
+    -- The default wincmd is to open aider in a floating window
     wincmd = ...
 }
 ```
 
 If you want to open `aider` in a floating window, configure it in something
 like this:
-
-```lua
-require('yarepl.extensions.aider').setup {
-    wincmd = function(bufnr, name)
-        vim.api.nvim_open_win(bufnr, true, {
-            relative = 'editor',
-            row = math.floor(vim.o.lines * 0.05),
-            col = math.floor(vim.o.columns * 0.05),
-            width = math.floor(vim.o.columns * 0.9),
-            height = math.floor(vim.o.lines * 0.9),
-            style = 'minimal',
-            title = name,
-            border = 'rounded',
-            title_pos = 'center',
-        })
-    end,
-}
-```
 
 ## Note
 
