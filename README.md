@@ -22,6 +22,7 @@
 - [Window configuration](#window-configuration)
 - [Add your own REPLs](#add-your-own-repls)
 - [Example keybinding setup](#example-keybinding-setup)
+- [Extensions](#extensions)
 - [Telescope Integration](#telescope-integration)
 - [Fzf-lua Integration](#fzf-lua-integration)
 - [Set up project-level REPLs](#set-up-project-level-repls)
@@ -789,6 +790,16 @@ desires the ability to easily switch between two modes:
    can use `<LocalLeader>ra` to attach the current buffer to a REPL.
    Subsequently, the `<LocalLeader>s` key can be directly used to send the text
    to the desired REPL.
+
+# Extensions
+
+The `Extensinos` module contains extended functionalities built upon the core of
+yarepl.nvim. While not considered an integral part of yarepl, it offers
+valuable additional features. Currently, the module includes:
+
+- aider: This component enhances AI-assisted coding capabilities through
+  aider integration. For comprehensive information about the features, please
+  refer to [extensions/README.md](extensions/README.md).
 
 # Telescope Integration
 
