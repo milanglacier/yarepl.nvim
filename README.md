@@ -1,4 +1,5 @@
 - [yarepl.nvim](#yareplnvim)
+- [Showcase](#showcase)
 - [What is yarepl.nvim?](#what-is-yareplnvim)
 - [Why yarepl.nvim?](#why-yareplnvim)
 - [Installation](#installation)
@@ -41,6 +42,16 @@ Yet Another REPL is a flexible REPL (Read-Eval-Print Loop) management tool that
 supports multiple paradigms for interacting with REPLs. It offers project-level
 configurations, works with tmux, integrates with Telescope, and provides a
 native dot repeat feature, without requiring vim-repeat.
+
+# Showcase
+
+![aider showcase](assets/aider-showcase.jpeg)
+
+This image highlights an AI-driven chat-based REPL,
+[aider.chat](https://aider.chat), managed by `yarepl`.
+
+`yarepl` enables integration with `aider.chat`. For more details,
+refer to the [Extensions](#extensions) section.
 
 # What is yarepl.nvim?
 
