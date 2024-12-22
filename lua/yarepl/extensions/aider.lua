@@ -210,7 +210,7 @@ function M.send_to_aider_no_format(id, lines)
     yarepl._send_strings(id, 'aider', bufnr, lines, false)
 end
 
-vim.api.nvim_create_user_command('AiderArgs', function(opts)
+vim.api.nvim_create_user_command('AiderSetArgs', function(opts)
     M.aider_args = opts.fargs or {}
 end, {
     nargs = '*',
@@ -302,52 +302,6 @@ keymap('n', '<Plug>(AiderExec)', '', {
         return partial_cmd_with_count_expr 'AiderExec'
     end,
     expr = true,
-})
-
--- general keymap from yarepl
-keymap('n', '<Leader>as', '<Plug>(REPLStart-aider)', {
-    desc = 'Start an aider REPL',
-})
-keymap('n', '<Leader>af', '<Plug>(REPLFocus-aider)', {
-    desc = 'Focus on aider REPL',
-})
-keymap('n', '<Leader>ah', '<Plug>(REPLHide-aider)', {
-    desc = 'Hide aider REPL',
-})
-keymap('v', '<Leader>ar', '<Plug>(REPLSendVisual-aider)', {
-    desc = 'Send visual region to aider',
-})
-keymap('n', '<Leader>arr', '<Plug>(REPLSendLine-aider)', {
-    desc = 'Send lines to aider',
-})
-keymap('n', '<Leader>ar', '<Plug>(REPLSendOperator-aider)', {
-    desc = 'Send Operator to aider',
-})
-
--- special keymap from aider
-keymap('n', '<Leader>ae', '<Plug>(AiderExec)', {
-    desc = 'Execute command in aider',
-})
-keymap('n', '<Leader>ay', '<Plug>(AiderSendYes)', {
-    desc = 'Send y to aider',
-})
-keymap('n', '<Leader>an', '<Plug>(AiderSendNo)', {
-    desc = 'Send n to aider',
-})
-keymap('n', '<Leader>aa', '<Plug>(AiderSendAbort)', {
-    desc = 'Send abort to aider',
-})
-keymap('n', '<Leader>aq', '<Plug>(AiderSendExit)', {
-    desc = 'Send exit to aider',
-})
-keymap('n', '<Leader>ag', '<cmd>AiderSetPrefix<cr>', {
-    desc = 'set aider prefix',
-})
-keymap('n', '<Leader>aG', '<cmd>AiderRemovePrefix<cr>', {
-    desc = 'remove aider prefix',
-})
-keymap('n', '<Leader>a<space>', '<cmd>checktime<cr>', {
-    desc = 'sync file changes by aider to nvim buffer',
 })
 
 return M

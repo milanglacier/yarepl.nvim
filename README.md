@@ -22,7 +22,7 @@
 - [Window configuration](#window-configuration)
 - [Add your own REPLs](#add-your-own-repls)
 - [Example keybinding setup](#example-keybinding-setup)
-- [Dist Module](#dist-module)
+- [Extensions](#extensions)
 - [Telescope Integration](#telescope-integration)
 - [Fzf-lua Integration](#fzf-lua-integration)
 - [Set up project-level REPLs](#set-up-project-level-repls)
@@ -791,15 +791,15 @@ desires the ability to easily switch between two modes:
    Subsequently, the `<LocalLeader>s` key can be directly used to send the text
    to the desired REPL.
 
-# Dist Module
+# Extensions
 
-The `dist` module contains extended functionalities built upon the core of
+The `Extensinos` module contains extended functionalities built upon the core of
 yarepl.nvim. While not considered an integral part of yarepl, it offers
 valuable additional features. Currently, the module includes:
 
-- aider.lua: This component enhances AI-assisted coding capabilities through
+- aider: This component enhances AI-assisted coding capabilities through
   aider integration. For comprehensive information about the features, please
-  refer to [dist/aider.md](dist/aider.md).
+  refer to [extensions/README.md](extensions/README.md).
 
 # Telescope Integration
 
