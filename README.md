@@ -23,7 +23,7 @@
 - [Add your own REPLs](#add-your-own-repls)
 - [Example keybinding setup](#example-keybinding-setup)
 - [Telescope Integration](#telescope-integration)
-- [Fzf-lua integration](#fzflua-integration)
+- [Fzf-lua Integration](#fzf-lua-integration)
 - [Set up project-level REPLs](#set-up-project-level-repls)
 - [Create persistent REPLs in tmux](#create-persistent-repls-in-tmux)
 - [FAQ](#faq)
