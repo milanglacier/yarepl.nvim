@@ -40,8 +40,9 @@
 
 Yet Another REPL is a flexible REPL (Read-Eval-Print Loop) management tool that
 supports multiple paradigms for interacting with REPLs. It offers project-level
-configurations, works with tmux, integrates with Telescope, and provides a
-native dot repeat feature, without requiring vim-repeat.
+configurations, works with tmux, integrates with `Telescope`, `fzf-lua`, and
+`aider.chat`, and provides a native dot repeat feature, without requiring
+vim-repeat.
 
 # Showcase
 
@@ -68,10 +69,6 @@ native dot repeat functionality without requiring `vim-repeat`.
 
 # Why yarepl.nvim?
 
-As a data scientist, talking with different REPLs is an essentail part of my
-workflow. I almost spending lifes in communicating with various REPLs, like R,
-Python, and Bash.
-
 With multiple projects at hand, I require the ability to send text from
 different files to REPLs with the same type (such as multiple ipython REPLs).
 
@@ -86,11 +83,11 @@ Python .
 
 As a CLI fnatic, to communicate with chatgpt, I prefer through a REPL `aichat`.
 Additionally, I require a set of global hotkeys and an isolated REPL
-environment to facilitate communication with 'aichat' separately without any
+environment to facilitate communication with `aichat` separately without any
 interference with other REPLs.
 
 Unfortunately, currently available REPL plugins do not afford me such great
-flexibility in managing REPL in multiple ways. This is why 'yarepl.nvim' was
+flexibility in managing REPL in multiple ways. This is why `yarepl.nvim` was
 created.
 
 # Installation
@@ -113,7 +110,7 @@ lazy.nvim:
 
 `yarepl.nvim` does not require any dependencies but functions better with the following plugins:
 
-1. `telescope.nvim`. `yarepl.nvim` provides a telescope extension for REPL
+1. `telescope.nvim` or `fzf-lua`. `yarepl.nvim` provides extensions for REPL
    previewer.
 
 2. A UI frontend that provides an alternative frontend for `vim.ui.select`.

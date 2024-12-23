@@ -35,7 +35,7 @@ you configure Aider as needed.
 
 In addition to the general `<plug>` keymap created by yarepl.nvim (for example
 `<Plug>(REPLSendLine-aider)`), aider.lua provides a set of additional `<Plug>`
-mappings to enhanve the experience with aider. Here are the
+mappings to enhance the experience with aider. Here are the
 available `<Plug>` mappings:
 
 - `<Plug>(REPLSendLine-aider)`: Send current line to aider
