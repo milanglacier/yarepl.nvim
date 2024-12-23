@@ -367,7 +367,7 @@ Here are examples of how to use this command:
 
 ### REPLSendOperator
 
-The opeerator to send the text to REPL `i` or the REPL that the current buffer
+The operator to send the text to REPL `i` or the REPL that the current buffer
 is attached to.
 
 If you provide an optional argument, the function will attempt to send to the

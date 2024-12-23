@@ -38,13 +38,16 @@ In addition to the general `<plug>` keymap created by yarepl.nvim (for example
 mappings to enhanve the experience with aider. Here are the
 available `<Plug>` mappings:
 
+- `<Plug>(REPLSendLine-aider)`: Send current line to aider
+- `<Plug>(REPLSendVisual-aider)`: Send visual selection to aider
+- `<Plug>(REPLSendOperator-aider)`: Operator to send text to aider
 - `<Plug>(AiderExec)`: Type the prompt in cmdline and send it to aider.
 - `<Plug>(AiderSendYes)`: Send 'y' (Yes) to aider
 - `<Plug>(AiderSendNo)`: Send 'n' (No) to aider
 - `<Plug>(AiderSendAbort)`: Send abort signal (C-c) to aider
 - `<Plug>(AiderSendExit)`: Send exit signal (C-d) to aider
 - `<Plug>(AiderSendDiff)`
-- `<Plug>(AiderSendPaste)`
+- `<Plug>(AiderSendPaste)`: send `/paste` command, particularly useful for sending images
 - `<Plug>(AiderSendClear)`
 - `<Plug>(AiderSendUndo)`
 - `<Plug>(AiderSendReset)`
@@ -104,6 +107,9 @@ keymap('n', '<Leader>ay', '<Plug>(AiderSendYes)', {
 })
 keymap('n', '<Leader>an', '<Plug>(AiderSendNo)', {
     desc = 'Send n to aider',
+})
+keymap('n', '<Leader>ap', '<Plug>(AiderSendPaste)', {
+    desc = 'Send /paste to aider',
 })
 keymap('n', '<Leader>aa', '<Plug>(AiderSendAbort)', {
     desc = 'Send abort to aider',
