@@ -265,6 +265,9 @@ local shortcuts = {
     { name = 'Reset', key = '/reset' },
     { name = 'Drop', key = '/drop' },
     { name = 'Ls', key = '/ls' },
+    { name = 'AskMode', key = '/ask' },
+    { name = 'ArchMode', key = '/architect' },
+    { name = 'CodeMode', key = '/code' },
 }
 
 local function run_cmd_with_count(cmd)

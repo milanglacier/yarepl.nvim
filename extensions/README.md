@@ -27,7 +27,10 @@ you configure Aider as needed.
 - `AiderRemovePrefix`: Remove the current prefix
 - `AiderSend<Action>`: Send specific actions to aider (e.g., `:AiderSendYes`,
   `:AiderSendNo`). Available action: `Yes`, `No`, `Abort`, `Diff`, `Paste`,
-  `Clear`, `Undo`, `Reset`, `Drop`, `Ls`.
+  `Clear`, `Undo`, `Reset`, `Drop`, `Ls`, `AskMode`, `ArchMode`, `CodeMode`.
+
+  **Note**: `AskMode`, `ArchMode`, `CodeMode` requires `aider v0.71.0+`
+
 - `AiderExec`: Send the prompt written in cmdline to aider with `/` prefix completion
 - `AiderSetArgs`: set the command line args to launch aider with autocompletion (e.g. `AiderSetArgs --model gpt-4o`)
 
@@ -53,6 +56,9 @@ available `<Plug>` mappings:
 - `<Plug>(AiderSendReset)`
 - `<Plug>(AiderSendDrop)`
 - `<Plug>(AiderSendLs)`
+- `<Plug>(AiderSendAskMode)`: switch aider to _ask_ mode
+- `<Plug>(AiderSendArchMode)`: switch aider to _architect_ mode
+- `<Plug>(AiderSendCodeMode)`: switch aider to _code_ mode
 
 ## Usage
 
@@ -119,6 +125,15 @@ keymap('n', '<Leader>aq', '<Plug>(AiderSendExit)', {
 })
 keymap('n', '<Leader>ag', '<cmd>AiderSetPrefix<cr>', {
     desc = 'set aider prefix',
+})
+keymap('n', '<Leader>ama', '<Plug>(AiderSendAskMode)', {
+    desc = 'Switch aider to ask mode',
+})
+keymap('n', '<Leader>amA', '<Plug>(AiderSendArchMode)', {
+    desc = 'Switch aider to architect mode',
+})
+keymap('n', '<Leader>amc', '<Plug>(AiderSendCodeMode)', {
+    desc = 'Switch aider to code mode',
 })
 keymap('n', '<Leader>aG', '<cmd>AiderRemovePrefix<cr>', {
     desc = 'remove aider prefix',
