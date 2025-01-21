@@ -819,7 +819,7 @@ desires the ability to easily switch between two modes:
 
 # Extensions
 
-The `Extensinos` module contains extended functionalities built upon the core
+The `Extensions` module contains extended functionalities built upon the core
 of yarepl.nvim. While not considered as core part of yarepl, it offers valuable
 additional features. Currently, the module includes:
 

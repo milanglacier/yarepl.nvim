@@ -153,7 +153,7 @@ require('yarepl.extensions.aider').setup {
     --NOTE: make sure you pass a list of string, not string,
     aider_args = { '--watch-files' },
     -- The default wincmd is to open aider in a floating window
-    wincmd = ...
+    wincmd = require('yarepl.extensions.aider').wincmd,
 }
 ```
 
