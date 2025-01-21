@@ -225,12 +225,12 @@ require('yarepl.extensions.code_cell').register_text_objects {
 
 **Usage Examples**:
 
-Markdown files (using key 'c'):
+Markdown files (using key `c`):
 
 - `ic`: Select cell content (excludes delimiters)
 - `ac`: Select entire cell (includes delimiters)
 
-Python/R files (using '<Leader>c'):
+Python/R files (using `<Leader>c`):
 
 - `i<Leader>c`: Select content between `# %%` markers
 - `a<Leader>c`: Select content including `# %%` markers
