@@ -40,10 +40,9 @@
 # yarepl.nvim
 
 Yet Another REPL is a flexible REPL / TUI App management tool that supports
-multiple paradigms for interacting with tui-apps\*. It seamlessly integrates
-with `Telescope`, `fzf-lua`, and `aider.chat`. This plugin also works with
-project-level config and tmux, and includes a native dot repeat feature without
-requiring vim-repeat.
+multiple paradigms for interacting with tui-apps\*. This plugin also works with
+project-level config and tmux, and includes native dot-repeat without requiring
+vim-repeat.
 
 Flexibility and parallelism are core priorities. With yarepl.nvim, you can
 effortlessly interact with multiple tui-apps through various paradigms:
@@ -53,6 +52,10 @@ effortlessly interact with multiple tui-apps through various paradigms:
 - Attach a buffer to a dedicated tui-apps
 
 \*tui-apps refers to both TUI Apps and REPLs collectively.
+
+`yarepl` also provides seamless integration `Telescope`, `fzf-lua`, and
+`aider.chat`, and also provide a convenient way to define code cell text
+objects. Available as [extensions](#extensions).
 
 # Showcase
 
