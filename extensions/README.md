@@ -1,3 +1,18 @@
+- [Aider](#aider)
+  - [Overview](#overview)
+  - [Features](#features)
+  - [Commands](#commands)
+  - [Keymaps](#keymaps)
+  - [Usage](#usage)
+    - [Example keybinding Setup](#example-keybinding-setup)
+  - [Customization](#customization)
+  - [Note](#note)
+- [Code Cell](#code-cell)
+  - [Overview](#overview-1)
+  - [Features](#features-1)
+  - [Usage](#usage-1)
+    - [Example Configuration](#example-configuration)
+
 # Aider
 
 ## Overview
@@ -159,6 +174,70 @@ require('yarepl.extensions.aider').setup {
 
 ## Note
 
-I recommend trying the `inline comment as instruction` feature in `aider`,
-which is enabled by default for `yarepl.extensions.aider`. See the
+I recommend explore the `inline comment as instruction` feature in `aider`,
+which is enabled by default for this extension. See the
 [documentation](https://aider.chat/docs/usage/watch.html).
+
+# Code Cell
+
+## Overview
+
+The code cell extension provides text objects for working with code cells in various file types. Code cells are sections of code delimited by specific patterns, commonly used in literate programming and notebook-style documents.
+
+## Features
+
+- Text objects for selecting code cells
+- Support for both "inner" and "around" selections
+- Configurable patterns for different file types
+- Automatic setup based on file type
+
+## Usage
+
+The extension creates text objects for code cell selection using defined start
+and end patterns.
+
+### Example Configuration
+
+The module requires explicit configuration to activate, as it has no default
+settings. Below is a sample configuration that enables:
+
+- Markdown-style code blocks (triple backticks) in rmd, quarto, and markdown files
+- Python/R-style code cells (`# %%`) in python and R files
+
+````lua
+require('yarepl.extensions.code_cell').register_text_objects {
+    {
+        key = 'c',
+        start_pattern = '```.+',
+        end_pattern = '^```$',
+        ft = { 'rmd', 'quarto', 'markdown' },
+        desc = 'markdown code cells',
+    },
+    {
+        key = '<Leader>c',
+        start_pattern = '^# ?%%%%.*',
+        end_pattern = '^# ?%%%%.*',
+        ft = { 'r', 'python' },
+        desc = 'r/python code cells',
+    },
+}
+````
+
+**Usage Examples**:
+
+Markdown files (using key 'c'):
+
+- `ic`: Select cell content (excludes delimiters)
+- `ac`: Select entire cell (includes delimiters)
+
+Python/R files (using '<Leader>c'):
+
+- `i<Leader>c`: Select content between `# %%` markers
+- `a<Leader>c`: Select content including `# %%` markers
+
+Note: Use Lua patterns rather than Vim regex patterns.
+
+These text objects function in both operator-pending and visual modes.
+
+To send code cells to REPL, map `<Plug>(REPLSendOperator)` to `<Leader>s`, then
+use `<Leader>sic` to send the current cell.
