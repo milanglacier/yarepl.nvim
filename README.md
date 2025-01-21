@@ -140,13 +140,13 @@ yarepl.setup {
     -- The available REPL palattes that `yarepl` can create REPL based on.
     -- To disable a built-in meta, set its key to `false`, e.g., `metas = { R = false }`
     metas = {
-        aichat = { cmd = 'aichat', formatter = yarepl.formatter.bracketed_pasting },
-        radian = { cmd = 'radian', formatter = yarepl.formatter.bracketed_pasting },
-        ipython = { cmd = 'ipython', formatter = yarepl.formatter.bracketed_pasting },
-        python = { cmd = 'python', formatter = yarepl.formatter.trim_empty_lines },
-        R = { cmd = 'R', formatter = yarepl.formatter.trim_empty_lines },
-        bash = { cmd = 'bash', formatter = yarepl.formatter.trim_empty_lines },
-        zsh = { cmd = 'zsh', formatter = yarepl.formatter.bracketed_pasting },
+        aichat = { cmd = 'aichat', formatter = 'bracketed_pasting' },
+        radian = { cmd = 'radian', formatter = 'bracketed_pasting_no_final_new_line' },
+        ipython = { cmd = 'ipython', formatter = 'bracketed_pasting' },
+        python = { cmd = 'python', formatter = 'trim_empty_lines' },
+        R = { cmd = 'R', formatter = 'trim_empty_lines' },
+        bash = { cmd = 'bash', formatter = vim.fn.has('linux') == 1 and 'bracketed_pasting' or 'trim_empty_lines' },
+        zsh = { cmd = 'zsh', formatter = 'bracketed_pasting' },
     },
     -- when a REPL process exits, should the window associated with those REPLs closed?
     close_on_exit = true,
@@ -584,20 +584,33 @@ metas = {
     ipython_or_python = { cmd = ipython_or_python, formatter = ipython_or_python_formatter },
 }
 
--- cmd can be three types: a string, a list of strings, or a function that
--- returns either a string or list of strings.
-
--- formatter is a function takes a list of string as an argument and returns a
--- list of strings.
 ```
 
+`cmd` can be three types: a string, a list of strings, or a function that
+returns either a string or list of strings.
+
+`formatter` can be either:
+
+1. A string that matches a builtin formatter name:
+   - 'bracketed_pasting'
+   - 'bracketed_pasting_no_final_new_line'
+   - 'trim_empty_lines'
+2. A function that takes a list of strings as input and returns a list of
+   strings to send to the REPL
+
 [Here is a more complex example for ghci, a haskell repl.](https://github.com/milanglacier/yarepl.nvim/issues/21)
+
+`yarepl` provides a helper function that enables you to quickly create a
+formatter function without starting from scratch. Below are general guidelines
+for crafting your own REPL formatter:
+
+<details>
 
 Some REPLs can distinguish between pasted text and text from the user manual
 input by using prefix and suffix sequences, such as bracketed paste.
 
 For modern REPLs with bracketed pasting support (which is usually the case), it
-is recommended to use `yarepl.formatter.bracketed_pasting`.
+is recommended to use "`bracketed_pasting`"
 
 Here are some tips for writing your own formatter function:
 
@@ -623,9 +636,6 @@ Here are some tips for writing your own formatter function:
 
 6. The returned list of strings will be sent to the `chansend` function for
    reference.
-
-There's a `yarepl` helper function that allows you to quickly build a formatter
-function without having to write everything from scratch.
 
 ```lua
 -- Calling this function will return a function that takes a list of strings as
@@ -677,8 +687,12 @@ yarepl.formatter.factory {
     },
 }
 
--- `yarepl` provides two default formatters, which can be constructed by
--- calling `yarepl.formatter.factory` with different arguments, like this:
+-- `yarepl` provides three builtin formatters that can be referenced by name:
+-- 1. 'bracketed_pasting' - Uses bracketed paste mode for modern REPLs
+-- 2. 'bracketed_pasting_no_final_new_line' - Same as above but without final newline
+-- 3. 'trim_empty_lines' - Trims empty lines from input
+
+-- You can also create custom formatters by calling `yarepl.formatter.factory`:
 
 yarepl.formatter.trim_empty_lines = yarepl.formatter.factory {
     when_multi_lines = {
@@ -696,6 +710,8 @@ yarepl.formatter.bracketed_pasting = yarepl.formatter.factory {
     },
 }
 ```
+
+</details>
 
 # Example keybinding setup
 

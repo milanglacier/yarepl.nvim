@@ -12,16 +12,16 @@ local default_config = function()
         ft = 'REPL',
         wincmd = 'belowright 15 split',
         metas = {
-            aichat = { cmd = 'aichat', formatter = M.formatter.bracketed_pasting },
-            radian = { cmd = 'radian', formatter = M.formatter.bracketed_pasting_no_final_new_line },
-            ipython = { cmd = 'ipython', formatter = M.formatter.bracketed_pasting },
-            python = { cmd = 'python', formatter = M.formatter.trim_empty_lines },
-            R = { cmd = 'R', formatter = M.formatter.trim_empty_lines },
+            aichat = { cmd = 'aichat', formatter = 'bracketed_pasting' },
+            radian = { cmd = 'radian', formatter = 'bracketed_pasting_no_final_new_line' },
+            ipython = { cmd = 'ipython', formatter = 'bracketed_pasting' },
+            python = { cmd = 'python', formatter = 'trim_empty_lines' },
+            R = { cmd = 'R', formatter = 'trim_empty_lines' },
             -- bash version >= 4.4 supports bracketed paste mode. but macos
             -- shipped with bash 3.2, so we don't use bracketed paste mode for
-            -- bash.
-            bash = { cmd = 'bash', formatter = M.formatter.trim_empty_lines },
-            zsh = { cmd = 'zsh', formatter = M.formatter.bracketed_pasting },
+            -- macOS
+            bash = { cmd = 'bash', formatter = vim.fn.has 'linux' == 1 and 'bracketed_pasting' or 'trim_empty_lines' },
+            zsh = { cmd = 'zsh', formatter = 'bracketed_pasting' },
         },
         close_on_exit = true,
         scroll_to_bottom_after_sending = true,
@@ -260,6 +260,17 @@ local function get_lines(mode)
     return api.nvim_buf_get_lines(0, begin_line - 1, end_line, false)
 end
 
+---Get the formatter function from either a string name or function
+---@param formatter string|function The formatter name or function
+---@return function Formatter function to use
+---@throws string Error if formatter name is unknown
+local function get_formatter(formatter)
+    if type(formatter) == 'string' then
+        return M.formatter[formatter] or error('Unknown formatter: ' .. formatter)
+    end
+    return formatter
+end
+
 function M.formatter.factory(opts)
     if type(opts) ~= 'table' then
         error 'opts must be a table'
@@ -469,6 +480,11 @@ M.setup = function(opts)
         -- remove the disabled builtin meta passed from user config
         if not meta then
             M._config.metas[name] = nil
+        else
+            -- Convert string formatter names to actual formatter functions
+            if meta.formatter then
+                meta.formatter = get_formatter(meta.formatter)
+            end
         end
     end
 
