@@ -56,7 +56,7 @@ effortlessly interact with multiple tui-apps through various paradigms:
 
 ![aider showcase](assets/aider-showcase.jpeg)
 
-This image highlights an AI-driven chat-based REPL,
+This image highlights an AI-driven coding assistant and REPL,
 [aider.chat](https://aider.chat), managed by `yarepl`.
 
 `yarepl` enables integration with `aider.chat`. For more details,
