@@ -1,6 +1,5 @@
 - [yarepl.nvim](#yareplnvim)
 - [Showcase](#showcase)
-- [What is yarepl.nvim?](#what-is-yareplnvim)
 - [Why yarepl.nvim?](#why-yareplnvim)
 - [Installation](#installation)
 - [Configuration](#configuration)
@@ -38,11 +37,20 @@
 
 # yarepl.nvim
 
-Yet Another REPL is a flexible REPL (Read-Eval-Print Loop) management tool that
-supports multiple paradigms for interacting with REPLs. It offers project-level
-configurations, works with tmux, integrates with `Telescope`, `fzf-lua`, and
-`aider.chat`, and provides a native dot repeat feature, without requiring
-vim-repeat.
+Yet Another REPL is a flexible REPL / TUI App management tool that supports
+multiple paradigms for interacting with tui-apps*. It seamlessly integrates
+with `Telescope`, `fzf-lua`, and `aider.chat`. This plugin also works with
+project-level config and tmux, and includes a native dot repeat feature without
+requiring vim-repeat.
+
+Flexibility and parallelism are core priorities. With yarepl.nvim, you can
+effortlessly interact with multiple tui-apps through various paradigms:
+
+- Send text from multiple buffers (same or different file types) to a single tui-app.
+- Send text from a single buffer to multiple tui-apps (same program or different)
+- Attach a buffer to a dedicated tui-apps
+
+*tui-apps refers to both TUI Apps and REPLs collectively.
 
 # Showcase
 
@@ -53,19 +61,6 @@ This image highlights an AI-driven chat-based REPL,
 
 `yarepl` enables integration with `aider.chat`. For more details,
 refer to the [Extensions](#extensions) section.
-
-# What is yarepl.nvim?
-
-Yarepl.nvim is a powerful and flexible REPL (Read-Eval-Print-Loop) management
-plugin for Neovim. It simplifies the process of interacting with a REPL and
-text buffer, making tasks such as sending and managing text and REPL buffers
-effortless.
-
-Flexibility and parallelism are top priority. With yarepl.nvim, you can easily
-interact with multiple REPLs using various paradigms, such as sending text from
-multiple buffers to a single REPL, sending text from a single buffer to
-multiple REPLs, and sending text to a specific type of REPL. Plus, it offers
-native dot repeat functionality without requiring `vim-repeat`.
 
 # Why yarepl.nvim?
 
