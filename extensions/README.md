@@ -12,6 +12,8 @@
   - [Features](#features-1)
   - [Usage](#usage-1)
     - [Example Configuration](#example-configuration)
+- [Telescope Integration](#telescope-integration)
+- [Fzf-lua Integration](#fzf-lua-integration)
 
 # Aider
 
@@ -241,3 +243,46 @@ These text objects function in both operator-pending and visual modes.
 
 To send code cells to REPL, map `<Plug>(REPLSendOperator)` to `<Leader>s`, then
 use `<Leader>sic` to send the current cell.
+
+# Telescope Integration
+
+`yarepl` has integrated with Telescope and can be enabled by adding the
+following line to your config:
+
+```lua
+require('telescope').load_extension 'REPLShow'
+```
+
+Once added, you can use `Telescope REPLShow` to preview the active REPL
+buffers. If you are using the default Telescope configuration, `<C-t>` opens a
+new tab for the selected REPL, `<C-v>` generates a vertical split window for
+the chosen REPL, and `<C-x>` creates a horizontal split window for your
+selected REPL.
+
+# Fzf-lua Integration
+
+`yarepl` has integrated with `Fzf-lua` and can be enabled by adding the
+following line to your config:
+
+```lua
+vim.keymap.set('n', '<Leader>rv', function() require('yarepl.extensions.fzf').repl_show() end)
+```
+
+This integration allows you to preview active REPL buffers. Pressing `<CR>`
+will open the selected REPL buffer using `wincmd`, either with a meta-local
+`wincmd` or the global `wincmd`, depending on the context.
+
+For users familiar with `Fzf-lua`'s API, custom options can be passed to the
+function to tailor its behavior, similar to any other `Fzf-lua` pickers. For
+example:
+
+```lua
+require('yarepl.extensions.fzf').repl_show {
+    winopts = {
+        title = 'REPL>',
+        previewer = {
+            layout = 'horizontal'
+        }
+    }
+}
+```

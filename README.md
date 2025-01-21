@@ -23,8 +23,10 @@
 - [Customizing REPLs](#customizing-repls)
 - [Example keybinding setup](#example-keybinding-setup)
 - [Extensions](#extensions)
-- [Telescope Integration](#telescope-integration)
-- [Fzf-lua Integration](#fzf-lua-integration)
+  - [aider](#aider)
+  - [code-cell](#code-cell)
+  - [fzf-lua](#fzf-lua)
+  - [telescope](#telescope)
 - [Set up project-level REPLs](#set-up-project-level-repls)
 - [Create persistent REPLs in tmux](#create-persistent-repls-in-tmux)
 - [FAQ](#faq)
@@ -816,59 +818,29 @@ desires the ability to easily switch between two modes:
 
 The `Extensions` module contains extended functionalities built upon the core
 of yarepl.nvim. While not considered as core part of yarepl, it offers valuable
-additional features. Currently, the module includes:
+additional features. For comprehensive information about the features, please
+refer to [extensions/README.md](extensions/README.md).
 
-- `aider`: This component enhances AI-assisted coding capabilities through
-  [aider.chat](https://aider.chat) integration. For comprehensive information
-  about the features, please refer to
-  [extensions/README.md](extensions/README.md).
-- `fzf`: This module provides integration with `fzf-lua`.
-- `code-cell`: This extension simplifies the creation of code cell text
-  objects, allowing you to utilize them with `REPLSendOperator` or other
-  operators such as paste, delete, and formatting.
+Currently, the module includes:
 
-# Telescope Integration
+## aider
 
-`yarepl` has integrated with Telescope and can be enabled by adding the
-following line to your config:
+This module enhances AI-assisted coding capabilities through
+[aider.chat](https://aider.chat) integration.
 
-```lua
-require('telescope').load_extension 'REPLShow'
-```
+## code-cell
 
-Once added, you can use `Telescope REPLShow` to preview the active REPL
-buffers. If you are using the default Telescope configuration, `<C-t>` opens a
-new tab for the selected REPL, `<C-v>` generates a vertical split window for
-the chosen REPL, and `<C-x>` creates a horizontal split window for your
-selected REPL.
+This module simplifies the creation of code cell text objects, allowing you to
+utilize them with `REPLSendOperator` or other operators such as paste, delete,
+and formatting.
 
-# Fzf-lua Integration
+## fzf-lua
 
-`yarepl` has integrated with `Fzf-lua` and can be enabled by adding the
-following line to your config:
+This module provides integration with `fzf-lua`.
 
-```lua
-vim.keymap.set('n', '<Leader>rv', function() require('yarepl.extensions.fzf').repl_show() end)
-```
+## telescope
 
-This integration allows you to preview active REPL buffers. Pressing `<CR>`
-will open the selected REPL buffer using `wincmd`, either with a meta-local
-`wincmd` or the global `wincmd`, depending on the context.
-
-For users familiar with `Fzf-lua`'s API, custom options can be passed to the
-function to tailor its behavior, similar to any other `Fzf-lua` pickers. For
-example:
-
-```lua
-require('yarepl.extensions.fzf').repl_show {
-    winopts = {
-        title = 'REPL>',
-        previewer = {
-            layout = 'horizontal'
-        }
-    }
-}
-```
+This module provides integration with `telescope`.
 
 # Set up project-level REPLs
 
