@@ -53,9 +53,9 @@ effortlessly interact with multiple tui-apps through various paradigms:
 
 \*tui-apps refers to both TUI Apps and REPLs collectively.
 
-`yarepl` also provides seamless integration `Telescope`, `fzf-lua`, and
-`aider.chat`, and also provide a convenient way to define code cell text
-objects. Available as [extensions](#extensions).
+`yarepl` provides seamless integration with `Telescope`, `fzf-lua`, and
+`aider.chat`. `yarepl` also offers convenient code cell text object
+definitions. Available as [extensions](#extensions).
 
 # Showcase
 
