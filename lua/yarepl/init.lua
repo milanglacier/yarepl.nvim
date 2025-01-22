@@ -260,6 +260,36 @@ local function get_lines(mode)
     return api.nvim_buf_get_lines(0, begin_line - 1, end_line, false)
 end
 
+local function write_temp_file(lines)
+    local temp_file = os.tmpname()
+    local file = io.open(temp_file, 'w')
+    if not file then
+        error 'Failed to create temp file'
+    end
+    file:write(table.concat(lines, '\n'))
+    file:close()
+    return temp_file
+end
+
+local function send_source_lines(id, name, bufnr, lines)
+    local temp_file = write_temp_file(lines)
+    local source = require 'yarepl.source'
+    local ft = source.meta[name] or vim.bo[bufnr].filetype
+    local source_cmd = source.ft[ft] and source.ft[ft](temp_file)
+
+    if not source_cmd then
+        vim.notify(string.format('No source command found for filetype: %s', ft))
+        return
+    end
+
+    M._send_strings(id, name, bufnr, { source_cmd }, false)
+
+    -- Clean up temp file after a short delay
+    vim.defer_fn(function()
+        os.remove(temp_file)
+    end, 1000)
+end
+
 ---Get the formatter function from either a string name or function
 ---@param formatter string|function The formatter name or function
 ---@return function Formatter function to use
@@ -811,6 +841,89 @@ api.nvim_create_user_command('REPLDetachBufferToREPL', function()
 end, {
     count = true,
     desc = [[Detach current buffer to any REPL.]],
+})
+
+api.nvim_create_user_command('REPLSourceVisual', function(opts)
+    local id = opts.count
+    local name = opts.args
+    local current_buffer = api.nvim_get_current_buf()
+
+    api.nvim_feedkeys('\27', 'nx', false)
+    local lines = get_lines 'visual'
+
+    if #lines == 0 then
+        vim.notify 'No visual range!'
+        return
+    end
+
+    send_source_lines(id, name, current_buffer, lines)
+end, {
+    count = true,
+    nargs = '?',
+    desc = [[
+Source visual range in REPL `i` or the REPL that current buffer is attached to.
+]],
+})
+
+api.nvim_create_user_command('REPLSourceLine', function(opts)
+    local id = opts.count
+    local name = opts.args
+    local current_buffer = api.nvim_get_current_buf()
+
+    local line = api.nvim_get_current_line()
+    send_source_lines(id, name, current_buffer, { line })
+end, {
+    count = true,
+    nargs = '?',
+    desc = [[
+Source current line in REPL `i` or the REPL that current buffer is attached to.
+]],
+})
+
+M._source_operator_internal = function(motion)
+    if motion == nil then
+        vim.go.operatorfunc = [[v:lua.require'yarepl'._source_operator_internal]]
+        api.nvim_feedkeys('g@', 'ni', false)
+    end
+
+    local id = vim.b[0].repl_id
+    local name = vim.b[0].closest_repl_name
+    local current_bufnr = api.nvim_get_current_buf()
+
+    local lines = get_lines 'operator'
+
+    if #lines == 0 then
+        vim.notify 'No motion!'
+        return
+    end
+
+    send_source_lines(id, name, current_bufnr, lines)
+end
+
+api.nvim_create_user_command('REPLSourceOperator', function(opts)
+    local repl_name = opts.args
+    local id = opts.count
+
+    if repl_name ~= '' then
+        vim.b[0].closest_repl_name = repl_name
+    else
+        vim.b[0].closest_repl_name = nil
+    end
+
+    if id ~= 0 then
+        vim.b[0].repl_id = id
+    else
+        vim.b[0].repl_id = nil
+    end
+
+    vim.go.operatorfunc = [[v:lua.require'yarepl'._source_operator_internal]]
+    api.nvim_feedkeys('g@', 'ni', false)
+end, {
+    count = true,
+    nargs = '?',
+    desc = [[
+The operator of source text in REPL `i` or the REPL that current buffer is attached to.
+]],
 })
 
 api.nvim_create_user_command('REPLSendVisual', function(opts)
