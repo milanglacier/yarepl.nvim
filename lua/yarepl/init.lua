@@ -396,6 +396,50 @@ M.formatter.bracketed_pasting_no_final_new_line = M.formatter.factory {
     },
 }
 
+---@param id number the id of the repl,
+---@param name string|nil the name of the closest repl that will try to find
+---@param bufnr number|nil the buffer number from which to find the attached REPL.
+---@param strings table[string] a list of strings
+---@param use_formatter boolean|nil whether use formatter (e.g. bracketed_pasting)? Default: true
+-- Send a list of strings to the repl specified by `id` and `name` and `bufnr`.
+-- If `id` is 0, then will try to find the REPL that `bufnr` is attached to, if
+-- not find, will use `id = 1`. If `name` is not nil or not an empty string,
+-- then will try to find the REPL with `name` relative to `id`. If `bufnr` is
+-- nil or `bufnr` = 0, will find the REPL that current buffer is attached to.
+M._send_strings = function(id, name, bufnr, strings, use_formatter)
+    use_formatter = use_formatter == nil and true or use_formatter
+    if bufnr == nil or bufnr == 0 then
+        bufnr = api.nvim_get_current_buf()
+    end
+
+    local repl = M._get_repl(id, name, bufnr)
+
+    if not repl then
+        vim.notify [[REPL doesn't exist!]]
+        return
+    end
+
+    if use_formatter then
+        strings = M._config.metas[repl.name].formatter(strings)
+    end
+
+    fn.chansend(repl.term, strings)
+
+    -- See https://github.com/milanglacier/yarepl.nvim/issues/12 and
+    -- https://github.com/urbainvaes/vim-ripple/issues/12 for more information.
+    -- It may be necessary to use a delayed `<CR>` on Windows to ensure that
+    -- the code is executed in the REPL.
+    if is_win32 and M._config.os.windows.send_delayed_cr_after_sending then
+        vim.defer_fn(function()
+            fn.chansend(repl.term, '\r')
+        end, 100)
+    end
+
+    if M._config.scroll_to_bottom_after_sending then
+        repl_win_scroll_to_bottom(repl)
+    end
+end
+
 M._send_operator_internal = function(motion)
     -- hack: allow dot-repeat
     if motion == nil then
@@ -558,50 +602,6 @@ end, {
 Create REPL `i` from the list of available REPLs.
 ]],
 })
-
----@param id number the id of the repl,
----@param name string|nil the name of the closest repl that will try to find
----@param bufnr number|nil the buffer number from which to find the attached REPL.
----@param strings table[string] a list of strings
----@param use_formatter boolean|nil whether use formatter (e.g. bracketed_pasting)? Default: true
--- Send a list of strings to the repl specified by `id` and `name` and `bufnr`.
--- If `id` is 0, then will try to find the REPL that `bufnr` is attached to, if
--- not find, will use `id = 1`. If `name` is not nil or not an empty string,
--- then will try to find the REPL with `name` relative to `id`. If `bufnr` is
--- nil or `bufnr` = 0, will find the REPL that current buffer is attached to.
-M._send_strings = function(id, name, bufnr, strings, use_formatter)
-    use_formatter = use_formatter == nil and true or use_formatter
-    if bufnr == nil or bufnr == 0 then
-        bufnr = api.nvim_get_current_buf()
-    end
-
-    local repl = M._get_repl(id, name, bufnr)
-
-    if not repl then
-        vim.notify [[REPL doesn't exist!]]
-        return
-    end
-
-    if use_formatter then
-        strings = M._config.metas[repl.name].formatter(strings)
-    end
-
-    fn.chansend(repl.term, strings)
-
-    -- See https://github.com/milanglacier/yarepl.nvim/issues/12 and
-    -- https://github.com/urbainvaes/vim-ripple/issues/12 for more information.
-    -- It may be necessary to use a delayed `<CR>` on Windows to ensure that
-    -- the code is executed in the REPL.
-    if is_win32 and M._config.os.windows.send_delayed_cr_after_sending then
-        vim.defer_fn(function()
-            fn.chansend(repl.term, '\r')
-        end, 100)
-    end
-
-    if M._config.scroll_to_bottom_after_sending then
-        repl_win_scroll_to_bottom(repl)
-    end
-end
 
 api.nvim_create_user_command(
     'REPLCleanup',
