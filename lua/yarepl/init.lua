@@ -4,6 +4,7 @@ local fn = vim.fn
 local is_win32 = vim.fn.has 'win32' == 1 and true or false
 
 M.formatter = {}
+M.commands = {}
 
 local default_config = function()
     return {
@@ -517,29 +518,7 @@ local function add_keymap(meta_name)
     })
 end
 
-M.setup = function(opts)
-    M._config = vim.tbl_deep_extend('force', default_config(), opts or {})
-
-    for name, meta in pairs(M._config.metas) do
-        -- remove the disabled builtin meta passed from user config
-        if not meta then
-            M._config.metas[name] = nil
-        else
-            -- Convert string formatter names to actual formatter functions
-            if meta.formatter then
-                meta.formatter = get_formatter(meta.formatter)
-            end
-        end
-    end
-
-    add_keymap()
-
-    for meta_name, _ in pairs(M._config.metas) do
-        add_keymap(meta_name)
-    end
-end
-
-api.nvim_create_user_command('REPLStart', function(opts)
+M.commands.start = function(opts)
     -- if calling the command without any count, we want count to become 1.
     local repl_name = opts.args
     local id = opts.count == 0 and 1 or opts.count
@@ -587,29 +566,11 @@ api.nvim_create_user_command('REPLStart', function(opts)
             repl_win_scroll_to_bottom(M._repls[id])
         end
     end
-end, {
-    count = true,
-    bang = true,
-    nargs = '?',
-    complete = function()
-        local metas = {}
-        for name, _ in pairs(M._config.metas) do
-            table.insert(metas, name)
-        end
-        return metas
-    end,
-    desc = [[
-Create REPL `i` from the list of available REPLs.
-]],
-})
+end
 
-api.nvim_create_user_command(
-    'REPLCleanup',
-    repl_cleanup,
-    { desc = 'clean invalid repls, and rearrange the repls order.' }
-)
+M.commands.cleanup = repl_cleanup
 
-api.nvim_create_user_command('REPLFocus', function(opts)
+M.commands.focus = function(opts)
     local id = opts.count
     local name = opts.args
     local current_buffer = api.nvim_get_current_buf()
@@ -622,15 +583,9 @@ api.nvim_create_user_command('REPLFocus', function(opts)
     end
 
     focus_repl(repl)
-end, {
-    count = true,
-    nargs = '?',
-    desc = [[
-Focus on REPL `i` or the REPL that current buffer is attached to.
-]],
-})
+end
 
-api.nvim_create_user_command('REPLHide', function(opts)
+M.commands.hide = function(opts)
     local id = opts.count
     local name = opts.args
     local current_buffer = api.nvim_get_current_buf()
@@ -648,15 +603,9 @@ api.nvim_create_user_command('REPLHide', function(opts)
         api.nvim_win_close(win, true)
         win = fn.bufwinid(bufnr)
     end
-end, {
-    count = true,
-    nargs = '?',
-    desc = [[
-Hide REPL `i` or the REPL that current buffer is attached to.
-]],
-})
+end
 
-api.nvim_create_user_command('REPLHideOrFocus', function(opts)
+M.commands.hide_or_focus = function(opts)
     local id = opts.count
     local name = opts.args
     local current_buffer = api.nvim_get_current_buf()
@@ -678,15 +627,9 @@ api.nvim_create_user_command('REPLHideOrFocus', function(opts)
     else
         focus_repl(repl)
     end
-end, {
-    count = true,
-    nargs = '?',
-    desc = [[
-Hide or focus REPL `i` or the REPL that current buffer is attached to.
-]],
-})
+end
 
-api.nvim_create_user_command('REPLClose', function(opts)
+M.commands.close = function(opts)
     local id = opts.count
     local name = opts.args
     local current_buffer = api.nvim_get_current_buf()
@@ -699,15 +642,9 @@ api.nvim_create_user_command('REPLClose', function(opts)
     end
 
     fn.chansend(repl.term, string.char(4))
-end, {
-    count = true,
-    nargs = '?',
-    desc = [[
-Close REPL `i` or the REPL that current buffer is attached to.
-]],
-})
+end
 
-api.nvim_create_user_command('REPLSwap', function(opts)
+M.commands.swap = function(opts)
     local id_1 = tonumber(opts.fargs[1])
     local id_2 = tonumber(opts.fargs[2])
 
@@ -761,12 +698,9 @@ api.nvim_create_user_command('REPLSwap', function(opts)
             repl_swap(id_1, id2)
         end)
     end
-end, {
-    desc = [[Swap two REPLs]],
-    nargs = '*',
-})
+end
 
-api.nvim_create_user_command('REPLAttachBufferToREPL', function(opts)
+M.commands.attach_buffer = function(opts)
     local current_buffer = api.nvim_get_current_buf()
 
     if opts.bang then
@@ -797,31 +731,18 @@ api.nvim_create_user_command('REPLAttachBufferToREPL', function(opts)
     else
         attach_buffer_to_repl(current_buffer, M._repls[repl_id])
     end
-end, {
-    count = true,
-    bang = true,
-    desc = [[
-Attach current buffer to REPL `i`
-]],
-})
+end
 
-api.nvim_create_user_command('REPLDetachBufferToREPL', function()
+M.commands.detach_buffer = function()
     local current_buffer = api.nvim_get_current_buf()
     M._bufnrs_to_repls[current_buffer] = nil
-end, {
-    count = true,
-    desc = [[Detach current buffer to any REPL.]],
-})
+end
 
-api.nvim_create_user_command('REPLSendVisual', function(opts)
+M.commands.send_visual = function(opts)
     local id = opts.count
     local name = opts.args
     local current_buffer = api.nvim_get_current_buf()
 
-    -- we must use `<ESC>` to clear those marks to mark '> and '> to be able to
-    -- access the updated visual range. Those magic letters 'nx' are coming
-    -- from Vigemus/iron.nvim and I am not quiet understand the effect of those
-    -- magic letters.
     api.nvim_feedkeys('\27', 'nx', false)
 
     local lines = get_lines 'visual'
@@ -832,15 +753,9 @@ api.nvim_create_user_command('REPLSendVisual', function(opts)
     end
 
     M._send_strings(id, name, current_buffer, lines)
-end, {
-    count = true,
-    nargs = '?',
-    desc = [[
-Send visual range to REPL `i` or the REPL that current buffer is attached to.
-]],
-})
+end
 
-api.nvim_create_user_command('REPLSendLine', function(opts)
+M.commands.send_line = function(opts)
     local id = opts.count
     local name = opts.args
     local current_buffer = api.nvim_get_current_buf()
@@ -848,15 +763,9 @@ api.nvim_create_user_command('REPLSendLine', function(opts)
     local line = api.nvim_get_current_line()
 
     M._send_strings(id, name, current_buffer, { line })
-end, {
-    count = true,
-    nargs = '?',
-    desc = [[
-Send current line to REPL `i` or the REPL that current buffer is attached to.
-]],
-})
+end
 
-api.nvim_create_user_command('REPLSendOperator', function(opts)
+M.commands.send_operator = function(opts)
     local repl_name = opts.args
     local id = opts.count
 
@@ -873,18 +782,10 @@ api.nvim_create_user_command('REPLSendOperator', function(opts)
     end
 
     vim.go.operatorfunc = [[v:lua.require'yarepl'._send_operator_internal]]
-    -- Those magic letters 'ni' are coming from Vigemus/iron.nvim and I am not
-    -- quite understand the effect of those magic letters.
     api.nvim_feedkeys('g@', 'ni', false)
-end, {
-    count = true,
-    nargs = '?',
-    desc = [[
-The operator of send text to REPL `i` or the REPL that current buffer is attached to.
-]],
-})
+end
 
-api.nvim_create_user_command('REPLExec', function(opts)
+M.commands.exec = function(opts)
     local first_arg = opts.fargs[1]
     local current_buffer = api.nvim_get_current_buf()
     local name = ''
@@ -905,7 +806,127 @@ api.nvim_create_user_command('REPLExec', function(opts)
     local command_list = vim.split(command, '\r')
 
     M._send_strings(id, name, current_buffer, command_list)
-end, {
+end
+
+M.setup = function(opts)
+    M._config = vim.tbl_deep_extend('force', default_config(), opts or {})
+
+    for name, meta in pairs(M._config.metas) do
+        -- remove the disabled builtin meta passed from user config
+        if not meta then
+            M._config.metas[name] = nil
+        else
+            -- Convert string formatter names to actual formatter functions
+            if meta.formatter then
+                meta.formatter = get_formatter(meta.formatter)
+            end
+        end
+    end
+
+    add_keymap()
+
+    for meta_name, _ in pairs(M._config.metas) do
+        add_keymap(meta_name)
+    end
+end
+
+api.nvim_create_user_command('REPLStart', M.commands.start, {
+    count = true,
+    bang = true,
+    nargs = '?',
+    complete = function()
+        local metas = {}
+        for name, _ in pairs(M._config.metas) do
+            table.insert(metas, name)
+        end
+        return metas
+    end,
+    desc = [[
+Create REPL `i` from the list of available REPLs.
+]],
+})
+
+api.nvim_create_user_command(
+    'REPLCleanup',
+    M.commands.cleanup,
+    { desc = 'clean invalid repls, and rearrange the repls order.' }
+)
+
+api.nvim_create_user_command('REPLFocus', M.commands.focus, {
+    count = true,
+    nargs = '?',
+    desc = [[
+Focus on REPL `i` or the REPL that current buffer is attached to.
+]],
+})
+
+api.nvim_create_user_command('REPLHide', M.commands.hide, {
+    count = true,
+    nargs = '?',
+    desc = [[
+Hide REPL `i` or the REPL that current buffer is attached to.
+]],
+})
+
+api.nvim_create_user_command('REPLHideOrFocus', M.commands.hide_or_focus, {
+    count = true,
+    nargs = '?',
+    desc = [[
+Hide or focus REPL `i` or the REPL that current buffer is attached to.
+]],
+})
+
+api.nvim_create_user_command('REPLClose', M.commands.close, {
+    count = true,
+    nargs = '?',
+    desc = [[
+Close REPL `i` or the REPL that current buffer is attached to.
+]],
+})
+
+api.nvim_create_user_command('REPLSwap', M.commands.swap, {
+    desc = [[Swap two REPLs]],
+    nargs = '*',
+})
+
+api.nvim_create_user_command('REPLAttachBufferToREPL', M.commands.attach_buffer, {
+    count = true,
+    bang = true,
+    desc = [[
+Attach current buffer to REPL `i`
+]],
+})
+
+api.nvim_create_user_command('REPLDetachBufferToREPL', M.commands.detach_buffer, {
+    count = true,
+    desc = [[Detach current buffer to any REPL.]],
+})
+
+api.nvim_create_user_command('REPLSendVisual', M.commands.send_visual, {
+    count = true,
+    nargs = '?',
+    desc = [[
+Send visual range to REPL `i` or the REPL that current buffer is attached to.
+]],
+})
+
+api.nvim_create_user_command('REPLSendLine', M.commands.send_line, {
+    count = true,
+    nargs = '?',
+    desc = [[
+Send current line to REPL `i` or the REPL that current buffer is attached to.
+]],
+})
+
+api.nvim_create_user_command('REPLSendOperator', M.commands.send_operator, {
+    count = true,
+    nargs = '?',
+    desc = [[
+The operator of send text to REPL `i` or the REPL that current buffer is attached to.
+]],
+})
+
+api.nvim_create_user_command('REPLExec', M.commands.exec, {
     count = true,
     nargs = '*',
     desc = [[
