@@ -27,6 +27,7 @@
   - [code-cell](#code-cell)
   - [fzf-lua](#fzf-lua)
   - [telescope](#telescope)
+  - [Snacks.picker](#snackspicker)
 - [Set up project-level REPLs](#set-up-project-level-repls)
 - [Create persistent REPLs in tmux](#create-persistent-repls-in-tmux)
 - [FAQ](#faq)
@@ -53,9 +54,10 @@ effortlessly interact with multiple tui-apps through various paradigms:
 
 \*tui-apps refers to both TUI Apps and REPLs collectively.
 
-`yarepl` provides seamless integration with `Telescope`, `fzf-lua`, and
-`aider.chat`. `yarepl` also offers convenient code cell text object
-definitions. Available as [extensions](#extensions).
+The plugin features integration with `aider.chat` and provides convenient code
+cell text object definitions. Choose your preferred fuzzy finder among
+`telescope`, `fzf-lua`, or `Snacks.picker` to preview active REPLs. These
+features are available as [extensions](#extensions).
 
 # Showcase
 
@@ -855,11 +857,15 @@ and formatting.
 
 ## fzf-lua
 
-This module provides integration with `fzf-lua`.
+This module provides a fuzzy finder interface to preview active REPLs with `fzf-lua`.
 
 ## telescope
 
-This module provides integration with `telescope`.
+This module provides a fuzzy finder interface to preview active REPLs with `telescope`.
+
+## Snacks.picker
+
+This module provides a fuzzy finder interface to preview active REPLs with `Snacks.picker`.
 
 # Set up project-level REPLs
 

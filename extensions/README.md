@@ -14,6 +14,7 @@
     - [Example Configuration](#example-configuration)
 - [Telescope Integration](#telescope-integration)
 - [Fzf-lua Integration](#fzf-lua-integration)
+- [Snacks.picker Integration](#snackspicker-integration)
 
 # Aider
 
@@ -284,5 +285,27 @@ require('yarepl.extensions.fzf').repl_show {
             layout = 'horizontal'
         }
     }
+}
+```
+
+# Snacks.picker Integration
+
+`yarepl` has integrated with `Snacks.picker` and can be enabled by adding the
+following line to your config:
+
+```lua
+vim.keymap.set('n', '<Leader>rv', function() require('yarepl.extensions.snacks').repl_show() end)
+```
+
+This integration allows you to preview active REPL buffers. Pressing `<CR>`
+will open the selected REPL buffer using `wincmd`, either with a meta-local
+`wincmd` or the global `wincmd`, depending on the context.
+
+For users familiar with `Snacks.picker`'s API, custom options can be passed to
+the function to tailor its behavior, similar to other `Snacks` pickers.
+
+```lua
+require('yarepl.extensions.snacks').repl_show {
+    prompt = 'Yarepl REPL',
 }
 ```
