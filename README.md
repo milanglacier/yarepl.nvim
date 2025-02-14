@@ -98,17 +98,16 @@ created.
 to ensure backward compatibility with `nvim 0.8` if there are any compatibility
 issues.
 
-packer.nvim:
-
-```lua
-use { 'milanglacier/yarepl.nvim' }
-```
-
-lazy.nvim:
+**lazy.nvim**:
 
 ```lua
 { 'milanglacier/yarepl.nvim', config = true }
 ```
+
+**rocks.nvim**:
+
+`Yarepl` is available on luarocks.org. Simply run `Rocks install yarepl.nvim`
+to install it like any other luarocks package.
 
 `yarepl.nvim` does not require any dependencies but functions better with the following plugins:
 
