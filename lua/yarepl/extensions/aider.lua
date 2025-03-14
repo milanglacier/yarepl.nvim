@@ -55,6 +55,8 @@ local prefixes = {
     '/undo',
     '/voice',
     '/web',
+    '/think-tokens',
+    '/reasoning-effort',
 }
 
 local aider_args = {
@@ -149,6 +151,10 @@ local aider_args = {
     '--voice-format',
     '--voice-language',
     '--multiline',
+    '--reasoning-effort',
+    '--thinking-tokens',
+    '--auto-accept-architect',
+    '--no-auto-accept-architect',
 }
 
 -- Create a closure for prefix handling
