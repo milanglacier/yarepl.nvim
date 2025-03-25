@@ -57,6 +57,11 @@ local prefixes = {
     '/web',
     '/think-tokens',
     '/reasoning-effort',
+    '/editor-model',
+    '/weak-model',
+    '/editor',
+    '/edit',
+    '/context',
 }
 
 local aider_args = {
@@ -280,6 +285,7 @@ local shortcuts = {
     { name = 'AskMode', key = '/ask' },
     { name = 'ArchMode', key = '/architect' },
     { name = 'CodeMode', key = '/code' },
+    { name = 'ContextMode', key = '/context' },
 }
 
 local function run_cmd_with_count(cmd)

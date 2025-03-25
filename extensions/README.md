@@ -40,14 +40,15 @@ The `yarepl.extensions.aider` module offers command-line completions to help
 you configure Aider as needed.
 
 - `AiderSetPrefix`: Specify a `/` prefix for Aider commands, such as `/ask`,
-  `/architect`, etc. When sending buffer content to the Aider REPL, the specified
-  prefix will be prepended to the buffer content.
+  `/architect`, `/context` etc. When sending buffer content to the Aider REPL,
+  the specified prefix will be prepended to the buffer content.
 - `AiderRemovePrefix`: Remove the current prefix
 - `AiderSend<Action>`: Send specific actions to aider (e.g., `:AiderSendYes`,
   `:AiderSendNo`). Available action: `Yes`, `No`, `Abort`, `Diff`, `Paste`,
-  `Clear`, `Undo`, `Reset`, `Drop`, `Ls`, `AskMode`, `ArchMode`, `CodeMode`.
+  `Clear`, `Undo`, `Reset`, `Drop`, `Ls`, `AskMode`, `ArchMode`, `CodeMode`,
+  `ContextMode`.
 
-  **Note**: `AskMode`, `ArchMode`, `CodeMode` requires `aider v0.71.0+`
+  **Note**: `ContextMode` requires `aider v0.79.0+`
 
 - `AiderExec`: Send the prompt written in cmdline to aider with `/` prefix completion
 - `AiderSetArgs`: set the command line args to launch aider with autocompletion (e.g. `AiderSetArgs --model gpt-4o`)
@@ -77,6 +78,7 @@ available `<Plug>` mappings:
 - `<Plug>(AiderSendAskMode)`: switch aider to _ask_ mode
 - `<Plug>(AiderSendArchMode)`: switch aider to _architect_ mode
 - `<Plug>(AiderSendCodeMode)`: switch aider to _code_ mode
+- `<Plug>(AiderSendContextMode)`: switch aider to _context_ mode
 
 ## Usage
 
