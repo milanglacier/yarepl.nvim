@@ -151,7 +151,17 @@ local function create_repl(id, repl_name)
         repl_cleanup()
     end
 
-    local term = fn.termopen(cmd, opts)
+    ---@diagnostic disable-next-line: redefined-local
+    local function termopen(cmd, opts)
+        if vim.fn.has 'nvim-0.11' == 1 then
+            opts.term = true
+            return vim.fn.jobstart(cmd, opts)
+        else
+            return vim.fn.termopen(cmd, opts)
+        end
+    end
+
+    local term = termopen(cmd, opts)
     if M._config.format_repl_buffers_names then
         api.nvim_buf_set_name(bufnr, string.format('#%s#%d', repl_name, id))
     end
