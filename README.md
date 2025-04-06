@@ -349,10 +349,10 @@ function will do this for you.
 
 ### REPLSourceVisual
 
-Similar to `REPLSendVisual`, the key distinction is that `REPLSourceVisual`
-first writes the visual selection's code content to a temporary file before
-instructing the REPL to source that file, rather than sending the content
-directly.
+Similar to `REPLSendVisual`, the key distinction with `REPLSourceVisual` is
+that it first writes the visually selected code to a temporary file. It then
+sends a one-liner command to the REPL to source this file, instead of sending
+the content directly.
 
 The primary advantage of `REPLSourceVisual` lies in handling large code
 content. Instead of sending huge code chunks directly to the REPL, it prevents
