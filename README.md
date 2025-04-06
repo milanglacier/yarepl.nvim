@@ -15,12 +15,15 @@
     - [REPLClose](#replclose)
     - [REPLSwap](#replswap)
     - [REPLSendVisual](#replsendvisual)
+    - [REPLSourceVisual](#replsourcevisual)
     - [REPLSendLine](#replsendline)
     - [REPLSendOperator](#replsendoperator)
+    - [REPLSourceOperator](#replsourceoperator)
     - [REPLExec](#replexec)
   - [Keymaps](#keymaps)
 - [Window configuration](#window-configuration)
 - [Customizing REPLs](#customizing-repls)
+- [Customizing the `source_func`](#customizing-the-source_func)
 - [Example keybinding setup](#example-keybinding-setup)
 - [Extensions](#extensions)
   - [aider](#aider)
@@ -141,13 +144,17 @@ yarepl.setup {
     -- The available REPL palattes that `yarepl` can create REPL based on.
     -- To disable a built-in meta, set its key to `false`, e.g., `metas = { R = false }`
     metas = {
-        aichat = { cmd = 'aichat', formatter = 'bracketed_pasting' },
-        radian = { cmd = 'radian', formatter = 'bracketed_pasting_no_final_new_line' },
-        ipython = { cmd = 'ipython', formatter = 'bracketed_pasting' },
-        python = { cmd = 'python', formatter = 'trim_empty_lines' },
-        R = { cmd = 'R', formatter = 'trim_empty_lines' },
-        bash = { cmd = 'bash', formatter = vim.fn.has('linux') == 1 and 'bracketed_pasting' or 'trim_empty_lines' },
-        zsh = { cmd = 'zsh', formatter = 'bracketed_pasting' },
+        aichat = { cmd = 'aichat', formatter = 'bracketed_pasting', source_func = 'aichat' },
+        radian = { cmd = 'radian', formatter = 'bracketed_pasting_no_final_new_line', source_func = 'R' },
+        ipython = { cmd = 'ipython', formatter = 'bracketed_pasting', source_func = 'python' },
+        python = { cmd = 'python', formatter = 'trim_empty_lines', source_func = 'python' },
+        R = { cmd = 'R', formatter = 'trim_empty_lines', source_func = 'R' },
+        bash = {
+            cmd = 'bash',
+            formatter = vim.fn.has 'linux' == 1 and 'bracketed_pasting' or 'trim_empty_lines',
+            source_func = 'bash',
+        },
+        zsh = { cmd = 'zsh', formatter = 'bracketed_pasting', source_func = 'bash' },
     },
     -- when a REPL process exits, should the window associated with those REPLs closed?
     close_on_exit = true,
@@ -340,6 +347,31 @@ For example, `V3j:<Control+u>3REPLSendVisual` sends the selected three lines to
 REPL `3`. However, you do not need to specify `Control+u` in your keymap as the
 function will do this for you.
 
+### REPLSourceVisual
+
+Similar to `REPLSendVisual`, the key distinction is that `REPLSourceVisual`
+first writes the visual selection's code content to a temporary file before
+instructing the REPL to source that file, rather than sending the content
+directly.
+
+The primary advantage of `REPLSourceVisual` lies in handling large code
+content. Instead of sending huge code chunks directly to the REPL, it prevents
+cluttering your interaction history, maintaining a cleaner session.
+Additionally, on Windows, sourcing from a file mitigates potential issues with
+stdin processing when the REPL must read substantial input, as the file-based
+approach significantly reduces the data read from the stdin.
+
+However, one notable drawback involves the security implications of temporary
+file creation. Since the REPL executes code from this file, any vulnerability
+in temporary file handling—such as exposure to malicious attack—could pose
+security risks. Thus, while beneficial in certain scenarios, this method
+requires careful consideration of its potential drawbacks.
+
+Note that the REPL configuration requires a corresponding `source_func`
+implementation. For more information, refer to the section [Customizing the
+Source Func](#customizing-the-source_func). Built-in source implementations are
+available for Python, R, and Bash.
+
 ### REPLSendLine
 
 Sends current line to REPL `i` or the REPL that current buffer is attached to.
@@ -390,6 +422,14 @@ Here are examples of how to use this command:
 
 `REPLSendOperator` is **dot-repeatable**, you do not need to install
 vim-repeat to make it work.
+
+### REPLSourceOperator
+
+The `REPLSourceOperator` is analogous to the `REPLSendOperator`. To understand
+the distinction between these two operators, refer to the section on
+`REPLSourceVisual`, which contrasts `REPLSendVisual` with `REPLSourceVisual`.
+This comparison provides a clear analogy that highlights the differences
+between `REPLSendOperator` and `REPLSourceOperator`.
 
 ### REPLExec
 
@@ -442,6 +482,8 @@ Note:
 - `<Plug>(REPLSendLine)`
 - `<Plug>(REPLSendOperator)`
 - `<Plug>(REPLSendVisual)`
+- `<Plug>(REPLSourceOperator)`
+- `<Plug>(REPLSourceVisual)`
 - `<Plug>(REPLClose)`
 - `<Plug>(REPLExec)`
 
@@ -458,6 +500,8 @@ And for each meta you registered (say you have a meta named `ipython`), the foll
 - `<Plug>(REPLSendLine-ipython)`
 - `<Plug>(REPLSendOperator-ipython)`
 - `<Plug>(REPLSendVisual-ipython)`
+- `<Plug>(REPLSourceOperator-ipython)`
+- `<Plug>(REPLSourceVisual-ipython)`
 - `<Plug>(REPLClose-ipython)`
 - `<Plug>(REPLExec-ipython)`
 
@@ -714,6 +758,57 @@ yarepl.formatter.bracketed_pasting = yarepl.formatter.factory {
 
 </details>
 
+# Customizing the `source_func`
+
+To use `REPLSourceOperator` and `REPLSourceVisual`, your REPL meta
+configuration must implement a `source_func`. Here's an example setup using
+`yarepl` with a predefined source function:
+
+```lua
+local yarepl = require 'yarepl'
+
+yarepl.setup {
+    metas = {
+        ipython = {
+            cmd = 'ipython',
+            formatter = 'bracketed_pasting',
+            -- Provide a string for the built-in source function, or pass a custom
+            -- function for your own implementation.
+            source_func = 'python',
+        },
+    }
+}
+```
+
+There are three built-in `source_func` identifiers available as strings:
+`python`, `R`, and `bash`.
+
+If you need to define a custom `source_func`, you must implement a function
+that accepts a string and returns a string. The input will be the buffer's code
+content, and the output is what will be sent to the REPL.
+
+A common approach involves writing the input string to a temporary file, then
+returning a string that sources this file. The exact "sourcing" syntax depends
+on the target programming language.
+
+Here’s an example implementation of a `source_func` for Python:
+
+<details>
+
+```lua
+M.source_funcs.python = function(str)
+    local file = make_tmp_file(str)
+    if not file then
+        return
+    end
+
+    local cmd = string.format('exec(open("%s", "r").read())', file)
+    return cmd
+end
+```
+
+</details>
+
 # Example keybinding setup
 
 If you don't want to use those `<Plug>` keymaps provided by the plugin but
@@ -738,11 +833,17 @@ keymap('n', '<Leader>ch', '<Plug>(REPLHide-aichat)', {
 keymap('v', '<Leader>cr', '<Plug>(REPLSendVisual-aichat)', {
     desc = 'Send visual region to Aichat',
 })
+keymap('v', '<Leader>cR', '<Plug>(REPLSourceVisual-aichat)', {
+    desc = 'Source visual region to Aichat',
+})
 keymap('n', '<Leader>crr', '<Plug>(REPLSendLine-aichat)', {
     desc = 'Send lines to Aichat',
 })
 keymap('n', '<Leader>cr', '<Plug>(REPLSendOperator-aichat)', {
     desc = 'Send Operator to Aichat',
+})
+keymap('n', '<Leader>cr', '<Plug>(REPLSourceOperator-aichat)', {
+    desc = 'Source Operator to Aichat',
 })
 keymap('n', '<Leader>ce', '<Plug>(REPLExec-aichat)', {
     desc = 'Execute command in aichat',
@@ -785,11 +886,17 @@ autocmd('FileType', {
         bufmap(0, 'v', '<LocalLeader>s', '<Plug>(REPLSendVisual)', {
             desc = 'Send visual region to REPL',
         })
+        bufmap(0, 'v', '<LocalLeader>S', '<Plug>(REPLSourceVisual)', {
+            desc = 'Source visual region to REPL',
+        })
         bufmap(0, 'n', '<LocalLeader>ss', '<Plug>(REPLSendLine)', {
             desc = 'Send line to REPL',
         })
         bufmap(0, 'n', '<LocalLeader>s', '<Plug>(REPLSendOperator)', {
-            desc = 'Send current line to REPL',
+            desc = 'Send operator to REPL',
+        })
+        bufmap(0, 'n', '<LocalLeader>S', '<Plug>(REPLSourceOperator)', {
+            desc = 'Source operator to REPL',
         })
         bufmap(0, 'n', '<LocalLeader>re', '<Plug>(REPLExec)', {
             desc = 'Execute command in REPL',
