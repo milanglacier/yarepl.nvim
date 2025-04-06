@@ -892,6 +892,10 @@ local function make_tmp_file(content)
     f:write(content)
     f:close()
 
+    vim.defer_fn(function()
+        os.remove(tmp_file)
+    end, 1000)
+
     return tmp_file
 end
 
