@@ -15,7 +15,7 @@ local default_config = function()
         metas = {
             aichat = { cmd = 'aichat', formatter = 'bracketed_pasting', source_func = 'aichat' },
             radian = { cmd = 'radian', formatter = 'bracketed_pasting_no_final_new_line', source_func = 'R' },
-            ipython = { cmd = 'ipython', formatter = 'bracketed_pasting', source_func = 'python' },
+            ipython = { cmd = 'ipython', formatter = 'bracketed_pasting', source_func = 'ipython' },
             python = { cmd = 'python', formatter = 'trim_empty_lines', source_func = 'python' },
             R = { cmd = 'R', formatter = 'trim_empty_lines', source_func = 'R' },
             -- bash version >= 4.4 supports bracketed paste mode. but macos
@@ -909,6 +909,18 @@ M.source_funcs.python = function(str)
     end
 
     local cmd = string.format('exec(open("%s", "r").read())', file)
+    return cmd
+end
+
+M.source_funcs.ipython = function(str)
+    local file = make_tmp_file(str)
+    if not file then
+        return
+    end
+
+    -- The `-i` flag ensures the current environment is inherited when
+    -- executing the file
+    local cmd = string.format('%%run -i "%s"', file)
     return cmd
 end
 

@@ -146,7 +146,7 @@ yarepl.setup {
     metas = {
         aichat = { cmd = 'aichat', formatter = 'bracketed_pasting', source_func = 'aichat' },
         radian = { cmd = 'radian', formatter = 'bracketed_pasting_no_final_new_line', source_func = 'R' },
-        ipython = { cmd = 'ipython', formatter = 'bracketed_pasting', source_func = 'python' },
+        ipython = { cmd = 'ipython', formatter = 'bracketed_pasting', source_func = 'ipython' },
         python = { cmd = 'python', formatter = 'trim_empty_lines', source_func = 'python' },
         R = { cmd = 'R', formatter = 'trim_empty_lines', source_func = 'R' },
         bash = {
@@ -781,8 +781,8 @@ yarepl.setup {
 }
 ```
 
-There are three built-in `source_func` identifiers available as strings:
-`python`, `R`, and `bash`.
+Several built-in `source_func` options can be accessed as strings: `ipython`,
+`python`, `R`, `aichat`, and `bash`.
 
 If you need to define a custom `source_func`, you must implement a function
 that accepts a string and returns a string. The input will be the buffer's code
