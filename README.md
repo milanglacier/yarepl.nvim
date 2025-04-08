@@ -637,17 +637,18 @@ returns either a string or list of strings.
 `formatter` can be either:
 
 1. A string that matches a builtin formatter name:
-   - 'bracketed_pasting'
-   - 'bracketed_pasting_no_final_new_line'
-   - 'trim_empty_lines'
+   - `bracketed_pasting`: wrap the content within bracketed paste sequences
+   - `bracketed_pasting_no_final_new_line`: similar to `bracketed_pasting`, but does not add a new line at the end
+   - `trim_empty_lines`: remove empty lines from the input
 2. A function that takes a list of strings as input and returns a list of
    strings to send to the REPL
 
 [Here is a more complex example for ghci, a haskell repl.](https://github.com/milanglacier/yarepl.nvim/issues/21)
 
-`yarepl` provides a helper function that enables you to quickly create a
-formatter function without starting from scratch. Below are general guidelines
-for crafting your own REPL formatter:
+`yarepl` offers a convenient helper function that simplifies the process of
+creating a custom formatter without starting from scratch. For usage examples
+and general guidelines on setting your own REPL formatter, expand the
+**Details** section below.
 
 <details>
 
