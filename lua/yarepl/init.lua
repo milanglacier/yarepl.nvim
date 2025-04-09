@@ -582,7 +582,7 @@ end
 M.commands.start = function(opts)
     -- if calling the command without any count, we want count to become 1.
     local repl_name = opts.args
-    local id = opts.count == 0 and 1 or opts.count
+    local id = opts.count == 0 and #M._repls + 1 or opts.count
     local repl = M._repls[id]
     local current_bufnr = api.nvim_get_current_buf()
 
