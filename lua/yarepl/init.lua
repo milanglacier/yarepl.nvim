@@ -884,7 +884,7 @@ end
 ---@param keep_file boolean? Whether keep the temporary file after temporary execution
 ---@return string? The file name of the temporary file
 local function make_tmp_file(content, keep_file)
-    local tmp_file = os.tmpname()
+    local tmp_file = os.tmpname() .. '_yarepl'
 
     local f = io.open(tmp_file, 'w+')
     if f == nil then
