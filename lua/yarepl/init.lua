@@ -880,7 +880,10 @@ M.commands.exec = function(opts)
     M._send_strings(id, name, current_buffer, command_list)
 end
 
-local function make_tmp_file(content)
+---@param content string
+---@param keep_file boolean? Whether keep the temporary file after temporary execution
+---@return string? The file name of the temporary file
+local function make_tmp_file(content, keep_file)
     local tmp_file = os.tmpname()
 
     local f = io.open(tmp_file, 'w+')
@@ -892,9 +895,11 @@ local function make_tmp_file(content)
     f:write(content)
     f:close()
 
-    vim.defer_fn(function()
-        os.remove(tmp_file)
-    end, 1000)
+    if not keep_file then
+        vim.defer_fn(function()
+            os.remove(tmp_file)
+        end, 5000)
+    end
 
     return tmp_file
 end
@@ -903,12 +908,16 @@ end
 M.source_funcs = {}
 
 M.source_funcs.python = function(str)
-    local file = make_tmp_file(str)
+    -- Preserve the temporary file since PDB requires its existence for
+    -- displaying context via the `list` command
+    local file = make_tmp_file(str, true)
     if not file then
         return
     end
 
-    local cmd = string.format('exec(open("%s", "r").read())', file)
+    -- Use 'compile' to ensure proper debugging context when using PDB's `list`
+    -- command
+    local cmd = string.format('exec(compile(open("%s", "r").read(), "%s", "exec"))', file, file)
     return cmd
 end
 
