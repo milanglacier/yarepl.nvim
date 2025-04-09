@@ -922,7 +922,7 @@ M.source_funcs.python = function(str)
 end
 
 M.source_funcs.ipython = function(str)
-    local file = make_tmp_file(str)
+    local file = make_tmp_file(str, true)
     if not file then
         return
     end
