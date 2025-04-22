@@ -15,8 +15,8 @@ local default_config = function()
         metas = {
             aichat = { cmd = 'aichat', formatter = 'bracketed_pasting', source_syntax = 'aichat' },
             radian = { cmd = 'radian', formatter = 'bracketed_pasting_no_final_new_line', source_syntax = 'R' },
-            ipython = { cmd = 'ipython', formatter = 'bracketed_pasting', source_func = 'ipython' },
-            python = { cmd = 'python', formatter = 'trim_empty_lines', source_func = 'python' },
+            ipython = { cmd = 'ipython', formatter = 'bracketed_pasting', source_syntax = 'ipython' },
+            python = { cmd = 'python', formatter = 'trim_empty_lines', source_syntax = 'python' },
             R = { cmd = 'R', formatter = 'trim_empty_lines', source_syntax = 'R' },
             -- bash version >= 4.4 supports bracketed paste mode. but macos
             -- shipped with bash 3.2, so we don't use bracketed paste mode for
@@ -438,30 +438,26 @@ M._send_strings = function(id, name, bufnr, strings, use_formatter, source_strin
     if source_string then
         local meta = M._config.metas[repl.name]
         local source_syntax = M.source_syntaxes[meta.source_syntax] or meta.source_syntax
-        local source_func_name = meta.source_func
+
+        if not source_syntax then
+            vim.notify(
+                'No source syntax or source function is available for '
+                    .. repl.name
+                    .. '. Fallback to send string directly.'
+            )
+        end
+
         local content = table.concat(strings, '\n')
 
         local source_command_sent_to_repl
 
-        if source_syntax then
+        if type(source_syntax) == 'string' then
             source_command_sent_to_repl = M.source_file_with_source_syntax(content, source_syntax)
-        elseif source_func_name then
-            local source_func
-            if type(source_func_name) == 'string' then
-                source_func = M.source_funcs[source_func_name]
-            else
-                source_func = source_func_name
-            end
-            if source_func then
-                source_command_sent_to_repl = source_func(content)
-            end
+        elseif type(source_syntax) == 'function' then
+            source_command_sent_to_repl = source_syntax(content)
         end
 
-        if not source_command_sent_to_repl then
-            vim.notify(
-                'No source syntax or func is available for ' .. repl.name .. '. Fallback to send string directly.'
-            )
-        elseif source_command_sent_to_repl ~= '' then
+        if source_command_sent_to_repl and source_command_sent_to_repl ~= '' then
             strings = vim.split(source_command_sent_to_repl, '\n')
         end
     end
@@ -940,12 +936,10 @@ function M.source_file_with_source_syntax(content, source_syntax, keep_file)
     return source_syntax
 end
 
----@type table<string, fun(str: string): string?>
-M.source_funcs = {}
----@type table<string, string>
+---@type table<string, string | fun(str: string): string?>
 M.source_syntaxes = {}
 
-M.source_funcs.python = function(str)
+M.source_syntaxes.python = function(str)
     -- Preserve the temporary file since PDB requires its existence for
     -- displaying context via the `list` command
     return M.source_file_with_source_syntax(
@@ -955,7 +949,7 @@ M.source_funcs.python = function(str)
     )
 end
 
-M.source_funcs.ipython = function(str)
+M.source_syntaxes.ipython = function(str)
     -- The `-i` flag ensures the current environment is inherited when
     -- executing the file
     return M.source_file_with_source_syntax(str, '%run -i "{{file}}"', true)

@@ -23,7 +23,7 @@
   - [Keymaps](#keymaps)
 - [Window configuration](#window-configuration)
 - [Customizing REPLs](#customizing-repls)
-- [Customizing the Source Function or Syntax](#customizing-the-source-function-or-syntax)
+- [Customizing the Source Syntax](#customizing-the-source-syntax)
 - [Example keybinding setup](#example-keybinding-setup)
 - [Extensions](#extensions)
   - [aider](#aider)
@@ -146,8 +146,8 @@ yarepl.setup {
     metas = {
         aichat = { cmd = 'aichat', formatter = 'bracketed_pasting', source_syntax = 'aichat' },
         radian = { cmd = 'radian', formatter = 'bracketed_pasting_no_final_new_line', source_syntax = 'R' },
-        ipython = { cmd = 'ipython', formatter = 'bracketed_pasting', source_func = 'ipython' },
-        python = { cmd = 'python', formatter = 'trim_empty_lines', source_func = 'python' },
+        ipython = { cmd = 'ipython', formatter = 'bracketed_pasting', source_syntax = 'ipython' },
+        python = { cmd = 'python', formatter = 'trim_empty_lines', source_syntax = 'python' },
         R = { cmd = 'R', formatter = 'trim_empty_lines', source_syntax = 'R' },
         bash = {
             cmd = 'bash',
@@ -367,9 +367,9 @@ in temporary file handling—such as exposure to malicious attack—could pose
 security risks. Thus, while beneficial in certain scenarios, this method
 requires careful consideration of its potential drawbacks.
 
-Note that the REPL configuration requires a corresponding `source_func` or
-`source_syntax` implementation. For more information, refer to the section
-[Customizing the Source Func or Syntax](#customizing-the-source_func). Built-in source
+Note that the REPL configuration requires a corresponding `source_syntax`
+implementation. For more information, refer to the section [Customizing the
+Source Syntax](#customizing-the-source-syntax). Built-in source
 implementations are available for Python, R, and Bash.
 
 ### REPLSendLine
@@ -759,10 +759,10 @@ yarepl.formatter.bracketed_pasting = yarepl.formatter.factory {
 
 </details>
 
-# Customizing the Source Function or Syntax
+# Customizing the Source Syntax
 
 To utilize `REPLSourceOperator` and `REPLSourceVisual`, your REPL meta
-configuration must include either a `source_func` or `source_syntax`.
+configuration must include either `source_syntax`.
 
 Here's an example setup using `yarepl` with a source syntax:
 
@@ -786,23 +786,18 @@ replaced by the temporary file path. The interpolated string is subsequently
 sent to the REPL.
 
 Several built-in `source_syntax` options can be accessed as strings: `R`,
-`aichat`, and `bash`.
+`aichat`, `bash`, `ipython` and `python`.
 
-Alternatively, instead of using `source_syntax`, you can specify `source_func`
-for a more flexible configuration of the "sourcing" behavior.
-
-Several built-in `source_func` options can be accessed as strings: `ipython`
-and `python`.
-
-If you need to define a custom `source_func`, you must implement a function
-that accepts a string and returns a string. The input will be the selected code
-content, and the output is what will be sent to the REPL.
+For a more flexible "sourcing" behavior, you can also define `source_syntax` as
+a function, instead of using a string with `{{file}}`. This function must take
+a string and return a string. The input is the selected code, and the output is
+what gets sent to the REPL.
 
 A common approach involves writing the input string to a temporary file, then
 returning a string that sources this file. The exact "sourcing" syntax depends
 on the target programming language.
 
-Here's an example setup using `yarepl` with a predefined source function:
+Here's an example setup using `yarepl` with a source function:
 
 <details>
 
@@ -824,17 +819,13 @@ yarepl.setup {
         ipython = {
             cmd = 'ipython',
             formatter = 'bracketed_pasting',
-            -- Provide a string for the built-in source function, or a custom function for your implementation.
-            source_func = python_source_func,
+            source_syntax = python_source_func,
         },
     }
 }
 ```
 
 </details>
-
-If both `source_syntax` and `source_func` are provided for a REPL meta,
-`source_syntax` takes precedence.
 
 # Example keybinding setup
 
