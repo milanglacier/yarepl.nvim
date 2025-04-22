@@ -810,13 +810,13 @@ yarepl.setup {
 Several built-in `source_func` options can be accessed as strings: `ipython`
 and `python`.
 
-To define a custom `source_func`, you must implement a function that accepts
-and returns a string. The input is the buffer's code content, and the output is
-what will be sent to the REPL.
+If you need to define a custom `source_func`, you must implement a function
+that accepts a string and returns a string. The input will be the selected code
+content, and the output is what will be sent to the REPL.
 
-A typical approach involves writing the input string to a temporary file,
-followed by returning a string that sources this file. The specific "sourcing"
-syntax is contingent on the target programming language.
+A common approach involves writing the input string to a temporary file, then
+returning a string that sources this file. The exact "sourcing" syntax depends
+on the target programming language.
 
 Here's an example implementation of a `source_func` for Python:
 
