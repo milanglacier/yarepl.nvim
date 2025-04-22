@@ -883,7 +883,7 @@ end
 ---@param content string
 ---@param keep_file boolean? Whether keep the temporary file after temporary execution
 ---@return string? The file name of the temporary file
-local function make_tmp_file(content, keep_file)
+function M.make_tmp_file(content, keep_file)
     local tmp_file = os.tmpname() .. '_yarepl'
 
     local f = io.open(tmp_file, 'w+')
@@ -910,7 +910,7 @@ M.source_funcs = {}
 M.source_funcs.python = function(str)
     -- Preserve the temporary file since PDB requires its existence for
     -- displaying context via the `list` command
-    local file = make_tmp_file(str, true)
+    local file = M.make_tmp_file(str, true)
     if not file then
         return
     end
@@ -922,7 +922,7 @@ M.source_funcs.python = function(str)
 end
 
 M.source_funcs.ipython = function(str)
-    local file = make_tmp_file(str, true)
+    local file = M.make_tmp_file(str, true)
     if not file then
         return
     end
@@ -934,7 +934,7 @@ M.source_funcs.ipython = function(str)
 end
 
 M.source_funcs.bash = function(str)
-    local file = make_tmp_file(str)
+    local file = M.make_tmp_file(str)
     if not file then
         return
     end
@@ -944,7 +944,7 @@ M.source_funcs.bash = function(str)
 end
 
 M.source_funcs.R = function(str)
-    local file = make_tmp_file(str)
+    local file = M.make_tmp_file(str)
     if not file then
         return
     end
@@ -954,7 +954,7 @@ M.source_funcs.R = function(str)
 end
 
 M.source_funcs.aichat = function(str)
-    local file = make_tmp_file(str)
+    local file = M.make_tmp_file(str)
     if not file then
         return
     end
