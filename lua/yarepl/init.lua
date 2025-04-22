@@ -904,63 +904,63 @@ function M.make_tmp_file(content, keep_file)
     return tmp_file
 end
 
+---@param content string
+---@param source_syntax string
+---@param keep_file boolean?
+---@reutrn string? The syntax to source the file
+function M.source_file_with_source_syntax(content, source_syntax, keep_file)
+    local tmp_file = os.tmpname() .. '_yarepl'
+
+    local f = io.open(tmp_file, 'w+')
+    if f == nil then
+        M.notify('Cannot open temporary message file: ' .. tmp_file, 'error', vim.log.levels.ERROR)
+        return
+    end
+
+    f:write(content)
+    f:close()
+
+    if not keep_file then
+        vim.defer_fn(function()
+            os.remove(tmp_file)
+        end, 5000)
+    end
+
+    -- replace {{file}} placeholder with the temp file name
+    source_syntax = source_syntax:gsub('{{file}}', tmp_file)
+
+    return source_syntax
+end
+
 ---@type table<string, fun(str: string): string?>
 M.source_funcs = {}
 
 M.source_funcs.python = function(str)
     -- Preserve the temporary file since PDB requires its existence for
     -- displaying context via the `list` command
-    local file = M.make_tmp_file(str, true)
-    if not file then
-        return
-    end
-
-    -- Use 'compile' to ensure proper debugging context when using PDB's `list`
-    -- command
-    local cmd = string.format('exec(compile(open("%s", "r").read(), "%s", "exec"))', file, file)
-    return cmd
+    return M.source_file_with_source_syntax(
+        str,
+        'exec(compile(open("{{file}}", "r").read(), "{{file}}", "exec"))',
+        true
+    )
 end
 
 M.source_funcs.ipython = function(str)
-    local file = M.make_tmp_file(str, true)
-    if not file then
-        return
-    end
-
     -- The `-i` flag ensures the current environment is inherited when
     -- executing the file
-    local cmd = string.format('%%run -i "%s"', file)
-    return cmd
+    return M.source_file_with_source_syntax(str, '%run -i "{{file}}"', true)
 end
 
 M.source_funcs.bash = function(str)
-    local file = M.make_tmp_file(str)
-    if not file then
-        return
-    end
-
-    local cmd = string.format('source "%s"', file)
-    return cmd
+    return M.source_file_with_source_syntax(str, 'source "{{file}}"')
 end
 
 M.source_funcs.R = function(str)
-    local file = M.make_tmp_file(str)
-    if not file then
-        return
-    end
-
-    local cmd = string.format('eval(parse(text = readr::read_file("%s")))', file)
-    return cmd
+    return M.source_file_with_source_syntax(str, 'eval(parse(text = readr::read_file("{{file}}")))')
 end
 
 M.source_funcs.aichat = function(str)
-    local file = M.make_tmp_file(str)
-    if not file then
-        return
-    end
-
-    local cmd = string.format('.file %s', file)
-    return cmd
+    return M.source_file_with_source_syntax(str, '.file {{file}}')
 end
 
 M.setup = function(opts)
