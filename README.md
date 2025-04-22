@@ -789,23 +789,7 @@ Several built-in `source_syntax` options can be accessed as strings: `R`,
 `aichat`, and `bash`.
 
 Alternatively, instead of using `source_syntax`, you can specify `source_func`
-for a more flexible configuration of the "source" behavior.
-
-Here's an example setup using `yarepl` with a predefined source function:
-
-```lua
-local yarepl = require 'yarepl'
-
-yarepl.setup {
-    metas = {
-        ipython = {
-            cmd = 'ipython',
-            formatter = 'bracketed_pasting',
-            source_func = 'python',  -- Provide a string for the built-in source function, or a custom function for your implementation.
-        },
-    }
-}
-```
+for a more flexible configuration of the "sourcing" behavior.
 
 Several built-in `source_func` options can be accessed as strings: `ipython`
 and `python`.
@@ -818,12 +802,13 @@ A common approach involves writing the input string to a temporary file, then
 returning a string that sources this file. The exact "sourcing" syntax depends
 on the target programming language.
 
-Here's an example implementation of a `source_func` for Python:
+Here's an example setup using `yarepl` with a predefined source function:
 
 <details>
 
 ```lua
-M.source_funcs.python = function(str)
+local yarepl = require 'yarepl'
+local python_source_func = function(str)
     local file = make_tmp_file(str)
     if not file then
         return
@@ -832,6 +817,18 @@ M.source_funcs.python = function(str)
     local cmd = string.format('exec(open("%s", "r").read())', file)
     return cmd
 end
+
+
+yarepl.setup {
+    metas = {
+        ipython = {
+            cmd = 'ipython',
+            formatter = 'bracketed_pasting',
+            -- Provide a string for the built-in source function, or a custom function for your implementation.
+            source_func = python_source_func,
+        },
+    }
+}
 ```
 
 </details>
