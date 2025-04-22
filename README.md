@@ -23,7 +23,7 @@
   - [Keymaps](#keymaps)
 - [Window configuration](#window-configuration)
 - [Customizing REPLs](#customizing-repls)
-- [Customizing the `source_func`](#customizing-the-source_func)
+- [Customizing the Source Function or Syntax](#customizing-the-source-function-or-syntax)
 - [Example keybinding setup](#example-keybinding-setup)
 - [Extensions](#extensions)
   - [aider](#aider)
@@ -144,17 +144,17 @@ yarepl.setup {
     -- The available REPL palattes that `yarepl` can create REPL based on.
     -- To disable a built-in meta, set its key to `false`, e.g., `metas = { R = false }`
     metas = {
-        aichat = { cmd = 'aichat', formatter = 'bracketed_pasting', source_func = 'aichat' },
-        radian = { cmd = 'radian', formatter = 'bracketed_pasting_no_final_new_line', source_func = 'R' },
+        aichat = { cmd = 'aichat', formatter = 'bracketed_pasting', source_syntax = 'aichat' },
+        radian = { cmd = 'radian', formatter = 'bracketed_pasting_no_final_new_line', source_syntax = 'R' },
         ipython = { cmd = 'ipython', formatter = 'bracketed_pasting', source_func = 'ipython' },
         python = { cmd = 'python', formatter = 'trim_empty_lines', source_func = 'python' },
-        R = { cmd = 'R', formatter = 'trim_empty_lines', source_func = 'R' },
+        R = { cmd = 'R', formatter = 'trim_empty_lines', source_syntax = 'R' },
         bash = {
             cmd = 'bash',
             formatter = vim.fn.has 'linux' == 1 and 'bracketed_pasting' or 'trim_empty_lines',
-            source_func = 'bash',
+            source_syntax = 'bash',
         },
-        zsh = { cmd = 'zsh', formatter = 'bracketed_pasting', source_func = 'bash' },
+        zsh = { cmd = 'zsh', formatter = 'bracketed_pasting', source_syntax = 'bash' },
     },
     -- when a REPL process exits, should the window associated with those REPLs closed?
     close_on_exit = true,
@@ -367,10 +367,10 @@ in temporary file handling—such as exposure to malicious attack—could pose
 security risks. Thus, while beneficial in certain scenarios, this method
 requires careful consideration of its potential drawbacks.
 
-Note that the REPL configuration requires a corresponding `source_func`
-implementation. For more information, refer to the section [Customizing the
-Source Func](#customizing-the-source_func). Built-in source implementations are
-available for Python, R, and Bash.
+Note that the REPL configuration requires a corresponding `source_func` or
+`source_syntax` implementation. For more information, refer to the section
+[Customizing the Source Func or Syntax](#customizing-the-source_func). Built-in source
+implementations are available for Python, R, and Bash.
 
 ### REPLSendLine
 
@@ -759,11 +759,39 @@ yarepl.formatter.bracketed_pasting = yarepl.formatter.factory {
 
 </details>
 
-# Customizing the `source_func`
+# Customizing the Source Function or Syntax
 
-To use `REPLSourceOperator` and `REPLSourceVisual`, your REPL meta
-configuration must implement a `source_func`. Here's an example setup using
-`yarepl` with a predefined source function:
+To utilize `REPLSourceOperator` and `REPLSourceVisual`, your REPL meta
+configuration must include either a `source_func` or `source_syntax`.
+
+Here's an example setup using `yarepl` with a source syntax:
+
+```lua
+local yarepl = require 'yarepl'
+
+yarepl.setup {
+    metas = {
+        ipython = {
+            cmd = 'radian',
+            formatter = 'bracketed_pasting_no_final_new_line',
+            source_syntax = 'eval(parse(text = "{{file}}"))',
+        },
+    }
+}
+```
+
+When `source_syntax` is specified, the selected code content is initially
+written to a temporary file. Here, `{{file}}` serves as a placeholder, which is
+replaced by the temporary file path. The interpolated string is subsequently
+sent to the REPL.
+
+Several built-in `source_syntax` options can be accessed as strings: `R`,
+`aichat`, and `bash`.
+
+Alternatively, instead of using `source_syntax`, you can specify `source_func`
+for a more flexible configuration of the "source" behavior.
+
+Here's an example setup using `yarepl` with a predefined source function:
 
 ```lua
 local yarepl = require 'yarepl'
@@ -773,26 +801,24 @@ yarepl.setup {
         ipython = {
             cmd = 'ipython',
             formatter = 'bracketed_pasting',
-            -- Provide a string for the built-in source function, or pass a custom
-            -- function for your own implementation.
-            source_func = 'python',
+            source_func = 'python',  -- Provide a string for the built-in source function, or a custom function for your implementation.
         },
     }
 }
 ```
 
-Several built-in `source_func` options can be accessed as strings: `ipython`,
-`python`, `R`, `aichat`, and `bash`.
+Several built-in `source_func` options can be accessed as strings: `ipython`
+and `python`.
 
-If you need to define a custom `source_func`, you must implement a function
-that accepts a string and returns a string. The input will be the buffer's code
-content, and the output is what will be sent to the REPL.
+To define a custom `source_func`, you must implement a function that accepts
+and returns a string. The input is the buffer's code content, and the output is
+what will be sent to the REPL.
 
-A common approach involves writing the input string to a temporary file, then
-returning a string that sources this file. The exact "sourcing" syntax depends
-on the target programming language.
+A typical approach involves writing the input string to a temporary file,
+followed by returning a string that sources this file. The specific "sourcing"
+syntax is contingent on the target programming language.
 
-Here’s an example implementation of a `source_func` for Python:
+Here's an example implementation of a `source_func` for Python:
 
 <details>
 
@@ -809,6 +835,9 @@ end
 ```
 
 </details>
+
+If both `source_syntax` and `source_func` are provided for a REPL meta,
+`source_syntax` takes precedence.
 
 # Example keybinding setup
 
