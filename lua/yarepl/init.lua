@@ -13,20 +13,20 @@ local default_config = function()
         ft = 'REPL',
         wincmd = 'belowright 15 split',
         metas = {
-            aichat = { cmd = 'aichat', formatter = 'bracketed_pasting', source_func = 'aichat' },
-            radian = { cmd = 'radian', formatter = 'bracketed_pasting_no_final_new_line', source_func = 'R' },
+            aichat = { cmd = 'aichat', formatter = 'bracketed_pasting', source_syntax = 'aichat' },
+            radian = { cmd = 'radian', formatter = 'bracketed_pasting_no_final_new_line', source_syntax = 'R' },
             ipython = { cmd = 'ipython', formatter = 'bracketed_pasting', source_func = 'ipython' },
             python = { cmd = 'python', formatter = 'trim_empty_lines', source_func = 'python' },
-            R = { cmd = 'R', formatter = 'trim_empty_lines', source_func = 'R' },
+            R = { cmd = 'R', formatter = 'trim_empty_lines', source_syntax = 'R' },
             -- bash version >= 4.4 supports bracketed paste mode. but macos
             -- shipped with bash 3.2, so we don't use bracketed paste mode for
             -- macOS
             bash = {
                 cmd = 'bash',
                 formatter = vim.fn.has 'linux' == 1 and 'bracketed_pasting' or 'trim_empty_lines',
-                source_func = 'bash',
+                source_syntax = 'bash',
             },
-            zsh = { cmd = 'zsh', formatter = 'bracketed_pasting', source_func = 'bash' },
+            zsh = { cmd = 'zsh', formatter = 'bracketed_pasting', source_syntax = 'bash' },
         },
         close_on_exit = true,
         scroll_to_bottom_after_sending = true,
@@ -416,13 +416,13 @@ M.formatter.bracketed_pasting_no_final_new_line = M.formatter.factory {
 ---@param bufnr number? the buffer number from which to find the attached REPL.
 ---@param strings string[] a list of strings
 ---@param use_formatter boolean? whether use formatter (e.g. bracketed_pasting)? Default: true
----@param use_source_func boolean? Whether use source_func (defined by REPL meta) Default: false
+---@param source_string boolean? Whether use source_func or source_syntax (defined by REPL meta) Default: false
 -- Send a list of strings to the repl specified by `id` and `name` and `bufnr`.
 -- If `id` is 0, then will try to find the REPL that `bufnr` is attached to, if
 -- not find, will use `id = 1`. If `name` is not nil or not an empty string,
 -- then will try to find the REPL with `name` relative to `id`. If `bufnr` is
 -- nil or `bufnr` = 0, will find the REPL that current buffer is attached to.
-M._send_strings = function(id, name, bufnr, strings, use_formatter, use_source_func)
+M._send_strings = function(id, name, bufnr, strings, use_formatter, source_string)
     use_formatter = use_formatter == nil and true or use_formatter
     if bufnr == nil or bufnr == 0 then
         bufnr = api.nvim_get_current_buf()
@@ -435,26 +435,34 @@ M._send_strings = function(id, name, bufnr, strings, use_formatter, use_source_f
         return
     end
 
-    if use_source_func then
-        local source_func_name = M._config.metas[repl.name].source_func
+    if source_string then
+        local meta = M._config.metas[repl.name]
+        local source_syntax = M.source_syntaxes[meta.source_syntax] or meta.source_syntax
+        local source_func_name = meta.source_func
+        local content = table.concat(strings, '\n')
 
-        local source_func
+        local source_command_sent_to_repl
 
-        if type(source_func_name) == 'string' then
-            source_func = M.source_funcs[source_func_name]
-        else
-            source_func = source_func_name
+        if source_syntax then
+            source_command_sent_to_repl = M.source_file_with_source_syntax(content, source_syntax)
+        elseif source_func_name then
+            local source_func
+            if type(source_func_name) == 'string' then
+                source_func = M.source_funcs[source_func_name]
+            else
+                source_func = source_func_name
+            end
+            if source_func then
+                source_command_sent_to_repl = source_func(content)
+            end
         end
 
-        if not source_func then
-            vim.notify('No source func is available for ' .. repl.name .. '. Fallback to send string directly.')
-        else
-            local str = table.concat(strings, '\n')
-            str = source_func(str) or ''
-
-            if str ~= '' then
-                strings = vim.split(str, '\n')
-            end
+        if not source_command_sent_to_repl then
+            vim.notify(
+                'No source syntax or func is available for ' .. repl.name .. '. Fallback to send string directly.'
+            )
+        elseif source_command_sent_to_repl ~= '' then
+            strings = vim.split(source_command_sent_to_repl, '\n')
         end
     end
 
@@ -934,6 +942,8 @@ end
 
 ---@type table<string, fun(str: string): string?>
 M.source_funcs = {}
+---@type table<string, string>
+M.source_syntaxes = {}
 
 M.source_funcs.python = function(str)
     -- Preserve the temporary file since PDB requires its existence for
@@ -951,17 +961,9 @@ M.source_funcs.ipython = function(str)
     return M.source_file_with_source_syntax(str, '%run -i "{{file}}"', true)
 end
 
-M.source_funcs.bash = function(str)
-    return M.source_file_with_source_syntax(str, 'source "{{file}}"')
-end
-
-M.source_funcs.R = function(str)
-    return M.source_file_with_source_syntax(str, 'eval(parse(text = readr::read_file("{{file}}")))')
-end
-
-M.source_funcs.aichat = function(str)
-    return M.source_file_with_source_syntax(str, '.file {{file}}')
-end
+M.source_syntaxes.bash = 'source "{{file}}"'
+M.source_syntaxes.R = 'eval(parse(text = readr::read_file("{{file}}")))'
+M.source_syntaxes.aichat = '.file "{{file}}"'
 
 M.setup = function(opts)
     M._config = vim.tbl_deep_extend('force', default_config(), opts or {})
