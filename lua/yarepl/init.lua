@@ -416,13 +416,13 @@ M.formatter.bracketed_pasting_no_final_new_line = M.formatter.factory {
 ---@param bufnr number? the buffer number from which to find the attached REPL.
 ---@param strings string[] a list of strings
 ---@param use_formatter boolean? whether use formatter (e.g. bracketed_pasting)? Default: true
----@param source_string boolean? Whether use source_func or source_syntax (defined by REPL meta) Default: false
+---@param source_content boolean? Whether use source_syntax (defined by REPL meta) Default: false
 -- Send a list of strings to the repl specified by `id` and `name` and `bufnr`.
 -- If `id` is 0, then will try to find the REPL that `bufnr` is attached to, if
 -- not find, will use `id = 1`. If `name` is not nil or not an empty string,
 -- then will try to find the REPL with `name` relative to `id`. If `bufnr` is
 -- nil or `bufnr` = 0, will find the REPL that current buffer is attached to.
-M._send_strings = function(id, name, bufnr, strings, use_formatter, source_string)
+M._send_strings = function(id, name, bufnr, strings, use_formatter, source_content)
     use_formatter = use_formatter == nil and true or use_formatter
     if bufnr == nil or bufnr == 0 then
         bufnr = api.nvim_get_current_buf()
@@ -435,7 +435,7 @@ M._send_strings = function(id, name, bufnr, strings, use_formatter, source_strin
         return
     end
 
-    if source_string then
+    if source_content then
         local meta = M._config.metas[repl.name]
         local source_syntax = M.source_syntaxes[meta.source_syntax] or meta.source_syntax
 
@@ -817,7 +817,7 @@ M.commands.send_visual = function(opts)
         return
     end
 
-    M._send_strings(id, name, current_buffer, lines, nil, opts.use_source_func)
+    M._send_strings(id, name, current_buffer, lines, nil, opts.source_content)
 end
 
 M.commands.send_line = function(opts)
@@ -846,18 +846,18 @@ M.commands.send_operator = function(opts)
         vim.b[0].repl_id = nil
     end
 
-    vim.go.operatorfunc = opts.use_source_func and [[v:lua.require'yarepl'._source_operator_internal]]
+    vim.go.operatorfunc = opts.source_content and [[v:lua.require'yarepl'._source_operator_internal]]
         or [[v:lua.require'yarepl'._send_operator_internal]]
     api.nvim_feedkeys('g@', 'ni', false)
 end
 
 M.commands.source_visual = function(opts)
-    opts.use_source_func = true
+    opts.source_content = true
     M.commands.send_visual(opts)
 end
 
 M.commands.source_operator = function(opts)
-    opts.use_source_func = true
+    opts.source_content = true
     M.commands.send_operator(opts)
 end
 
