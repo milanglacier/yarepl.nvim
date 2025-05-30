@@ -172,6 +172,17 @@ yarepl.setup {
             send_delayed_cr_after_sending = true,
         },
     },
+    print_1st_line_on_source = false, -- If true, sends the first non-empty line of sourced content as a comment
+    comment_prefixes = {
+        -- Defines comment characters for different REPLs
+        python = '# ',
+        ipython = '# ',
+        R = '# ',
+        bash = '# ',
+        zsh = '# ',
+        lua = '-- ',
+    },
+    default_comment_prefix = '# ', -- Fallback comment prefix if a specific one isn't found
 }
 ```
 
@@ -731,6 +742,17 @@ yarepl.formatter.factory {
             join_lines_with_cr = true,
         },
     },
+    print_1st_line_on_source = false, -- If true, sends the first non-empty line of sourced content as a comment
+    comment_prefixes = {
+        -- Defines comment characters for different REPLs
+        python = '# ',
+        ipython = '# ',
+        R = '# ',
+        bash = '# ',
+        zsh = '# ',
+        lua = '-- ',
+    },
+    default_comment_prefix = '# ', -- Fallback comment prefix if a specific one isn't found
 }
 
 -- `yarepl` provides three builtin formatters that can be referenced by name:
