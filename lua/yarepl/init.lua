@@ -37,6 +37,16 @@ local default_config = function()
                 send_delayed_cr_after_sending = true,
             },
         },
+        print_1st_line_on_source = false, -- If true, sends the first non-empty line of sourced content as a comment
+        comment_prefixes = { -- Defines comment characters for different REPLs
+            python = '# ',
+            ipython = '# ',
+            R = '# ',
+            bash = '# ',
+            zsh = '# ',
+            lua = '-- ',
+        },
+        default_comment_prefix = '# ', -- Fallback comment prefix if a specific one isn't found
     }
 end
 
@@ -448,7 +458,6 @@ M._send_strings = function(id, name, bufnr, strings, use_formatter, source_conte
         end
 
         local content = table.concat(strings, '\n')
-
         local source_command_sent_to_repl
 
         if type(source_syntax) == 'string' then
@@ -458,6 +467,26 @@ M._send_strings = function(id, name, bufnr, strings, use_formatter, source_conte
         end
 
         if source_command_sent_to_repl and source_command_sent_to_repl ~= '' then
+            local comment_to_send_to_repl
+            if M._config.print_1st_line_on_source then
+                local first_non_empty_line = 'YAREPL' -- to print timestamp even if no non-empty line is found
+                local comment_prefix = M._config.comment_prefixes[meta.source_syntax]
+                    or M._config.default_comment_prefix
+                local final_prefix = (comment_prefix:sub(-1) ~= ' ' and #comment_prefix > 0) and (comment_prefix .. ' ')
+                    or comment_prefix
+                for _, line in ipairs(strings) do
+                    local trimmed_line = vim.fn.trim(line)
+                    if #trimmed_line > 0 then
+                        first_non_empty_line = trimmed_line
+                        break
+                    end
+                end
+                comment_to_send_to_repl =
+                    string.format('%s%s - %s', final_prefix, os.date '%H:%M:%S', first_non_empty_line)
+            end
+            if comment_to_send_to_repl then
+                source_command_sent_to_repl = source_command_sent_to_repl .. '\n' .. comment_to_send_to_repl
+            end
             strings = vim.split(source_command_sent_to_repl, '\n')
         end
     end
