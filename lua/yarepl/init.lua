@@ -52,7 +52,7 @@ local default_config = function()
         virtual_text_when_source_content = {
             enabled_default = false, -- Global default for enabling virtual text on source
             hl_group_default = 'Comment', -- Default highlight group for YAREPL virtual text
-            delay_ms = 100, -- Delay in milliseconds to wait for REPL to echo command
+            delay_ms = 200, -- Delay in milliseconds to wait for REPL to echo command
         },
     }
 end
