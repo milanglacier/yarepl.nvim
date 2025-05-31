@@ -5,6 +5,7 @@ local is_win32 = vim.fn.has 'win32' == 1 and true or false
 
 M.formatter = {}
 M.commands = {}
+M._virt_text_ns_id = nil -- Namespace for virtual text
 
 local default_config = function()
     return {
@@ -27,6 +28,17 @@ local default_config = function()
                 source_syntax = 'bash',
             },
             zsh = { cmd = 'zsh', formatter = 'bracketed_pasting', source_syntax = 'bash' },
+            -- Example of enabling virtual text for a specific REPL:
+            -- mylua = {
+            --     cmd = 'lua',
+            --     formatter = 'trim_empty_lines',
+            --     source_syntax = 'lua',
+            --     virtual_text_when_source_content = { -- Per-REPL override for virtual text settings
+            --         enabled = true,
+            --         hl_group = 'MoreMsg',
+            --         -- delay_ms can also be overridden if desired, though typically global
+            --     }
+            -- },
         },
         close_on_exit = true,
         scroll_to_bottom_after_sending = true,
@@ -36,6 +48,11 @@ local default_config = function()
             windows = {
                 send_delayed_cr_after_sending = true,
             },
+        },
+        virtual_text_when_source_content = {
+            enabled_default = false, -- Global default for enabling virtual text on source
+            hl_group_default = 'Comment', -- Default highlight group for YAREPL virtual text
+            delay_ms = 100, -- Delay in milliseconds to wait for REPL to echo command
         },
     }
 end
@@ -411,6 +428,67 @@ M.formatter.bracketed_pasting_no_final_new_line = M.formatter.factory {
     },
 }
 
+--- Displays the source comment as virtual text in the REPL buffer.
+---@param repl table The REPL object.
+---@param original_strings string[] The original strings/code block sent by the user.
+---@param command_to_match string The first line of the command sent to REPL, used for anchoring.
+local function _display_source_comment_virtual_text(repl, original_strings, command_to_match)
+    if not repl_is_valid(repl) or not M._virt_text_ns_id then
+        return
+    end
+    if not command_to_match or command_to_match == '' then
+        return
+    end
+
+    local repl_meta = M._config.metas[repl.name]
+    local vt_config = repl_meta.virtual_text_when_source_content
+
+    local code_part_for_display = 'YAREPL'
+    if original_strings and #original_strings > 0 then
+        for _, line_str in ipairs(original_strings) do
+            local trimmed_line = vim.fn.trim(line_str)
+            if #trimmed_line > 0 then
+                code_part_for_display = trimmed_line
+                break
+            end
+        end
+    end
+
+    local comment_text = string.format('%s - %s', os.date '%H:%M:%S', code_part_for_display)
+
+    if not comment_text or comment_text == '' then
+        return
+    end
+
+    local delay_ms_to_use = vt_config.delay_ms
+
+    vim.defer_fn(function()
+        if not repl_is_valid(repl) then
+            return
+        end
+
+        local repl_bufnr_target = repl.bufnr
+        local lines_in_repl = api.nvim_buf_get_lines(repl_bufnr_target, 0, -1, false)
+        local found_cmd_line_0idx = -1
+
+        for i = #lines_in_repl, 1, -1 do
+            if lines_in_repl[i]:find(command_to_match, 1, true) then
+                found_cmd_line_0idx = i - 1
+                break
+            end
+        end
+
+        if found_cmd_line_0idx ~= -1 then
+            local hl_group = vt_config.hl_group
+            local virt_lines_opts = {
+                virt_lines = { { { comment_text, hl_group } } },
+                virt_lines_above = false,
+            }
+            api.nvim_buf_set_extmark(repl_bufnr_target, M._virt_text_ns_id, found_cmd_line_0idx, 0, virt_lines_opts)
+        end
+    end, delay_ms_to_use)
+end
+
 ---@param id number the id of the repl,
 ---@param name string? the name of the closest repl that will try to find
 ---@param bufnr number? the buffer number from which to find the attached REPL.
@@ -435,8 +513,8 @@ M._send_strings = function(id, name, bufnr, strings, use_formatter, source_conte
         return
     end
 
+    local meta = M._config.metas[repl.name]
     if source_content then
-        local meta = M._config.metas[repl.name]
         local source_syntax = M.source_syntaxes[meta.source_syntax] or meta.source_syntax
 
         if not source_syntax then
@@ -459,11 +537,16 @@ M._send_strings = function(id, name, bufnr, strings, use_formatter, source_conte
 
         if source_command_sent_to_repl and source_command_sent_to_repl ~= '' then
             strings = vim.split(source_command_sent_to_repl, '\n')
+            if meta.virtual_text_when_source_content and meta.virtual_text_when_source_content.enabled then
+                _display_source_comment_virtual_text(repl, strings, strings[1])
+            end
         end
+    else
+        strings = strings
     end
 
     if use_formatter then
-        strings = M._config.metas[repl.name].formatter(strings)
+        strings = meta.formatter(strings)
     end
 
     fn.chansend(repl.term, strings)
