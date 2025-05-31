@@ -536,10 +536,11 @@ M._send_strings = function(id, name, bufnr, strings, use_formatter, source_conte
         end
 
         if source_command_sent_to_repl and source_command_sent_to_repl ~= '' then
-            strings = vim.split(source_command_sent_to_repl, '\n')
             if meta.virtual_text_when_source_content and meta.virtual_text_when_source_content.enabled then
-                _display_source_comment_virtual_text(repl, strings, strings[1])
+                local command_to_match_in_repl = vim.split(source_command_sent_to_repl, '\n')[1]
+                _display_source_comment_virtual_text(repl, strings, command_to_match_in_repl)
             end
+            strings = vim.split(source_command_sent_to_repl, '\n')
         end
     else
         strings = strings
