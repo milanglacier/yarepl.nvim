@@ -558,7 +558,9 @@ M._send_strings = function(id, name, bufnr, strings, use_formatter, source_conte
     -- the code is executed in the REPL.
     if is_win32 and M._config.os.windows.send_delayed_cr_after_sending then
         vim.defer_fn(function()
-            fn.chansend(repl.term, '\r')
+            if repl_is_valid(repl) then
+                fn.chansend(repl.term, '\r')
+            end
         end, 100)
     end
 
@@ -1045,6 +1047,7 @@ M.source_syntaxes.aichat = '.file "{{file}}"'
 
 M.setup = function(opts)
     M._config = vim.tbl_deep_extend('force', default_config(), opts or {})
+    M._virt_text_ns_id = api.nvim_create_namespace 'YAREPLVirtText'
 
     for name, meta in pairs(M._config.metas) do
         -- remove the disabled builtin meta passed from user config
@@ -1054,6 +1057,20 @@ M.setup = function(opts)
             -- Convert string formatter names to actual formatter functions
             if meta.formatter then
                 meta.formatter = get_formatter(meta.formatter)
+            end
+
+            meta.virtual_text_when_source_content = meta.virtual_text_when_source_content or {}
+
+            if meta.virtual_text_when_source_content.enabled == nil then
+                meta.virtual_text_when_source_content.enabled =
+                    M._config.virtual_text_when_source_content.enabled_default
+            end
+            if meta.virtual_text_when_source_content.hl_group == nil then
+                meta.virtual_text_when_source_content.hl_group =
+                    M._config.virtual_text_when_source_content.hl_group_default
+            end
+            if meta.virtual_text_when_source_content.delay_ms == nil then
+                meta.virtual_text_when_source_content.delay_ms = M._config.virtual_text_when_source_content.delay_ms
             end
         end
     end
