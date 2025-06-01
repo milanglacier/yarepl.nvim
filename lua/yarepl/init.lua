@@ -421,6 +421,44 @@ M.formatter.bracketed_pasting_no_final_new_line = M.formatter.factory {
     },
 }
 
+--- Processes the source command to potentially add a commented first line.
+-- @param initial_source_command string The initial command string generated for sourcing.
+-- @param original_code_lines table A list of the original code lines being sent.
+-- @param source_syntax_key string The key for the source syntax (e.g., 'python', 'R').
+-- @return string The potentially modified source command string.
+local function append_source_log(initial_source_command, strings, source_syntax)
+    local comment_to_send_to_repl
+
+    -- Check if the feature to print the first line is enabled
+    if M._config.print_1st_line_on_source then
+        -- Get the specific comment prefix for the given source syntax
+        local comment_prefix = M._config.comment_prefixes[source_syntax]
+        -- Only proceed if a comment_prefix is defined for this source_syntax
+        if comment_prefix then
+            local first_non_empty_line = 'YAREPL' -- Default in case no non-empty line is found
+            -- Determine the final prefix, ensuring a space if the prefix isn't empty and doesn't end with one
+            local final_prefix = (comment_prefix:sub(-1) ~= ' ' and #comment_prefix > 0) and (comment_prefix .. ' ')
+                or comment_prefix
+            -- Find the first non-empty line from the original code lines
+            for _, line in ipairs(strings) do
+                local trimmed_line = vim.fn.trim(line)
+                if #trimmed_line > 0 then
+                    first_non_empty_line = trimmed_line
+                    break
+                end
+            end
+            -- Format the comment string with the prefix, timestamp, and the first non-empty line
+            comment_to_send_to_repl = string.format('%s%s - %s', final_prefix, os.date '%H:%M:%S', first_non_empty_line)
+        end
+    end
+    -- If a comment was generated, append it to the initial source command
+    if comment_to_send_to_repl then
+        return initial_source_command .. '\n' .. comment_to_send_to_repl
+    else
+        return initial_source_command
+    end
+end
+
 ---@param id number the id of the repl,
 ---@param name string? the name of the closest repl that will try to find
 ---@param bufnr number? the buffer number from which to find the attached REPL.
@@ -467,26 +505,7 @@ M._send_strings = function(id, name, bufnr, strings, use_formatter, source_conte
         end
 
         if source_command_sent_to_repl and source_command_sent_to_repl ~= '' then
-            local comment_to_send_to_repl
-            if M._config.print_1st_line_on_source then
-                local first_non_empty_line = 'YAREPL' -- to print timestamp even if no non-empty line is found
-                local comment_prefix = M._config.comment_prefixes[meta.source_syntax]
-                    or M._config.default_comment_prefix
-                local final_prefix = (comment_prefix:sub(-1) ~= ' ' and #comment_prefix > 0) and (comment_prefix .. ' ')
-                    or comment_prefix
-                for _, line in ipairs(strings) do
-                    local trimmed_line = vim.fn.trim(line)
-                    if #trimmed_line > 0 then
-                        first_non_empty_line = trimmed_line
-                        break
-                    end
-                end
-                comment_to_send_to_repl =
-                    string.format('%s%s - %s', final_prefix, os.date '%H:%M:%S', first_non_empty_line)
-            end
-            if comment_to_send_to_repl then
-                source_command_sent_to_repl = source_command_sent_to_repl .. '\n' .. comment_to_send_to_repl
-            end
+            source_command_sent_to_repl = append_source_log(source_command_sent_to_repl, strings, meta.source_syntax)
             strings = vim.split(source_command_sent_to_repl, '\n')
         end
     end
