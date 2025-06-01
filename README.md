@@ -182,7 +182,6 @@ yarepl.setup {
         zsh = '# ',
         lua = '-- ',
     },
-    default_comment_prefix = '# ', -- Fallback comment prefix if a specific one isn't found
 }
 ```
 
@@ -752,7 +751,6 @@ yarepl.formatter.factory {
         zsh = '# ',
         lua = '-- ',
     },
-    default_comment_prefix = '# ', -- Fallback comment prefix if a specific one isn't found
 }
 
 -- `yarepl` provides three builtin formatters that can be referenced by name:
