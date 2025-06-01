@@ -46,7 +46,6 @@ local default_config = function()
             zsh = '# ',
             lua = '-- ',
         },
-        default_comment_prefix = '# ', -- Fallback comment prefix if a specific one isn't found
     }
 end
 
