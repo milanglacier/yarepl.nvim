@@ -481,8 +481,8 @@ local function _display_source_comment_virtual_text(repl, original_strings, comm
         if found_cmd_line_0idx ~= -1 then
             local hl_group = vt_config.hl_group
             local virt_lines_opts = {
-                virt_lines = { { { comment_text, hl_group } } },
-                virt_lines_above = false,
+                virt_text = { { '  ' .. comment_text, hl_group } },
+                virt_text_pos = 'eol',
             }
             api.nvim_buf_set_extmark(repl_bufnr_target, M._virt_text_ns_id, found_cmd_line_0idx, 0, virt_lines_opts)
         end
