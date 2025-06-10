@@ -28,17 +28,6 @@ local default_config = function()
                 source_syntax = 'bash',
             },
             zsh = { cmd = 'zsh', formatter = 'bracketed_pasting', source_syntax = 'bash' },
-            -- Example of enabling virtual text for a specific REPL:
-            -- mylua = {
-            --     cmd = 'lua',
-            --     formatter = 'trim_empty_lines',
-            --     source_syntax = 'lua',
-            --     virtual_text_when_source_content = { -- Per-REPL override for virtual text settings
-            --         enabled = true,
-            --         hl_group = 'MoreMsg',
-            --         -- delay_ms can also be overridden if desired, though typically global
-            --     }
-            -- },
         },
         close_on_exit = true,
         scroll_to_bottom_after_sending = true,
@@ -49,10 +38,11 @@ local default_config = function()
                 send_delayed_cr_after_sending = true,
             },
         },
-        virtual_text_when_source_content = {
-            enabled_default = false, -- Global default for enabling virtual text on source
-            hl_group_default = 'Comment', -- Default highlight group for YAREPL virtual text
-            delay_ms = 200, -- Delay in milliseconds to wait for REPL to echo command
+        -- Display the first line as virtual text to indicate the actual
+        -- command sent to the REPL.
+        source_command_hint = {
+            enabled = false,
+            hl_group = 'Comment',
         },
     }
 end
@@ -430,8 +420,8 @@ M.formatter.bracketed_pasting_no_final_new_line = M.formatter.factory {
 
 --- Displays the source comment as virtual text in the REPL buffer.
 ---@param repl table The REPL object.
----@param original_content string[] The original strings/code block sent by the user.
----@param source_command string The first line of the command sent to REPL, used for anchoring.
+---@param original_content? string[] The original strings/code block sent by the user.
+---@param source_command? string The first line of the command sent to REPL, used for anchoring.
 local function show_source_command_hint(repl, original_content, source_command)
     if not repl_is_valid(repl) then
         return
@@ -440,8 +430,10 @@ local function show_source_command_hint(repl, original_content, source_command)
         return
     end
 
+    source_command = source_command:match '^([^\n]*)'
+
     local meta = M._config.metas[repl.name]
-    local config = meta.virtual_text_when_source_content
+    local config = meta.source_command_hint
 
     local code_part_for_display = ''
     if original_content and #original_content > 0 then
@@ -458,7 +450,7 @@ local function show_source_command_hint(repl, original_content, source_command)
         return
     end
 
-    local comment_text = string.format('%s - %s', os.date '%H:%M:%S', code_part_for_display)
+    local comment_text = string.format(' %s - %s', os.date '%H:%M:%S', code_part_for_display)
 
     local delay_ms = 400
 
@@ -481,7 +473,7 @@ local function show_source_command_hint(repl, original_content, source_command)
         if matched_line then
             local hl_group = config.hl_group
             local virt_lines_opts = {
-                virt_text = { { ' ' .. comment_text, hl_group } },
+                virt_text = { { comment_text, hl_group } },
                 virt_text_pos = 'eol',
             }
             api.nvim_buf_set_extmark(buf, M._virt_text_ns_id, matched_line, 0, virt_lines_opts)
@@ -536,9 +528,8 @@ M._send_strings = function(id, name, bufnr, strings, use_formatter, source_conte
         end
 
         if source_command_sent_to_repl and source_command_sent_to_repl ~= '' then
-            if meta.virtual_text_when_source_content and meta.virtual_text_when_source_content.enabled then
-                local command_to_match_in_repl = vim.split(source_command_sent_to_repl, '\n')[1]
-                show_source_command_hint(repl, strings, command_to_match_in_repl)
+            if meta.source_command_hint.enabled then
+                show_source_command_hint(repl, strings, source_command_sent_to_repl)
             end
             strings = vim.split(source_command_sent_to_repl, '\n')
         end
@@ -1058,19 +1049,8 @@ M.setup = function(opts)
                 meta.formatter = get_formatter(meta.formatter)
             end
 
-            meta.virtual_text_when_source_content = meta.virtual_text_when_source_content or {}
-
-            if meta.virtual_text_when_source_content.enabled == nil then
-                meta.virtual_text_when_source_content.enabled =
-                    M._config.virtual_text_when_source_content.enabled_default
-            end
-            if meta.virtual_text_when_source_content.hl_group == nil then
-                meta.virtual_text_when_source_content.hl_group =
-                    M._config.virtual_text_when_source_content.hl_group_default
-            end
-            if meta.virtual_text_when_source_content.delay_ms == nil then
-                meta.virtual_text_when_source_content.delay_ms = M._config.virtual_text_when_source_content.delay_ms
-            end
+            meta.source_command_hint =
+                vim.tbl_deep_extend('force', M._config.source_command_hint, meta.source_command_hint or {})
         end
     end
 
