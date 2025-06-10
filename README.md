@@ -172,6 +172,12 @@ yarepl.setup {
             send_delayed_cr_after_sending = true,
         },
     },
+    -- Display the first line as virtual text to indicate the actual
+    -- command sent to the REPL.
+    source_command_hint = {
+        enabled = false,
+        hl_group = 'Comment',
+    },
 }
 ```
 
@@ -371,6 +377,11 @@ Note that the REPL configuration requires a corresponding `source_syntax`
 implementation. For more information, refer to the section [Customizing the
 Source Syntax](#customizing-the-source-syntax). Built-in source
 implementations are available for Python, R, and Bash.
+
+Consider enabling `config.source_command_hint.enabled = true`. When enabled,
+the first non-empty line of the code chunk displays as virtual text alongside
+the source command sent to the REPL, providing a useful hint about the actual
+command being executed.
 
 ### REPLSendLine
 
@@ -580,6 +591,11 @@ yarepl.setup {
     wincmd = 'belowright 15 split',
 }
 ```
+
+Similar to `wincmd` (which allows you to configure a global default with
+meta-local overrides), you can also set meta-local overrides for
+`source_command_hint`. The configuration option name for meta-local overrides
+is identical to the global setting.
 
 # Customizing REPLs
 
