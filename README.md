@@ -787,7 +787,7 @@ local yarepl = require 'yarepl'
 
 yarepl.setup {
     metas = {
-        ipython = {
+        radian = {
             cmd = 'radian',
             formatter = 'bracketed_pasting_no_final_new_line',
             source_syntax = 'eval(parse(text = "{{file}}"))',
