@@ -5,6 +5,7 @@ local is_win32 = vim.fn.has 'win32' == 1 and true or false
 
 M.formatter = {}
 M.commands = {}
+M._virt_text_ns_id = api.nvim_create_namespace 'YareplVirtualText'
 
 local default_config = function()
     return {
@@ -36,6 +37,12 @@ local default_config = function()
             windows = {
                 send_delayed_cr_after_sending = true,
             },
+        },
+        -- Display the first line as virtual text to indicate the actual
+        -- command sent to the REPL.
+        source_command_hint = {
+            enabled = false,
+            hl_group = 'Comment',
         },
     }
 end
@@ -411,6 +418,69 @@ M.formatter.bracketed_pasting_no_final_new_line = M.formatter.factory {
     },
 }
 
+--- Displays the source comment as virtual text in the REPL buffer.
+---@param repl table The REPL object.
+---@param original_content? string[] The original strings/code block sent by the user.
+---@param source_command? string The first line of the command sent to REPL, used for anchoring.
+local function show_source_command_hint(repl, original_content, source_command)
+    if not repl_is_valid(repl) then
+        return
+    end
+    if not source_command or source_command == '' then
+        return
+    end
+
+    source_command = source_command:match '^([^\n]*)'
+
+    local meta = M._config.metas[repl.name]
+    local config = meta.source_command_hint
+
+    local code_part_for_display = ''
+    if original_content and #original_content > 0 then
+        for _, line_str in ipairs(original_content) do
+            local trimmed_line = vim.fn.trim(line_str)
+            if #trimmed_line > 0 then
+                code_part_for_display = trimmed_line
+                break
+            end
+        end
+    end
+
+    if code_part_for_display == '' then
+        return
+    end
+
+    local comment_text = string.format(' %s - %s', os.date '%H:%M:%S', code_part_for_display)
+
+    local delay_ms = 400
+
+    vim.defer_fn(function()
+        if not repl_is_valid(repl) then
+            return
+        end
+
+        local buf = repl.bufnr
+        local lines = api.nvim_buf_get_lines(buf, 0, -1, false)
+        local matched_line
+
+        for i = #lines, 1, -1 do
+            if lines[i]:find(source_command, 1, true) then
+                matched_line = i - 1
+                break
+            end
+        end
+
+        if matched_line then
+            local hl_group = config.hl_group
+            local virt_lines_opts = {
+                virt_text = { { comment_text, hl_group } },
+                virt_text_pos = 'eol',
+            }
+            api.nvim_buf_set_extmark(buf, M._virt_text_ns_id, matched_line, 0, virt_lines_opts)
+        end
+    end, delay_ms)
+end
+
 ---@param id number the id of the repl,
 ---@param name string? the name of the closest repl that will try to find
 ---@param bufnr number? the buffer number from which to find the attached REPL.
@@ -435,8 +505,8 @@ M._send_strings = function(id, name, bufnr, strings, use_formatter, source_conte
         return
     end
 
+    local meta = M._config.metas[repl.name]
     if source_content then
-        local meta = M._config.metas[repl.name]
         local source_syntax = M.source_syntaxes[meta.source_syntax] or meta.source_syntax
 
         if not source_syntax then
@@ -458,12 +528,17 @@ M._send_strings = function(id, name, bufnr, strings, use_formatter, source_conte
         end
 
         if source_command_sent_to_repl and source_command_sent_to_repl ~= '' then
+            if meta.source_command_hint.enabled then
+                show_source_command_hint(repl, strings, source_command_sent_to_repl)
+            end
             strings = vim.split(source_command_sent_to_repl, '\n')
         end
+    else
+        strings = strings
     end
 
     if use_formatter then
-        strings = M._config.metas[repl.name].formatter(strings)
+        strings = meta.formatter(strings)
     end
 
     fn.chansend(repl.term, strings)
@@ -474,7 +549,9 @@ M._send_strings = function(id, name, bufnr, strings, use_formatter, source_conte
     -- the code is executed in the REPL.
     if is_win32 and M._config.os.windows.send_delayed_cr_after_sending then
         vim.defer_fn(function()
-            fn.chansend(repl.term, '\r')
+            if repl_is_valid(repl) then
+                fn.chansend(repl.term, '\r')
+            end
         end, 100)
     end
 
@@ -971,6 +1048,9 @@ M.setup = function(opts)
             if meta.formatter then
                 meta.formatter = get_formatter(meta.formatter)
             end
+
+            meta.source_command_hint =
+                vim.tbl_deep_extend('force', M._config.source_command_hint, meta.source_command_hint or {})
         end
     end
 
