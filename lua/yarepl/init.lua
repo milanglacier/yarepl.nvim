@@ -1106,6 +1106,26 @@ M.setup = function(opts)
     end
 end
 
+M.commands.clear_hints = function()
+    local ns_id = M._virt_text_ns_id
+    local cleared_count = 0
+
+    for _, repl in ipairs(M._repls) do
+        -- Check if the REPL buffer is still loaded and valid.
+        if repl_is_valid(repl) then
+            -- Clear all extmarks within our specific namespace for the entire buffer.
+            api.nvim_buf_clear_namespace(repl.bufnr, ns_id, 0, -1)
+            cleared_count = cleared_count + 1
+        end
+    end
+
+    if cleared_count > 0 then
+        vim.notify(string.format('Cleared hints from %d REPL buffer(s).', cleared_count), vim.log.levels.INFO, { title = 'Yarepl' })
+    else
+        vim.notify('No active REPLs found to clear hints from.', vim.log.levels.INFO, { title = 'Yarepl' })
+    end
+end
+
 api.nvim_create_user_command('REPLStart', M.commands.start, {
     count = true,
     bang = true,
@@ -1224,6 +1244,10 @@ api.nvim_create_user_command('REPLExec', M.commands.exec, {
     desc = [[
 Execute a command in REPL `i` or the REPL that current buffer is attached to.
 ]],
+})
+
+api.nvim_create_user_command('REPLClearHints', M.commands.clear_hints, {
+    desc = 'Clear all source command hints from all active REPL buffers.',
 })
 
 return M
