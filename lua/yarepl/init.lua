@@ -418,6 +418,24 @@ M.formatter.bracketed_pasting_no_final_new_line = M.formatter.factory {
     },
 }
 
+-- Helper function to normalize strings for robust matching.
+local function normalize_str(s)
+    -- It converts to lowercase and strips all characters that are not letters or numbers.
+    return s:gsub('[^%a%d]', ''):lower()
+end
+
+-- Helper function to strip common REPL prefixes from a single line.
+local function clean_repl_continuation_prefix(line)
+    local continuation_patterns = {
+        '%.%.%.%s*:?', -- Python, IPython, Node.js: '...:' or '...'
+        '>>', -- PowerShell: '>>'
+        '>', -- Bash: '>'
+        '%+', -- R: '+'
+    }
+    local full_pattern = '^%s*(' .. table.concat(continuation_patterns, '|') .. ')%s*'
+    return line:gsub(full_pattern, '')
+end
+
 --- Displays the source comment as virtual text in the REPL buffer.
 ---@param repl table The REPL object.
 ---@param original_content? string[] The original strings/code block sent by the user.
@@ -430,7 +448,15 @@ local function show_source_command_hint(repl, original_content, source_command)
         return
     end
 
-    source_command = source_command:match '^([^\n]*)'
+    local tmp_file_anchor = source_command:match '([%w\\/.:_-]+_yarepl)'
+    if not tmp_file_anchor then
+        vim.notify(
+            '[Yarepl] Could not find temp file anchor in command. Hint disabled.',
+            vim.log.levels.WARN,
+            { title = 'REPL Hint' }
+        )
+        return
+    end
 
     local meta = M._config.metas[repl.name]
     local config = meta.source_command_hint
@@ -463,10 +489,29 @@ local function show_source_command_hint(repl, original_content, source_command)
         local lines = api.nvim_buf_get_lines(buf, 0, -1, false)
         local matched_line
 
+        local processed_target = normalize_str(tmp_file_anchor)
+        -- Phase 1: Attempt a fast single-line match first.
         for i = #lines, 1, -1 do
-            if lines[i]:find(source_command, 1, true) then
+            local processed_line = normalize_str(lines[i])
+            if processed_line:find(processed_target, 1, true) then
                 matched_line = i - 1
                 break
+            end
+        end
+
+        -- Phase 2: If no single-line match, fall back to the 2-line window.
+        if not matched_line then
+            local window_size = 2
+            if #lines >= window_size then
+                for i = #lines, window_size, -1 do
+                    local window_content = lines[i - 1] .. clean_repl_continuation_prefix(lines[i])
+                    local processed_window = normalize_str(window_content)
+
+                    if processed_window:find(processed_target, 1, true) then
+                        matched_line = i - 1
+                        break
+                    end
+                end
             end
         end
 
@@ -990,26 +1035,13 @@ end
 ---@param keep_file boolean?
 ---@reutrn string? The syntax to source the file
 function M.source_file_with_source_syntax(content, source_syntax, keep_file)
-    local tmp_file = os.tmpname() .. '_yarepl'
+    local tmp_file = M.make_tmp_file(content, keep_file)
 
-    local f = io.open(tmp_file, 'w+')
-    if f == nil then
-        M.notify('Cannot open temporary message file: ' .. tmp_file, 'error', vim.log.levels.ERROR)
-        return
+    if not tmp_file then
+        return nil
     end
 
-    f:write(content)
-    f:close()
-
-    if not keep_file then
-        vim.defer_fn(function()
-            os.remove(tmp_file)
-        end, 5000)
-    end
-
-    -- replace {{file}} placeholder with the temp file name
     source_syntax = source_syntax:gsub('{{file}}', tmp_file)
-
     return source_syntax
 end
 
@@ -1058,6 +1090,26 @@ M.setup = function(opts)
 
     for meta_name, _ in pairs(M._config.metas) do
         add_keymap(meta_name)
+    end
+end
+
+M.commands.clear_hints = function()
+    local ns_id = M._virt_text_ns_id
+    local cleared_count = 0
+
+    for _, repl in ipairs(M._repls) do
+        -- Check if the REPL buffer is still loaded and valid.
+        if repl_is_valid(repl) then
+            -- Clear all extmarks within our specific namespace for the entire buffer.
+            api.nvim_buf_clear_namespace(repl.bufnr, ns_id, 0, -1)
+            cleared_count = cleared_count + 1
+        end
+    end
+
+    if cleared_count > 0 then
+        vim.notify(string.format('Cleared hints from %d REPL buffer(s).', cleared_count), vim.log.levels.INFO, { title = 'Yarepl' })
+    else
+        vim.notify('No active REPLs found to clear hints from.', vim.log.levels.INFO, { title = 'Yarepl' })
     end
 end
 
@@ -1179,6 +1231,10 @@ api.nvim_create_user_command('REPLExec', M.commands.exec, {
     desc = [[
 Execute a command in REPL `i` or the REPL that current buffer is attached to.
 ]],
+})
+
+api.nvim_create_user_command('REPLClearHints', M.commands.clear_hints, {
+    desc = 'Clear all source command hints from all active REPL buffers.',
 })
 
 return M
