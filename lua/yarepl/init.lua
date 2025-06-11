@@ -418,6 +418,24 @@ M.formatter.bracketed_pasting_no_final_new_line = M.formatter.factory {
     },
 }
 
+-- Helper function to normalize strings for robust matching.
+local function normalize_str(s)
+    -- It converts to lowercase and strips all characters that are not letters or numbers.
+    return s:gsub('[^%a%d]', ''):lower()
+end
+
+-- Helper function to strip common REPL prefixes from a single line.
+local function clean_repl_continuation_prefix(line)
+    local continuation_patterns = {
+        '%.%.%.%s*:?', -- Python, IPython, Node.js: '...:' or '...'
+        '>>', -- PowerShell: '>>'
+        '>', -- Bash: '>'
+        '%+', -- R: '+'
+    }
+    local full_pattern = '^%s*(' .. table.concat(continuation_patterns, '|') .. ')%s*'
+    return line:gsub(full_pattern, '')
+end
+
 --- Displays the source comment as virtual text in the REPL buffer.
 ---@param repl table The REPL object.
 ---@param original_content? string[] The original strings/code block sent by the user.
@@ -430,7 +448,15 @@ local function show_source_command_hint(repl, original_content, source_command)
         return
     end
 
-    source_command = source_command:match '^([^\n]*)'
+    local tmp_file_anchor = source_command:match '([%w\\/.:_-]+_yarepl)'
+    if not tmp_file_anchor then
+        vim.notify(
+            '[Yarepl] Could not find temp file anchor in command. Hint disabled.',
+            vim.log.levels.WARN,
+            { title = 'REPL Hint' }
+        )
+        return
+    end
 
     local meta = M._config.metas[repl.name]
     local config = meta.source_command_hint
@@ -463,10 +489,29 @@ local function show_source_command_hint(repl, original_content, source_command)
         local lines = api.nvim_buf_get_lines(buf, 0, -1, false)
         local matched_line
 
+        local processed_target = normalize_str(tmp_file_anchor)
+        -- Phase 1: Attempt a fast single-line match first.
         for i = #lines, 1, -1 do
-            if lines[i]:find(source_command, 1, true) then
+            local processed_line = normalize_str(lines[i])
+            if processed_line:find(processed_target, 1, true) then
                 matched_line = i - 1
                 break
+            end
+        end
+
+        -- Phase 2: If no single-line match, fall back to the 2-line window.
+        if not matched_line then
+            local window_size = 2
+            if #lines >= window_size then
+                for i = #lines, window_size, -1 do
+                    local window_content = lines[i - 1] .. clean_repl_continuation_prefix(lines[i])
+                    local processed_window = normalize_str(window_content)
+
+                    if processed_window:find(processed_target, 1, true) then
+                        matched_line = i - 1
+                        break
+                    end
+                end
             end
         end
 
