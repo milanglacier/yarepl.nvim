@@ -1035,26 +1035,13 @@ end
 ---@param keep_file boolean?
 ---@reutrn string? The syntax to source the file
 function M.source_file_with_source_syntax(content, source_syntax, keep_file)
-    local tmp_file = os.tmpname() .. '_yarepl'
+    local tmp_file = M.make_tmp_file(content, keep_file)
 
-    local f = io.open(tmp_file, 'w+')
-    if f == nil then
-        M.notify('Cannot open temporary message file: ' .. tmp_file, 'error', vim.log.levels.ERROR)
-        return
+    if not tmp_file then
+        return nil
     end
 
-    f:write(content)
-    f:close()
-
-    if not keep_file then
-        vim.defer_fn(function()
-            os.remove(tmp_file)
-        end, 5000)
-    end
-
-    -- replace {{file}} placeholder with the temp file name
     source_syntax = source_syntax:gsub('{{file}}', tmp_file)
-
     return source_syntax
 end
 
