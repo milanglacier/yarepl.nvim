@@ -546,13 +546,14 @@ M._send_strings = function(id, name, bufnr, strings, use_formatter, source_conte
     -- See https://github.com/milanglacier/yarepl.nvim/issues/12 and
     -- https://github.com/urbainvaes/vim-ripple/issues/12 for more information.
     -- It may be necessary to use a delayed `<CR>` on Windows to ensure that
-    -- the code is executed in the REPL.
-    if is_win32 and M._config.os.windows.send_delayed_cr_after_sending then
+    -- the code is executed in the REPL. Some REPLs also need this delayed CR
+    -- to recognize that we want to finalize/evaluate the command.
+    if (is_win32 and M._config.os.windows.send_delayed_cr_after_sending) or meta.send_delayed_final_cr then
         vim.defer_fn(function()
             if repl_is_valid(repl) then
                 fn.chansend(repl.term, '\r')
             end
-        end, 100)
+        end, 300)
     end
 
     if M._config.scroll_to_bottom_after_sending then

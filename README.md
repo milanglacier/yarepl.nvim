@@ -23,6 +23,7 @@
   - [Keymaps](#keymaps)
 - [Window configuration](#window-configuration)
 - [Customizing REPLs](#customizing-repls)
+  - [Delayed Final CR Option](#delayed-final-cr-option)
 - [Customizing the Source Syntax](#customizing-the-source-syntax)
 - [Example keybinding setup](#example-keybinding-setup)
 - [Extensions](#extensions)
@@ -774,6 +775,35 @@ yarepl.formatter.bracketed_pasting = yarepl.formatter.factory {
 ```
 
 </details>
+
+## Delayed Final CR Option
+
+`send_delayed_final_cr` (optional, defaults to `false`): Some REPLs do not
+recognize the final CR (return)'s purpose is to tell the REPL that we want to
+"finalize" (or evaluate) that command when it is input with a large chunk of
+text when bracketed pasting is enabled. To mitigate this, we have to send the
+final CR with a delay (to let the REPL realize that we want to evaluate that
+command). In general we should ignore this option (keep it as the default
+`false`). The one observed exception is Claude Code which should use `true`.
+PRs are welcome if you find other REPLs that require setting this option to
+`true`.
+
+Example usage:
+
+```lua
+metas = {
+    claude_code = {
+        cmd = 'claude',
+        formatter = 'bracketed_pasting',
+        send_delayed_final_cr = true
+    },
+    ipython = {
+        cmd = 'ipython',
+        formatter = 'bracketed_pasting',
+        send_delayed_final_cr = false  -- this is the default, can be omitted
+    },
+}
+```
 
 # Customizing the Source Syntax
 
