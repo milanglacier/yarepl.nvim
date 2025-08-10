@@ -170,7 +170,7 @@ yarepl.setup {
         -- them. The default options are recommended for Windows user.
         windows = {
             -- Send a final `\r` to the REPL with delay,
-            send_delayed_cr_after_sending = true,
+            send_delayed_final_cr = true,
         },
     },
     -- Display the first line as virtual text to indicate the actual

@@ -44,7 +44,7 @@ local default_config = function()
         format_repl_buffers_names = true,
         os = {
             windows = {
-                send_delayed_cr_after_sending = true,
+                send_delayed_final_cr = true,
             },
         },
         -- Display the first line as virtual text to indicate the actual
@@ -557,7 +557,7 @@ M._send_strings = function(id, name, bufnr, strings, use_formatter, source_conte
     -- It may be necessary to use a delayed `<CR>` on Windows to ensure that
     -- the code is executed in the REPL. Some REPLs also need this delayed CR
     -- to recognize that we want to finalize/evaluate the command.
-    if (is_win32 and M._config.os.windows.send_delayed_cr_after_sending) or meta.send_delayed_final_cr then
+    if (is_win32 and M._config.os.windows.send_delayed_final_cr) or meta.send_delayed_final_cr then
         vim.defer_fn(function()
             if repl_is_valid(repl) then
                 fn.chansend(repl.term, '\r')
@@ -1048,6 +1048,19 @@ M.source_syntaxes.aichat = '.file "{{file}}"'
 
 M.setup = function(opts)
     M._config = vim.tbl_deep_extend('force', default_config(), opts or {})
+
+    -- Check for deprecated option
+    if opts and opts.os and opts.os.windows and opts.os.windows.send_delayed_cr_after_sending ~= nil then
+        vim.deprecate(
+            'os.windows.send_delayed_cr_after_sending',
+            'os.windows.send_delayed_final_cr',
+            'next release',
+            'yarepl.nvim',
+            false
+        )
+
+        M._config.os.os.windows.send_delayed_final_cr = opts.os.windows.send_delayed_cr_after_sending
+    end
 
     for name, meta in pairs(M._config.metas) do
         -- remove the disabled builtin meta passed from user config
