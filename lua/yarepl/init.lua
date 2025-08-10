@@ -3,6 +3,14 @@ local api = vim.api
 local fn = vim.fn
 local is_win32 = vim.fn.has 'win32' == 1 and true or false
 
+---@class yarepl.REPLMeta
+---@field cmd string[]|string|fun(): string The command to start the REPL or a function that returns the command
+---@field formatter string|fun(lines: string[]): string[] The formatter name or function to process lines before sending
+---@field source_syntax string The syntax type for sourcing code (e.g., 'python', 'R', 'bash')
+---@field wincmd? string|fun(bufnr: number, name: string) The window command or function to create/focus the REPL window
+---@field source_command_hint? table Configuration for showing source command hints
+---@field send_delayed_final_cr? boolean Whether to send a delayed carriage return after commands
+
 M.formatter = {}
 M.commands = {}
 M._virt_text_ns_id = api.nvim_create_namespace 'YareplVirtualText'
@@ -13,6 +21,7 @@ local default_config = function()
         scratch = true,
         ft = 'REPL',
         wincmd = 'belowright 15 split',
+        ---@type table<string, yarepl.REPLMeta>
         metas = {
             aichat = { cmd = 'aichat', formatter = 'bracketed_pasting', source_syntax = 'aichat' },
             radian = { cmd = 'radian', formatter = 'bracketed_pasting_no_final_new_line', source_syntax = 'R' },
