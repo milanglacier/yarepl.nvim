@@ -795,6 +795,7 @@ metas = {
     claude_code = {
         cmd = 'claude',
         formatter = 'bracketed_pasting',
+        source_syntax = '@{{file}}',
         send_delayed_final_cr = true
     },
     ipython = {
