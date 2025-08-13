@@ -87,6 +87,14 @@ programming style in text format such as `rmarkdown`, `quarto`, or plain
 `markdown`, I need to send text in the buffer to different REPLs such as R and
 Python .
 
+Additionally, `yarepl.nvim` features a `source_syntax` capability that allows
+sourcing large code chunks from temporary files instead of sending them
+directly to the REPL. This prevents cluttering your interaction history and
+provides better handling of substantial code content, especially useful on
+Windows where large stdin processing can be problematic. The plugin writes
+selected code regions/content to temporary files and provides convenient syntax
+definitions for how each REPL should source files.
+
 As a CLI fnatic, to communicate with chatgpt, I prefer through a REPL `aichat`.
 Additionally, I require a set of global hotkeys and an isolated REPL
 environment to facilitate communication with `aichat` separately without any
