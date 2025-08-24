@@ -28,6 +28,7 @@
 - [Example keybinding setup](#example-keybinding-setup)
 - [Extensions](#extensions)
   - [aider](#aider)
+  - [codex](#codex)
   - [code-cell](#code-cell)
   - [fzf-lua](#fzf-lua)
   - [telescope](#telescope)
@@ -58,10 +59,10 @@ effortlessly interact with multiple tui-apps through various paradigms:
 
 \*tui-apps refers to both TUI Apps and REPLs collectively.
 
-The plugin features integration with `aider.chat` and provides convenient code
-cell text object definitions. Choose your preferred fuzzy finder among
-`telescope`, `fzf-lua`, or `Snacks.picker` to preview active REPLs. These
-features are available as [extensions](#extensions).
+The plugin features integration with `aider.chat` and the Codex CLI, and
+provides convenient code cell text object definitions. Choose your preferred
+fuzzy finder among `telescope`, `fzf-lua`, or `Snacks.picker` to preview active
+REPLs. These features are available as [extensions](#extensions).
 
 # Showcase
 
@@ -1027,6 +1028,11 @@ Currently, the module includes:
 
 This module enhances AI-assisted coding capabilities through
 [aider.chat](https://aider.chat) integration.
+
+## codex
+
+This module enhances AI-assisted coding capabilities through [OpenAI's Codex
+CLI](https://github.com/openai/codex) integration.
 
 ## code-cell
 

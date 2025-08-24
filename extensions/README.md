@@ -7,10 +7,18 @@
     - [Example keybinding Setup](#example-keybinding-setup)
   - [Customization](#customization)
   - [Note](#note)
-- [Code Cell](#code-cell)
+- [Codex](#codex)
   - [Overview](#overview-1)
   - [Features](#features-1)
+  - [Commands](#commands-1)
+  - [Keymaps](#keymaps-1)
   - [Usage](#usage-1)
+    - [Example keybinding Setup](#example-keybinding-setup-1)
+  - [Customization](#customization-1)
+- [Code Cell](#code-cell)
+  - [Overview](#overview-2)
+  - [Features](#features-2)
+  - [Usage](#usage-2)
     - [Example Configuration](#example-configuration)
 - [Telescope Integration](#telescope-integration)
 - [Fzf-lua Integration](#fzf-lua-integration)
@@ -182,6 +190,103 @@ require('yarepl.extensions.aider').setup {
 I recommend explore the `inline comment as instruction` feature in `aider`,
 which is enabled by default for this extension. See the
 [documentation](https://aider.chat/docs/usage/watch.html).
+
+# Codex
+
+## Overview
+
+This extension integrates the Codex CLI with yarepl to provide a smooth
+workflow inside Neovim. It offers commands, keymaps, and a ready-to-use meta to
+launch and interact with Codex.
+
+## Features
+
+- Seamless yarepl integration for Codex sessions
+- Completions for common slash-style Codex commands
+- Predefined shortcuts for frequent actions (Abort, Exit, Diff, Status, etc.)
+- Configurable Codex command and arguments
+- Floating window default for a focused REPL experience
+
+## Commands
+
+- `CodexSetArgs`: Set CLI arguments for launching Codex with completion support
+  (e.g., `:CodexSetArgs --model gpt-5`).
+- `CodexSend<Action>`: Send a predefined action to Codex. Available actions:
+  `Abort` (Ctrl-C), `Exit` (Ctrl-D), `Diff`, `Status`, `Model`, `New`,
+  `Approvals`, `Compact`.
+- `CodexExec`: Type a prompt or slash command in the cmdline and send it to
+  Codex, with completion for common prefixes like `/model`, `/approvals`,
+  `/init`, `/new`, `/compact`, `/diff`, `/mention`, `/status`.
+
+All commands accept an optional count to target a specific Codex REPL id.
+
+## Keymaps
+
+In addition to the general `<Plug>` maps created by yarepl once the `codex`
+meta is registered (e.g. `<Plug>(REPLSendLine-codex)`), this extension defines
+extra convenience maps:
+
+- `<Plug>(CodexExec)`: Type in cmdline and send to Codex
+- `<Plug>(CodexSendAbort)`: Send abort (Ctrl-C)
+- `<Plug>(CodexSendExit)`: Send exit (Ctrl-D)
+- `<Plug>(CodexSendDiff)`
+- `<Plug>(CodexSendStatus)`
+- `<Plug>(CodexSendModel)`
+- `<Plug>(CodexSendNew)`
+- `<Plug>(CodexSendApprovals)`
+- `<Plug>(CodexSendCompact)`
+
+You can prefix a count (e.g. `2`) before a mapping to target that REPL id.
+
+## Usage
+
+Add the Codex meta to your setup:
+
+```lua
+require('yarepl').setup {
+  metas = {
+    codex = require('yarepl.extensions.codex').create_codex_meta(),
+  },
+}
+```
+
+### Example keybinding Setup
+
+```lua
+local keymap = vim.api.nvim_set_keymap
+
+-- general yarepl keymaps for the codex meta
+keymap('n', '<Leader>cs', '<Plug>(REPLStart-codex)', { desc = 'Start Codex' })
+keymap('n', '<Leader>cf', '<Plug>(REPLFocus-codex)', { desc = 'Focus Codex' })
+keymap('n', '<Leader>ch', '<Plug>(REPLHide-codex)', { desc = 'Hide Codex' })
+keymap('v', '<Leader>cr', '<Plug>(REPLSendVisual-codex)', { desc = 'Send visual to Codex' })
+keymap('n', '<Leader>crr', '<Plug>(REPLSendLine-codex)', { desc = 'Send line to Codex' })
+keymap('n', '<Leader>cr', '<Plug>(REPLSendOperator-codex)', { desc = 'Send operator to Codex' })
+
+-- codex-specific convenience keymaps
+keymap('n', '<Leader>ce', '<Plug>(CodexExec)', { desc = 'Exec in Codex' })
+keymap('n', '<Leader>ca', '<Plug>(CodexSendAbort)', { desc = 'Abort' })
+keymap('n', '<Leader>cD', '<Plug>(CodexSendExit)', { desc = 'Exit' })
+keymap('n', '<Leader>cd', '<Plug>(CodexSendDiff)', { desc = 'Diff' })
+keymap('n', '<Leader>ct', '<Plug>(CodexSendStatus)', { desc = 'Status' })
+keymap('n', '<Leader>cm', '<Plug>(CodexSendModel)', { desc = 'Model' })
+keymap('n', '<Leader>cn', '<Plug>(CodexSendNew)', { desc = 'New' })
+keymap('n', '<Leader>ca', '<Plug>(CodexSendApprovals)', { desc = 'Approvals' })
+keymap('n', '<Leader>cc', '<Plug>(CodexSendCompact)', { desc = 'Compact' })
+```
+
+## Customization
+
+Default configuration:
+
+```lua
+require('yarepl.extensions.codex').setup {
+  codex_cmd = 'codex',
+  codex_args = {},
+  -- The default is a floating window; you can override it
+  wincmd = require('yarepl.extensions.codex').wincmd,
+}
+```
 
 # Code Cell
 
