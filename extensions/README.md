@@ -273,6 +273,9 @@ keymap('n', '<Leader>cm', '<Plug>(CodexSendModel)', { desc = 'Model' })
 keymap('n', '<Leader>cn', '<Plug>(CodexSendNew)', { desc = 'New' })
 keymap('n', '<Leader>ca', '<Plug>(CodexSendApprovals)', { desc = 'Approvals' })
 keymap('n', '<Leader>cc', '<Plug>(CodexSendCompact)', { desc = 'Compact' })
+keymap('n', '<Leader>c<space>', '<cmd>checktime<cr>', {
+    desc = 'sync file changes by codex to nvim buffer',
+})
 ```
 
 ## Customization
