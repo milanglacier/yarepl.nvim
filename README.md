@@ -51,15 +51,15 @@ project-level config and tmux, and includes native dot-repeat without requiring
 vim-repeat.
 
 Flexibility and parallelism are core priorities. With yarepl.nvim, you can
-effortlessly interact with multiple tui-apps through various paradigms:
+effortlessly interact with multiple TUI Apps through various paradigms:
 
-- Send text from multiple buffers (same or different file types) to a single tui-app.
-- Send text from a single buffer to multiple tui-apps (same program or different)
-- Attach a buffer to a dedicated tui-apps
+- Send text from multiple buffers (same or different file types) to a single TUI App.
+- Send text from a single buffer to multiple TUI Apps (same program or different)
+- Attach a buffer to a dedicated TUI Apps
 
-\*tui-apps refers to both TUI Apps and REPLs collectively.
+\*: TUI APPs refers to both REPLs and other TUI Apps collectively.
 
-The plugin features integration with `aider.chat` and the Codex CLI, and
+The plugin features integration with `aider.chat` and `OpenAI Codex CLI`, and
 provides convenient code cell text object definitions. Choose your preferred
 fuzzy finder among `telescope`, `fzf-lua`, or `Snacks.picker` to preview active
 REPLs. These features are available as [extensions](#extensions).
@@ -72,6 +72,9 @@ This image highlights an AI-driven coding assistant and REPL,
 [aider.chat](https://aider.chat), managed by `yarepl`.
 
 `yarepl` enables integration with `aider.chat`. For more details,
+refer to the [Extensions](#extensions) section.
+
+`yarepl` enables integration with the Codex CLI. For more details,
 refer to the [Extensions](#extensions) section.
 
 # Why yarepl.nvim?
