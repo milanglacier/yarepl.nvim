@@ -1,4 +1,5 @@
 local keymap = vim.api.nvim_set_keymap
+local util = require 'yarepl.extensions.utility'
 
 local M = {}
 
@@ -228,12 +229,6 @@ M.create_aider_meta = function()
     }
 end
 
-function M.send_to_aider_no_format(id, lines)
-    local yarepl = require 'yarepl'
-    local bufnr = vim.api.nvim_get_current_buf()
-    yarepl._send_strings(id, 'aider', bufnr, lines, false)
-end
-
 vim.api.nvim_create_user_command('AiderSetArgs', function(opts)
     M.aider_args = opts.fargs or {}
 end, {
@@ -288,26 +283,16 @@ local shortcuts = {
     { name = 'ContextMode', key = '/context' },
 }
 
-local function run_cmd_with_count(cmd)
-    vim.cmd(string.format('%d%s', vim.v.count, cmd))
-end
-
-local function partial_cmd_with_count_expr(cmd)
-    -- <C-U> is equivalent to \21, we want to clear the range before
-    -- next input to ensure the count is recognized correctly.
-    return ':\21' .. vim.v.count .. cmd
-end
-
 for _, shortcut in ipairs(shortcuts) do
     vim.api.nvim_create_user_command('AiderSend' .. shortcut.name, function(opts)
         local id = opts.count
-        M.send_to_aider_no_format(id, { shortcut.key .. '\r' })
+        util.send_to_repl_no_format('aider', id, { shortcut.key .. '\r' })
     end, { count = true })
 
     keymap('n', string.format('<Plug>(AiderSend%s)', shortcut.name), '', {
         noremap = true,
         callback = function()
-            run_cmd_with_count('AiderSend' .. shortcut.name)
+            util.run_cmd_with_count('AiderSend' .. shortcut.name)
         end,
     })
 end
@@ -315,7 +300,7 @@ end
 vim.api.nvim_create_user_command('AiderExec', function(opts)
     local id = opts.count
     local command = opts.args
-    M.send_to_aider_no_format(id, command .. '\r')
+    util.send_to_repl_no_format('aider', id, command .. '\r')
 end, {
     count = true,
     nargs = '*',
@@ -327,7 +312,7 @@ end, {
 keymap('n', '<Plug>(AiderExec)', '', {
     noremap = true,
     callback = function()
-        return partial_cmd_with_count_expr 'AiderExec'
+        return util.partial_cmd_with_count_expr 'AiderExec'
     end,
     expr = true,
 })

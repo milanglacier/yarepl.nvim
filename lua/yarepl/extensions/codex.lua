@@ -1,4 +1,5 @@
 local keymap = vim.api.nvim_set_keymap
+local util = require 'yarepl.extensions.utility'
 
 local M = {}
 
@@ -90,22 +91,6 @@ local shortcuts = {
     { name = 'Compact', key = '/compact' },
 }
 
-local function run_cmd_with_count(cmd)
-    vim.cmd(string.format('%d%s', vim.v.count, cmd))
-end
-
-local function partial_cmd_with_count_expr(cmd)
-    -- <C-U> is equivalent to \21, we want to clear the range before
-    -- next input to ensure the count is recognized correctly.
-    return ':\21' .. vim.v.count .. cmd
-end
-
-function M.send_to_codex_no_format(id, lines)
-    local yarepl = require 'yarepl'
-    local bufnr = vim.api.nvim_get_current_buf()
-    yarepl._send_strings(id, 'codex', bufnr, lines, false)
-end
-
 vim.api.nvim_create_user_command('CodexSetArgs', function(opts)
     M.codex_args = opts.fargs or {}
 end, {
@@ -118,13 +103,13 @@ end, {
 for _, shortcut in ipairs(shortcuts) do
     vim.api.nvim_create_user_command('CodexSend' .. shortcut.name, function(opts)
         local id = opts.count
-        M.send_to_codex_no_format(id, { shortcut.key .. '\r' })
+        util.send_to_repl_no_format('codex', id, { shortcut.key .. '\r' })
     end, { count = true })
 
     keymap('n', string.format('<Plug>(CodexSend%s)', shortcut.name), '', {
         noremap = true,
         callback = function()
-            run_cmd_with_count('CodexSend' .. shortcut.name)
+            util.run_cmd_with_count('CodexSend' .. shortcut.name)
         end,
     })
 end
@@ -132,7 +117,7 @@ end
 vim.api.nvim_create_user_command('CodexExec', function(opts)
     local id = opts.count
     local command = opts.args
-    M.send_to_codex_no_format(id, command .. '\r')
+    util.send_to_repl_no_format('codex', id, command .. '\r')
 end, {
     count = true,
     nargs = '*',
@@ -144,7 +129,7 @@ end, {
 keymap('n', '<Plug>(CodexExec)', '', {
     noremap = true,
     callback = function()
-        return partial_cmd_with_count_expr 'CodexExec'
+        return util.partial_cmd_with_count_expr 'CodexExec'
     end,
     expr = true,
 })
