@@ -2,13 +2,12 @@ local M = {}
 
 -- Execute a user command with a count prefix, using the current v:count.
 function M.run_cmd_with_count(cmd)
-    vim.cmd(string.format('%d%s', vim.v.count, cmd))
+    require('yarepl').run_cmd_with_count(cmd)
 end
 
 -- Build an expression for mappings that need to pass a count to a user command.
--- Uses <C-U> (\21) to clear any existing range before the command.
 function M.partial_cmd_with_count_expr(cmd)
-    return ':\21' .. vim.v.count .. cmd
+    return require('yarepl').partial_cmd_with_count_expr(cmd)
 end
 
 -- Send raw strings to a named REPL without applying any formatter.
@@ -22,4 +21,3 @@ function M.send_to_repl_no_format(meta_name, id, lines)
 end
 
 return M
-

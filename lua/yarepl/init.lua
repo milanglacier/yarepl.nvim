@@ -612,11 +612,11 @@ M._source_operator_internal = function(motion)
     M._send_strings(id, name, current_bufnr, lines, nil, true)
 end
 
-local function run_cmd_with_count(cmd)
+function M.run_cmd_with_count(cmd)
     vim.cmd(string.format('%d%s', vim.v.count, cmd))
 end
 
-local function partial_cmd_with_count_expr(cmd)
+function M.partial_cmd_with_count_expr(cmd)
     -- <C-U> is equivalent to \21, we want to clear the range before
     -- next input to ensure the count is recognized correctly.
     return ':\21' .. vim.v.count .. cmd
@@ -648,9 +648,9 @@ local function add_keymap(meta_name)
             noremap = true,
             callback = function()
                 if meta_name then
-                    run_cmd_with_count(spec[2] .. ' ' .. meta_name)
+                    M.run_cmd_with_count(spec[2] .. ' ' .. meta_name)
                 else
-                    run_cmd_with_count(spec[2])
+                    M.run_cmd_with_count(spec[2])
                 end
             end,
         })
@@ -661,9 +661,9 @@ local function add_keymap(meta_name)
         noremap = true,
         callback = function()
             if meta_name then
-                return partial_cmd_with_count_expr('REPLExec $' .. meta_name)
+                return M.partial_cmd_with_count_expr('REPLExec $' .. meta_name)
             else
-                return partial_cmd_with_count_expr 'REPLExec '
+                return M.partial_cmd_with_count_expr 'REPLExec '
             end
         end,
         expr = true,
