@@ -213,7 +213,8 @@ launch and interact with Codex.
   (e.g., `:CodexSetArgs --model gpt-5`).
 - `CodexSend<Action>`: Send a predefined action to Codex. Available actions:
   `Abort` (Ctrl-C), `Exit` (Ctrl-D), `Diff`, `Status`, `Model`, `New`,
-  `Approvals`, `Compact`.
+  `Approvals`, `Compact`, `TranscriptEnter` (Ctrl-T), `TranscriptQuit` (q),
+  `TranscriptBegin` (Home), `TranscriptEnd` (End), `PageUp`, `PageDown`.
 - `CodexExec`: Type a prompt or slash command in the cmdline and send it to
   Codex, with completion for common prefixes like `/model`, `/approvals`,
   `/init`, `/new`, `/compact`, `/diff`, `/mention`, `/status`.
@@ -227,14 +228,20 @@ meta is registered (e.g. `<Plug>(REPLSendLine-codex)`), this extension defines
 extra convenience maps:
 
 - `<Plug>(CodexExec)`: Type in cmdline and send to Codex
-- `<Plug>(CodexSendAbort)`: Send abort (Ctrl-C)
-- `<Plug>(CodexSendExit)`: Send exit (Ctrl-D)
+- `<Plug>(CodexSendAbort)`: Send Ctrl-C
+- `<Plug>(CodexSendExit)`: Send Ctrl-D
 - `<Plug>(CodexSendDiff)`
 - `<Plug>(CodexSendStatus)`
 - `<Plug>(CodexSendModel)`
 - `<Plug>(CodexSendNew)`
 - `<Plug>(CodexSendApprovals)`
 - `<Plug>(CodexSendCompact)`
+- `<Plug>(CodexSendTranscriptEnter)`
+- `<Plug>(CodexSendTranscriptQuit)`
+- `<Plug>(CodexSendTranscriptBegin)`: Send `<Home>`
+- `<Plug>(CodexSendTranscriptEnd)`: Send `<End>`
+- `<Plug>(CodexSendPageUp)`
+- `<Plug>(CodexSendPageDown)`
 
 You can prefix a count (e.g. `2`) before a mapping to target that REPL id.
 
@@ -271,8 +278,15 @@ keymap('n', '<Leader>cd', '<Plug>(CodexSendDiff)', { desc = 'Diff' })
 keymap('n', '<Leader>ct', '<Plug>(CodexSendStatus)', { desc = 'Status' })
 keymap('n', '<Leader>cm', '<Plug>(CodexSendModel)', { desc = 'Model' })
 keymap('n', '<Leader>cn', '<Plug>(CodexSendNew)', { desc = 'New' })
-keymap('n', '<Leader>ca', '<Plug>(CodexSendApprovals)', { desc = 'Approvals' })
+keymap('n', '<Leader>cA', '<Plug>(CodexSendApprovals)', { desc = 'Approvals' })
 keymap('n', '<Leader>cc', '<Plug>(CodexSendCompact)', { desc = 'Compact' })
+-- transcript and navigation helpers
+keymap('n', '<Leader>cte', '<Plug>(CodexSendTranscriptEnter)', { desc = 'Transcript mode' })
+keymap('n', '<Leader>ctq', '<Plug>(CodexSendTranscriptQuit)', { desc = 'Transcript quit' })
+keymap('n', '<Leader>ctg', '<Plug>(CodexSendTranscriptBegin)', { desc = 'Transcript begin' })
+keymap('n', '<Leader>ctG', '<Plug>(CodexSendTranscriptEnd)', { desc = 'Transcript end' })
+keymap('n', '<Leader>ctk', '<Plug>(CodexSendPageUp)', { desc = 'Transcript page up' })
+keymap('n', '<Leader>ctj', '<Plug>(CodexSendPageDown)', { desc = 'Transcript page down' })
 keymap('n', '<Leader>c<space>', '<cmd>checktime<cr>', {
     desc = 'sync file changes by codex to nvim buffer',
 })
