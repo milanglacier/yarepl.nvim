@@ -81,14 +81,25 @@ M.create_codex_meta = function()
 end
 
 local shortcuts = {
-    { name = 'Abort', key = '\3' }, -- Ctrl-c
-    { name = 'Exit', key = '\4' }, -- Ctrl-d
-    { name = 'Diff', key = '/diff' },
-    { name = 'Status', key = '/status' },
-    { name = 'Model', key = '/model' },
-    { name = 'New', key = '/new' },
-    { name = 'Approvals', key = '/approvals' },
-    { name = 'Compact', key = '/compact' },
+    -- Ctrl-c
+    { name = 'Abort', key = '\3', requires_cr = false },
+    -- Ctrl-d
+    { name = 'Exit', key = '\4', requires_cr = false },
+    { name = 'Diff', key = '/diff', requires_cr = true },
+    { name = 'Status', key = '/status', requires_cr = true },
+    { name = 'Model', key = '/model', requires_cr = true },
+    { name = 'New', key = '/new', requires_cr = true },
+    { name = 'Approvals', key = '/approvals', requires_cr = true },
+    { name = 'Compact', key = '/compact', requires_cr = true },
+    --Ctrl-t
+    { name = 'TranscriptEnter', key = '\20', requires_cr = false },
+    { name = 'TranscriptQuit', key = 'q', requires_cr = false },
+    -- Home
+    { name = 'TranscriptBegin', key = '\27[1~', requires_cr = false },
+    -- End
+    { name = 'TranscriptEnd', key = '\27[4~', requires_cr = false },
+    { name = 'PageUp', key = '\27[5~', requires_cr = false },
+    { name = 'PageDown', key = '\27[6~', requires_cr = false },
 }
 
 vim.api.nvim_create_user_command('CodexSetArgs', function(opts)
@@ -103,7 +114,7 @@ end, {
 for _, shortcut in ipairs(shortcuts) do
     vim.api.nvim_create_user_command('CodexSend' .. shortcut.name, function(opts)
         local id = opts.count
-        util.send_to_repl_no_format('codex', id, { shortcut.key .. '\r' })
+        util.send_to_repl_no_format('codex', id, { shortcut.key .. (shortcut.requires_cr and '\r' or '') })
     end, { count = true })
 
     keymap('n', string.format('<Plug>(CodexSend%s)', shortcut.name), '', {
