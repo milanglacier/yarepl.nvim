@@ -286,7 +286,7 @@ local shortcuts = {
 for _, shortcut in ipairs(shortcuts) do
     vim.api.nvim_create_user_command('AiderSend' .. shortcut.name, function(opts)
         local id = opts.count
-        util.send_to_repl_no_format('aider', id, { shortcut.key .. '\r' })
+        util.send_to_repl_raw('aider', id,  shortcut.key .. '\r' )
     end, { count = true })
 
     keymap('n', string.format('<Plug>(AiderSend%s)', shortcut.name), '', {
@@ -300,7 +300,7 @@ end
 vim.api.nvim_create_user_command('AiderExec', function(opts)
     local id = opts.count
     local command = opts.args
-    util.send_to_repl_no_format('aider', id, command .. '\r')
+    util.send_to_repl_raw('aider', id, command .. '\r')
 end, {
     count = true,
     nargs = '*',

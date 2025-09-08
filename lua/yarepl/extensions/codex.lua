@@ -44,7 +44,7 @@ local codex_args = {
 }
 
 M.codex_args = {}
-M.formatter = 'bracketed_pasting'
+M.formatter = 'bracketed_pasting_delayed_cr'
 M.codex_cmd = 'codex'
 
 M.setup = function(params)
@@ -77,6 +77,7 @@ M.create_codex_meta = function()
         formatter = M.formatter,
         wincmd = M.wincmd,
         source_syntax = M.source_syntax,
+        send_delayed_final_cr = true,
     }
 end
 
@@ -114,7 +115,7 @@ end, {
 for _, shortcut in ipairs(shortcuts) do
     vim.api.nvim_create_user_command('CodexSend' .. shortcut.name, function(opts)
         local id = opts.count
-        util.send_to_repl_no_format('codex', id, { shortcut.key .. (shortcut.requires_cr and '\r' or '') })
+        util.send_to_repl_raw('codex', id, shortcut.key, shortcut.requires_cr)
     end, { count = true })
 
     keymap('n', string.format('<Plug>(CodexSend%s)', shortcut.name), '', {
@@ -128,7 +129,7 @@ end
 vim.api.nvim_create_user_command('CodexExec', function(opts)
     local id = opts.count
     local command = opts.args
-    util.send_to_repl_no_format('codex', id, command .. '\r')
+    util.send_to_repl_raw('codex', id, command, true)
 end, {
     count = true,
     nargs = '*',

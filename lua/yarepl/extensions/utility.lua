@@ -10,14 +10,18 @@ function M.partial_cmd_with_count_expr(cmd)
     return require('yarepl').partial_cmd_with_count_expr(cmd)
 end
 
--- Send raw strings to a named REPL without applying any formatter.
--- meta_name: the yarepl meta name (e.g., 'aider', 'codex')
--- id: the REPL id (number) to send to
--- lines: string or table of strings to send
-function M.send_to_repl_no_format(meta_name, id, lines)
+-- Send raw strings to a named REPL
+---@param meta_name string
+---@param id integer
+---@param lines string
+---@param send_delayed_final_cr boolean?
+---@return nil
+function M.send_to_repl_raw(meta_name, id, lines, send_delayed_final_cr)
     local yarepl = require 'yarepl'
+    ---@diagnostic disable-next-line redefined-local
+    local lines = vim.split(lines, '\r')
     local bufnr = vim.api.nvim_get_current_buf()
-    yarepl._send_strings(id, meta_name, bufnr, lines, false)
+    yarepl._send_strings(id, meta_name, bufnr, lines, false, false, send_delayed_final_cr)
 end
 
 return M
