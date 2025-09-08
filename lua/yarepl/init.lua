@@ -427,6 +427,19 @@ M.formatter.bracketed_pasting_no_final_new_line = M.formatter.factory {
     },
 }
 
+-- This formatter is only used with `send_delayed_final_cr` enabled, since the
+-- final cr is send via a delayed event, so we don't including the final new
+-- line in the code blocks we initially send to REPL.
+M.formatter.bracketed_pasting_delayed_cr = M.formatter.factory {
+    when_single_line = {
+        end_code = '',
+    },
+    when_multi_lines = {
+        open_code = '\27[200~',
+        end_code = '\27[201~',
+    },
+}
+
 --- Displays the source comment as virtual text in the REPL buffer.
 ---@param repl table The REPL object.
 ---@param original_content? string[] The original strings/code block sent by the user.
@@ -496,12 +509,13 @@ end
 ---@param strings string[] a list of strings
 ---@param use_formatter boolean? whether use formatter (e.g. bracketed_pasting)? Default: true
 ---@param source_content boolean? Whether use source_syntax (defined by REPL meta) Default: false
+---@param send_delayed_final_cr boolean? Default: depends on REPL meta or config.os.windows.
 -- Send a list of strings to the repl specified by `id` and `name` and `bufnr`.
 -- If `id` is 0, then will try to find the REPL that `bufnr` is attached to, if
 -- not find, will use `id = 1`. If `name` is not nil or not an empty string,
 -- then will try to find the REPL with `name` relative to `id`. If `bufnr` is
 -- nil or `bufnr` = 0, will find the REPL that current buffer is attached to.
-M._send_strings = function(id, name, bufnr, strings, use_formatter, source_content)
+M._send_strings = function(id, name, bufnr, strings, use_formatter, source_content, send_delayed_final_cr)
     use_formatter = use_formatter == nil and true or use_formatter
     if bufnr == nil or bufnr == 0 then
         bufnr = api.nvim_get_current_buf()
@@ -515,6 +529,15 @@ M._send_strings = function(id, name, bufnr, strings, use_formatter, source_conte
     end
 
     local meta = M._config.metas[repl.name]
+
+    if send_delayed_final_cr == nil then
+        if is_win32 and M._config.os.windows.send_delayed_final_cr then
+            send_delayed_final_cr = true
+        else
+            send_delayed_final_cr = meta.send_delayed_final_cr
+        end
+    end
+
     if source_content then
         local source_syntax = M.source_syntaxes[meta.source_syntax] or meta.source_syntax
 
@@ -557,7 +580,7 @@ M._send_strings = function(id, name, bufnr, strings, use_formatter, source_conte
     -- It may be necessary to use a delayed `<CR>` on Windows to ensure that
     -- the code is executed in the REPL. Some REPLs also need this delayed CR
     -- to recognize that we want to finalize/evaluate the command.
-    if (is_win32 and M._config.os.windows.send_delayed_final_cr) or meta.send_delayed_final_cr then
+    if send_delayed_final_cr then
         vim.defer_fn(function()
             if repl_is_valid(repl) then
                 fn.chansend(repl.term, '\r')

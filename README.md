@@ -668,6 +668,7 @@ returns either a string or list of strings.
 1. A string that matches a builtin formatter name:
    - `bracketed_pasting`: wrap the content within bracketed paste sequences
    - `bracketed_pasting_no_final_new_line`: similar to `bracketed_pasting`, but does not add a new line at the end
+   - `bracketed_pasting_delayed_cr`: similar to `bracketed_pasting`, but use with `send_delayed_final_cr = true`
    - `trim_empty_lines`: remove empty lines from the input
 2. A function that takes a list of strings as input and returns a list of
    strings to send to the REPL
@@ -762,10 +763,11 @@ yarepl.formatter.factory {
     },
 }
 
--- `yarepl` provides three builtin formatters that can be referenced by name:
+-- `yarepl` provides four builtin formatters that can be referenced by name:
 -- 1. 'bracketed_pasting' - Uses bracketed paste mode for modern REPLs
 -- 2. 'bracketed_pasting_no_final_new_line' - Same as above but without final newline
--- 3. 'trim_empty_lines' - Trims empty lines from input
+-- 3. 'bracketed_pasting_delayed_cr': similar to `bracketed_pasting`, but use with `send_delayed_final_cr = true`
+-- 4. 'trim_empty_lines' - Trims empty lines from input
 
 -- You can also create custom formatters by calling `yarepl.formatter.factory`:
 
@@ -796,9 +798,11 @@ recognize the final CR (return)'s purpose is to tell the REPL that we want to
 text when bracketed pasting is enabled. To mitigate this, we have to send the
 final CR with a delay (to let the REPL realize that we want to evaluate that
 command). In general we should ignore this option (keep it as the default
-`false`). The one observed exception is Claude Code which should use `true`.
-PRs are welcome if you find other REPLs that require setting this option to
-`true`.
+`false`). When you do enable this option, prefer using the
+`bracketed_pasting_delayed_cr` formatter so that the final CR is not included
+in the initial stream (it will be sent by the delayed event). The two observed
+exceptions are Claude Code and OpenAI Codex which should use `true`. PRs are
+welcome if you find other REPLs that require setting this option to `true`.
 
 Example usage:
 
@@ -806,7 +810,7 @@ Example usage:
 metas = {
     claude_code = {
         cmd = 'claude',
-        formatter = 'bracketed_pasting',
+        formatter = 'bracketed_pasting_delayed_cr',
         source_syntax = '@{{file}}',
         send_delayed_final_cr = true
     },
@@ -815,6 +819,8 @@ metas = {
         formatter = 'bracketed_pasting',
         send_delayed_final_cr = false  -- this is the default, can be omitted
     },
+    -- yarepl provides builtin extension to use with codex.
+    codex = require('yarepl.extensions.codex').create_codex_meta(),
 }
 ```
 
