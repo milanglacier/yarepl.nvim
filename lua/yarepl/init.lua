@@ -1082,7 +1082,7 @@ M.setup = function(opts)
             false
         )
 
-        M._config.os.os.windows.send_delayed_final_cr = opts.os.windows.send_delayed_cr_after_sending
+        M._config.os.windows.send_delayed_final_cr = opts.os.windows.send_delayed_cr_after_sending
     end
 
     for name, meta in pairs(M._config.metas) do
