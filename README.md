@@ -45,19 +45,18 @@
 
 # yarepl.nvim
 
-Yet Another REPL is a flexible REPL / TUI App management tool that supports
-multiple paradigms for interacting with tui-apps\*. This plugin also works with
+Yet Another REPL is a flexible REPL / CLI App management tool that supports
+multiple paradigms for interacting with them. This plugin also works with
 project-level config and tmux, and includes native dot-repeat without requiring
 vim-repeat.
 
 Flexibility and parallelism are core priorities. With yarepl.nvim, you can
-effortlessly interact with multiple TUI Apps through various paradigms:
+effortlessly interact with multiple CLI Apps through various paradigms:
 
-- Send text from multiple buffers (same or different file types) to a single TUI App.
-- Send text from a single buffer to multiple TUI Apps (same program or different)
-- Attach a buffer to a dedicated TUI Apps
-
-\*: TUI APPs refers to both REPLs and other TUI Apps collectively.
+- Send text from multiple buffers (same or different file types) to a single
+  REPL / CLI App.
+- Send text from a single buffer to multiple CLI Apps (same program or different)
+- Attach a buffer to a dedicated CLI Apps
 
 The plugin features integration with `aider.chat` and `OpenAI Codex CLI`, and
 provides convenient code cell text object definitions. Choose your preferred
