@@ -70,11 +70,13 @@ REPLs. These features are available as [extensions](#extensions).
 This image highlights an AI-driven coding assistant and REPL,
 [aider.chat](https://aider.chat), managed by `yarepl`.
 
-`yarepl` enables integration with `aider.chat`. For more details,
-refer to the [Extensions](#extensions) section.
+![codex showcase](assets/codex-showcase.jpg)
 
-`yarepl` enables integration with the Codex CLI. For more details,
-refer to the [Extensions](#extensions) section.
+This example showcases the Codex CLI integration running side by side with a
+Neovim buffer, all managed through `yarepl`.
+
+`yarepl` enables integration with the OpenAI's Codex CLI and Aider.chat. For
+more details, refer to the [Extensions](#extensions) section.
 
 # Why yarepl.nvim?
 
