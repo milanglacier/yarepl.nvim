@@ -5,11 +5,11 @@ local M = {}
 
 M.wincmd = function(bufnr, name)
     vim.api.nvim_open_win(bufnr, true, {
-        relative = 'editor',
-        row = math.floor(vim.o.lines * 0.05),
-        col = math.floor(vim.o.columns * 0.05),
-        width = math.floor(vim.o.columns * 0.9),
-        height = math.floor(vim.o.lines * 0.9),
+        relative = 'laststatus',
+        row = 0,
+        col = math.floor(vim.o.columns * 0.5),
+        width = math.floor(vim.o.columns * 0.5),
+        height = math.floor(vim.o.lines * 0.7),
         style = 'minimal',
         title = name,
         border = 'rounded',
@@ -286,7 +286,7 @@ local shortcuts = {
 for _, shortcut in ipairs(shortcuts) do
     vim.api.nvim_create_user_command('AiderSend' .. shortcut.name, function(opts)
         local id = opts.count
-        util.send_to_repl_raw('aider', id,  shortcut.key .. '\r' )
+        util.send_to_repl_raw('aider', id, shortcut.key .. '\r')
     end, { count = true })
 
     keymap('n', string.format('<Plug>(AiderSend%s)', shortcut.name), '', {

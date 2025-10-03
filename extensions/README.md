@@ -180,7 +180,7 @@ require('yarepl.extensions.aider').setup {
     aider_cmd = 'aider',
     --NOTE: make sure you pass a list of string, not string,
     aider_args = { '--watch-files' },
-    -- The default wincmd is to open aider in a floating window
+    -- The default wincmd is to open aider in a floating window at the bottom-right corner
     wincmd = require('yarepl.extensions.aider').wincmd,
 }
 ```
@@ -300,7 +300,7 @@ Default configuration:
 require('yarepl.extensions.codex').setup {
   codex_cmd = 'codex',
   codex_args = {},
-  -- The default is a floating window; you can override it
+  -- The default is a floating window at the bottom right corner; you can override it
   wincmd = require('yarepl.extensions.codex').wincmd,
 }
 ```
