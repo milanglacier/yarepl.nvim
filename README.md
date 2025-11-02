@@ -65,7 +65,7 @@ REPLs. These features are available as [extensions](#extensions).
 
 # Showcase
 
-![aider showcase](assets/aider-showcase.jpeg)
+![aider showcase](assets/aider-showcase.jpg)
 
 This image highlights an AI-driven coding assistant and REPL,
 [aider.chat](https://aider.chat), managed by `yarepl`.
