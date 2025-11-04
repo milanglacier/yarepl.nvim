@@ -2,9 +2,10 @@ local keymap = vim.api.nvim_set_keymap
 local util = require 'yarepl.extensions.utility'
 
 local M = {}
+M.show_winbar_in_float_window = true
 
 M.wincmd = function(bufnr, name)
-    vim.api.nvim_open_win(bufnr, true, {
+    local winid = vim.api.nvim_open_win(bufnr, true, {
         relative = 'laststatus',
         row = 0,
         col = math.floor(vim.o.columns * 0.5),
@@ -15,6 +16,9 @@ M.wincmd = function(bufnr, name)
         border = 'rounded',
         title_pos = 'center',
     })
+    if M.show_winbar_in_float_window then
+        vim.wo[winid].winbar = '%t'
+    end
 end
 
 M.source_syntax = 'read the instruction from {{file}}'
@@ -48,9 +52,7 @@ M.formatter = 'bracketed_pasting_delayed_cr'
 M.codex_cmd = 'codex'
 
 M.setup = function(params)
-    M.codex_cmd = params.codex_cmd or M.codex_cmd
-    M.codex_args = params.codex_args or M.codex_args
-    M.wincmd = params.wincmd or M.wincmd
+    M = vim.tbl_deep_extend('force', M, params or {})
 end
 
 M.create_codex_meta = function()

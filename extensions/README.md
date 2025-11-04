@@ -180,6 +180,8 @@ require('yarepl.extensions.aider').setup {
     aider_cmd = 'aider',
     --NOTE: make sure you pass a list of string, not string,
     aider_args = { '--watch-files' },
+    -- Display a winbar (e.g., "aider#<id>") in the floating window.
+    show_winbar_in_float_win = true,
     -- The default wincmd is to open aider in a floating window at the bottom-right corner
     wincmd = require('yarepl.extensions.aider').wincmd,
 }
@@ -298,10 +300,12 @@ Default configuration:
 
 ```lua
 require('yarepl.extensions.codex').setup {
-  codex_cmd = 'codex',
-  codex_args = {},
-  -- The default is a floating window at the bottom right corner; you can override it
-  wincmd = require('yarepl.extensions.codex').wincmd,
+      codex_cmd = 'codex',
+      codex_args = {},
+      -- Display a winbar (e.g., "codex#<id>") in the floating window.
+      show_winbar_in_float_win = true,
+      -- The default is a floating window at the bottom right corner; you can override it
+      wincmd = require('yarepl.extensions.codex').wincmd,
 }
 ```
 

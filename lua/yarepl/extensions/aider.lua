@@ -2,9 +2,10 @@ local keymap = vim.api.nvim_set_keymap
 local util = require 'yarepl.extensions.utility'
 
 local M = {}
+M.show_winbar_in_float_window = true
 
 M.wincmd = function(bufnr, name)
-    vim.api.nvim_open_win(bufnr, true, {
+    local winid = vim.api.nvim_open_win(bufnr, true, {
         relative = 'laststatus',
         row = 0,
         col = math.floor(vim.o.columns * 0.5),
@@ -15,6 +16,9 @@ M.wincmd = function(bufnr, name)
         border = 'rounded',
         title_pos = 'center',
     })
+    if M.show_winbar_in_float_window then
+        vim.wo[winid].winbar = '%t'
+    end
 end
 
 -- Predefined prefix setters
@@ -198,9 +202,7 @@ M.aider_args = { '--watch-files' }
 M.aider_cmd = 'aider'
 
 M.setup = function(params)
-    M.aider_cmd = params.aider_cmd or M.aider_cmd
-    M.aider_args = params.aider_args or M.aider_args
-    M.wincmd = params.wincmd or M.wincmd
+    M = vim.tbl_deep_extend('force', M, params or {})
 end
 
 M.create_aider_meta = function()
