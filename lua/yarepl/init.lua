@@ -281,14 +281,34 @@ local function repl_win_scroll_to_bottom(repl)
     end
 end
 
--- currently only support line-wise sending in both visual and operator mode.
-local function get_lines(mode)
+local function get_selection_text(mode)
     local begin_mark = mode == 'operator' and "'[" or "'<"
     local end_mark = mode == 'operator' and "']" or "'>"
 
-    local begin_line = fn.getpos(begin_mark)[2]
-    local end_line = fn.getpos(end_mark)[2]
-    return api.nvim_buf_get_lines(0, begin_line - 1, end_line, false)
+    -- Get the full positions: [bufnum, lnum, col, off]
+    local begin_pos = fn.getpos(begin_mark)
+    local end_pos = fn.getpos(end_mark)
+
+    -- Convert Vim 1-based row/col to API 0-based row/col
+    local begin_line = begin_pos[2] - 1
+    local begin_col = begin_pos[3] - 1
+
+    local end_line = end_pos[2] - 1
+    -- The API uses exclusive end columns.
+    -- Since Vim's 'col' is 1-based inclusive, its numeric value
+    -- works perfectly as a 0-based exclusive value.
+    local end_col = end_pos[3]
+
+    -- Handle edge case: Linewise selections often have a column value of v:maxcol (2147483647).
+    -- We must clamp this to the actual end of the line for the API to work.
+    if end_col >= 2147483647 then
+        local line_text = api.nvim_buf_get_lines(0, end_line, end_line + 1, true)[1]
+        end_col = line_text and #line_text or 0
+    end
+
+    -- Fetch the precise range of text
+    -- nvim_buf_get_text(buffer, start_row, start_col, end_row, end_col, opts)
+    return api.nvim_buf_get_text(0, begin_line, begin_col, end_line, end_col, {})
 end
 
 ---Get the formatter function from either a string name or function
