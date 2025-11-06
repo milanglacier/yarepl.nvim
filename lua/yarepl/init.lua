@@ -302,7 +302,7 @@ local function get_selection_text(mode)
     -- Handle edge case: Linewise selections often have a column value of v:maxcol (2147483647).
     -- We must clamp this to the actual end of the line for the API to work.
     if end_col >= 2147483647 then
-        local line_text = api.nvim_buf_get_lines(0, end_line, end_line + 1, true)[1]
+        local line_text = api.nvim_buf_get_selection_text(0, end_line, end_line + 1, true)[1]
         end_col = line_text and #line_text or 0
     end
 
@@ -502,7 +502,7 @@ local function show_source_command_hint(repl, original_content, source_command)
         end
 
         local buf = repl.bufnr
-        local lines = api.nvim_buf_get_lines(buf, 0, -1, false)
+        local lines = api.nvim_buf_get_selection_text(buf, 0, -1, false)
         local matched_line
 
         for i = #lines, 1, -1 do
@@ -624,7 +624,7 @@ M._send_operator_internal = function(motion)
     local name = vim.b[0].closest_repl_name
     local current_bufnr = api.nvim_get_current_buf()
 
-    local lines = get_lines 'operator'
+    local lines = get_selection_text 'operator'
 
     if #lines == 0 then
         vim.notify 'No motion!'
@@ -645,7 +645,7 @@ M._source_operator_internal = function(motion)
     local name = vim.b[0].closest_repl_name
     local current_bufnr = api.nvim_get_current_buf()
 
-    local lines = get_lines 'operator'
+    local lines = get_selection_text 'operator'
 
     if #lines == 0 then
         vim.notify 'No motion!'
@@ -940,7 +940,7 @@ M.commands.send_visual = function(opts)
 
     api.nvim_feedkeys('\27', 'nx', false)
 
-    local lines = get_lines 'visual'
+    local lines = get_selection_text 'visual'
 
     if #lines == 0 then
         vim.notify 'No visual range!'
