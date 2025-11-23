@@ -281,34 +281,42 @@ local function repl_win_scroll_to_bottom(repl)
     end
 end
 
-local function get_selection_text(mode)
+-- currently only support line-wise sending in both visual and operator mode.
+local function get_lines(mode, type)
     local begin_mark = mode == 'operator' and "'[" or "'<"
     local end_mark = mode == 'operator' and "']" or "'>"
 
-    -- Get the full positions: [bufnum, lnum, col, off]
     local begin_pos = fn.getpos(begin_mark)
     local end_pos = fn.getpos(end_mark)
 
-    -- Convert Vim 1-based row/col to API 0-based row/col
-    local begin_line = begin_pos[2] - 1
-    local begin_col = begin_pos[3] - 1
-
-    local end_line = end_pos[2] - 1
-    -- The API uses exclusive end columns.
-    -- Since Vim's 'col' is 1-based inclusive, its numeric value
-    -- works perfectly as a 0-based exclusive value.
+    local begin_line = begin_pos[2]
+    local begin_col = begin_pos[3]
+    local end_line = end_pos[2]
     local end_col = end_pos[3]
 
-    -- Handle edge case: Linewise selections often have a column value of v:maxcol (2147483647).
-    -- We must clamp this to the actual end of the line for the API to work.
-    if end_col >= 2147483647 then
-        local line_text = api.nvim_buf_get_selection_text(0, end_line, end_line + 1, true)[1]
-        end_col = line_text and #line_text or 0
+    if type == 'line' or type == 'V' then
+        return api.nvim_buf_get_lines(0, begin_line - 1, end_line, false)
+    elseif type == 'char' or type == 'v' then
+        if api.nvim_buf_get_text then
+            return api.nvim_buf_get_text(0, begin_line - 1, begin_col - 1, end_line - 1, end_col, {})
+        else
+            -- Fallback for older Neovim versions
+            local lines = api.nvim_buf_get_lines(0, begin_line - 1, end_line, false)
+            if #lines == 0 then
+                return {}
+            end
+            if #lines == 1 then
+                lines[1] = string.sub(lines[1], begin_col, end_col)
+                return lines
+            end
+            lines[1] = string.sub(lines[1], begin_col)
+            lines[#lines] = string.sub(lines[#lines], 1, end_col)
+            return lines
+        end
+    else
+        -- Block mode or unknown, fallback to line-wise
+        return api.nvim_buf_get_lines(0, begin_line - 1, end_line, false)
     end
-
-    -- Fetch the precise range of text
-    -- nvim_buf_get_text(buffer, start_row, start_col, end_row, end_col, opts)
-    return api.nvim_buf_get_text(0, begin_line, begin_col, end_line, end_col, {})
 end
 
 ---Get the formatter function from either a string name or function
@@ -502,7 +510,7 @@ local function show_source_command_hint(repl, original_content, source_command)
         end
 
         local buf = repl.bufnr
-        local lines = api.nvim_buf_get_selection_text(buf, 0, -1, false)
+        local lines = api.nvim_buf_get_lines(buf, 0, -1, false)
         local matched_line
 
         for i = #lines, 1, -1 do
@@ -618,13 +626,14 @@ M._send_operator_internal = function(motion)
     if motion == nil then
         vim.go.operatorfunc = [[v:lua.require'yarepl'._send_operator_internal]]
         api.nvim_feedkeys('g@', 'ni', false)
+        return
     end
 
     local id = vim.b[0].repl_id
     local name = vim.b[0].closest_repl_name
     local current_bufnr = api.nvim_get_current_buf()
 
-    local lines = get_selection_text 'operator'
+    local lines = get_lines('operator', motion)
 
     if #lines == 0 then
         vim.notify 'No motion!'
@@ -639,13 +648,14 @@ M._source_operator_internal = function(motion)
     if motion == nil then
         vim.go.operatorfunc = [[v:lua.require'yarepl'._source_operator_internal]]
         api.nvim_feedkeys('g@', 'ni', false)
+        return
     end
 
     local id = vim.b[0].repl_id
     local name = vim.b[0].closest_repl_name
     local current_bufnr = api.nvim_get_current_buf()
 
-    local lines = get_selection_text 'operator'
+    local lines = get_lines('operator', motion)
 
     if #lines == 0 then
         vim.notify 'No motion!'
@@ -940,7 +950,7 @@ M.commands.send_visual = function(opts)
 
     api.nvim_feedkeys('\27', 'nx', false)
 
-    local lines = get_selection_text 'visual'
+    local lines = get_lines('visual', vim.fn.visualmode())
 
     if #lines == 0 then
         vim.notify 'No visual range!'
