@@ -177,6 +177,7 @@ local function create_repl(id, repl_name)
             opts.term = true
             return vim.fn.jobstart(cmd, opts)
         else
+            ---@diagnostic disable-next-line: deprecated
             return vim.fn.termopen(cmd, opts)
         end
     end
@@ -493,6 +494,7 @@ local function show_source_command_hint(repl, original_content, source_command)
         end
 
         if matched_line then
+            ---@diagnostic disable-next-line: need-check-nil
             local hl_group = config.hl_group
             local virt_lines_opts = {
                 virt_text = { { comment_text, hl_group } },
