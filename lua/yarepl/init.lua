@@ -296,7 +296,10 @@ local function get_lines(mode, type)
     local end_col = end_pos[3]
 
     if type == 'char' or type == 'v' then
-        return api.nvim_buf_get_text(0, begin_line - 1, begin_col - 1, end_line - 1, end_col, {})
+        local lines = api.nvim_buf_get_text(0, begin_line - 1, begin_col - 1, end_line - 1, -1, {})
+        local offset = vim.str_utf_end(lines[#lines], end_col)
+        lines[#lines] = lines[#lines]:sub(1, end_col + offset)
+        return lines
     else
         -- Line-wise mode, or fallback to line-wise for unsupported block-wise mode.
         return api.nvim_buf_get_lines(0, begin_line - 1, end_line, false)
