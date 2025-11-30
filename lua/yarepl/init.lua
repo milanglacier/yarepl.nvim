@@ -283,7 +283,9 @@ local function repl_win_scroll_to_bottom(repl)
 end
 
 -- Currently, block-wise sending is not supported.
-local function get_lines(mode, type)
+---@param mode "operator"|"visual"
+---@param submode string
+local function get_lines(mode, submode)
     local begin_mark = mode == 'operator' and "'[" or "'<"
     local end_mark = mode == 'operator' and "']" or "'>"
 
@@ -295,7 +297,7 @@ local function get_lines(mode, type)
     local end_line = end_pos[2]
     local end_col = end_pos[3]
 
-    if type == 'char' or type == 'v' then
+    if submode == 'char' or submode == 'v' then
         local lines = api.nvim_buf_get_text(0, begin_line - 1, begin_col - 1, end_line - 1, -1, {})
         if #lines > 0 and #lines[#lines] > 0 then
             if begin_line == end_line then
