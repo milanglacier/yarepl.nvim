@@ -283,13 +283,41 @@ local function repl_win_scroll_to_bottom(repl)
 end
 
 -- currently only support line-wise sending in both visual and operator mode.
-local function get_lines(mode)
+local function get_lines(mode, type)
     local begin_mark = mode == 'operator' and "'[" or "'<"
     local end_mark = mode == 'operator' and "']" or "'>"
 
-    local begin_line = fn.getpos(begin_mark)[2]
-    local end_line = fn.getpos(end_mark)[2]
-    return api.nvim_buf_get_lines(0, begin_line - 1, end_line, false)
+    local begin_pos = fn.getpos(begin_mark)
+    local end_pos = fn.getpos(end_mark)
+
+    local begin_line = begin_pos[2]
+    local begin_col = begin_pos[3]
+    local end_line = end_pos[2]
+    local end_col = end_pos[3]
+
+    if type == 'line' or type == 'V' then
+        return api.nvim_buf_get_lines(0, begin_line - 1, end_line, false)
+    elseif type == 'char' or type == 'v' then
+        if api.nvim_buf_get_text then
+            return api.nvim_buf_get_text(0, begin_line - 1, begin_col - 1, end_line - 1, end_col, {})
+        else
+            -- Fallback for older Neovim versions
+            local lines = api.nvim_buf_get_lines(0, begin_line - 1, end_line, false)
+            if #lines == 0 then
+                return {}
+            end
+            if #lines == 1 then
+                lines[1] = string.sub(lines[1], begin_col, end_col)
+                return lines
+            end
+            lines[1] = string.sub(lines[1], begin_col)
+            lines[#lines] = string.sub(lines[#lines], 1, end_col)
+            return lines
+        end
+    else
+        -- Block mode or unknown, fallback to line-wise
+        return api.nvim_buf_get_lines(0, begin_line - 1, end_line, false)
+    end
 end
 
 ---Get the formatter function from either a string name or function
@@ -600,13 +628,14 @@ M._send_operator_internal = function(motion)
     if motion == nil then
         vim.go.operatorfunc = [[v:lua.require'yarepl'._send_operator_internal]]
         api.nvim_feedkeys('g@', 'ni', false)
+        return
     end
 
     local id = vim.b[0].repl_id
     local name = vim.b[0].closest_repl_name
     local current_bufnr = api.nvim_get_current_buf()
 
-    local lines = get_lines 'operator'
+    local lines = get_lines('operator', motion)
 
     if #lines == 0 then
         vim.notify 'No motion!'
@@ -621,13 +650,14 @@ M._source_operator_internal = function(motion)
     if motion == nil then
         vim.go.operatorfunc = [[v:lua.require'yarepl'._source_operator_internal]]
         api.nvim_feedkeys('g@', 'ni', false)
+        return
     end
 
     local id = vim.b[0].repl_id
     local name = vim.b[0].closest_repl_name
     local current_bufnr = api.nvim_get_current_buf()
 
-    local lines = get_lines 'operator'
+    local lines = get_lines('operator', motion)
 
     if #lines == 0 then
         vim.notify 'No motion!'
@@ -922,7 +952,7 @@ M.commands.send_visual = function(opts)
 
     api.nvim_feedkeys('\27', 'nx', false)
 
-    local lines = get_lines 'visual'
+    local lines = get_lines('visual', vim.fn.visualmode())
 
     if #lines == 0 then
         vim.notify 'No visual range!'
