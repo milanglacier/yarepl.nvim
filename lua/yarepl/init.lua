@@ -1,7 +1,7 @@
 local M = {}
 local api = vim.api
 local fn = vim.fn
-local is_win32 = vim.fn.has 'win32' == 1 and true or false
+local is_win32 = vim.fn.has 'win32' == 1
 
 ---@class yarepl.REPLMeta
 ---@field cmd string[]|string|fun(): string The command to start the REPL or a function that returns the command
