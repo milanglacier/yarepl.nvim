@@ -282,7 +282,7 @@ local function repl_win_scroll_to_bottom(repl)
     end
 end
 
--- currently only support line-wise sending in both visual and operator mode.
+-- Currently, block-wise sending is not supported.
 local function get_lines(mode, type)
     local begin_mark = mode == 'operator' and "'[" or "'<"
     local end_mark = mode == 'operator' and "']" or "'>"
@@ -295,27 +295,10 @@ local function get_lines(mode, type)
     local end_line = end_pos[2]
     local end_col = end_pos[3]
 
-    if type == 'line' or type == 'V' then
-        return api.nvim_buf_get_lines(0, begin_line - 1, end_line, false)
-    elseif type == 'char' or type == 'v' then
-        if api.nvim_buf_get_text then
-            return api.nvim_buf_get_text(0, begin_line - 1, begin_col - 1, end_line - 1, end_col, {})
-        else
-            -- Fallback for older Neovim versions
-            local lines = api.nvim_buf_get_lines(0, begin_line - 1, end_line, false)
-            if #lines == 0 then
-                return {}
-            end
-            if #lines == 1 then
-                lines[1] = string.sub(lines[1], begin_col, end_col)
-                return lines
-            end
-            lines[1] = string.sub(lines[1], begin_col)
-            lines[#lines] = string.sub(lines[#lines], 1, end_col)
-            return lines
-        end
+    if type == 'char' or type == 'v' then
+        return api.nvim_buf_get_text(0, begin_line - 1, begin_col - 1, end_line - 1, end_col, {})
     else
-        -- Block mode or unknown, fallback to line-wise
+        -- Line-wise mode, or fallback to line-wise for unsupported block-wise mode.
         return api.nvim_buf_get_lines(0, begin_line - 1, end_line, false)
     end
 end
