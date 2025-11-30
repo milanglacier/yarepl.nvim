@@ -1205,9 +1205,9 @@ To resolve this issue, you have several options:
 
 # Limitations
 
-- Currently, `yarepl` only supports sending entire lines to REPL. This means
-  that no matter what the motion or visual range is, it will always send the
-  whole line to the REPL.
+- Currently, `yarepl` does not support sending block-wise visual selections. If
+  a user attempts to send code while in block-wise visual mode, it will
+  automatically fall back to sending the selection line-wise.
 
 # Acknowledgements
 
