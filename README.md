@@ -343,10 +343,11 @@ Sends the visual range to REPL `i` or the REPL that the current buffer
 is attached to.
 
 If you provide an optional argument, the function will attempt to send to the
-closest REPL with the specified name. If no count is supplied, it will try to
-send to the REPL that the current buffer is attached to. If the current buffer
-isn't attached to any REPL, it will use REPL 1. If you add a count `i`, it will
-send to REPL `i`.
+closest REPL with the specified name. When no count is supplied, it first
+checks whether the current buffer is attached to a REPL with that name and uses
+it. If the buffer isn't attached to a matching REPL, it will use REPL 1 to find
+the closest match. If you add a count `i`, it will send to the closest REPL
+with that name relative to `i`.
 
 Here are examples of how to use this command:
 
@@ -355,8 +356,9 @@ Here are examples of how to use this command:
 
 2. `3REPLSendVisual` sends the visual range to REPL 3.
 
-3. `REPLSendVisual ipython` sends the visual range to the closest ipython REPL
-   relative to id `1`.
+3. `REPLSendVisual ipython` sends the visual range to the attached ipython REPL
+   if there is one for the current buffer; otherwise, it uses the closest
+   ipython REPL relative to id `1`.
 
 4. `3REPLSendVisual ipython` sends the visual range to the closest ipython REPL
    relative to id `3`.
@@ -402,10 +404,11 @@ command being executed.
 Sends current line to REPL `i` or the REPL that current buffer is attached to.
 
 If you provide an optional argument, the function will attempt to send to the
-closest REPL with the specified name. If no count is supplied, it will try to
-send to the REPL that the current buffer is attached to. If the current buffer
-isn't attached to any REPL, it will use REPL 1. If you add a count `i`, it will
-send to REPL `i`.
+closest REPL with the specified name. When no count is supplied, it first
+checks whether the current buffer is attached to a REPL with that name and uses
+it. If the buffer isn't attached to a matching REPL, it will use REPL 1 to find
+the closest match. If you add a count `i`, it will send to the closest REPL
+with that name relative to `i`.
 
 Here are examples of how to use this command:
 
@@ -414,8 +417,9 @@ Here are examples of how to use this command:
 
 2. `3REPLSendLine` sends the current line to REPL 3.
 
-3. `REPLSendLine ipython` sends the current line to the closest ipython REPL
-   relative to id `1`.
+3. `REPLSendLine ipython` sends the current line to the attached ipython REPL
+   if there is one for the current buffer; otherwise, it uses the closest
+   ipython REPL relative to id `1`.
 
 4. `3REPLSendLine ipython` sends the current line to the closest ipython REPL
    relative to id `3`.
@@ -426,10 +430,11 @@ The operator to send the text to REPL `i` or the REPL that the current buffer
 is attached to.
 
 If you provide an optional argument, the function will attempt to send to the
-closest REPL with the specified name. If no count is supplied, it will try to
-send to the REPL that the current buffer is attached to. If the current buffer
-isn't attached to any REPL, it will use REPL 1. If you add a count `i`, it will
-send to REPL `i`.
+closest REPL with the specified name. When no count is supplied, it first
+checks whether the current buffer is attached to a REPL with that name and uses
+it. If the buffer isn't attached to a matching REPL, it will use REPL 1 to find
+the closest match. If you add a count `i`, it will send to the closest REPL
+with that name relative to `i`.
 
 Here are examples of how to use this command:
 
@@ -439,8 +444,9 @@ Here are examples of how to use this command:
 
 2. `3REPLSendOperator` sends the motion to REPL 3.
 
-3. `REPLSendOperator ipython` sends the motion to the closest ipython REPL
-   relative to id `1`.
+3. `REPLSendOperator ipython` sends the motion to the attached ipython REPL if
+   there is one for the current buffer; otherwise, it uses the closest ipython
+   REPL relative to id `1`.
 
 4. `3REPLSendOperator ipython` sends the motion to the closest ipython REPL
    relative to id `3`.
@@ -462,10 +468,11 @@ Sends the command typed in the cmdline to REPL `i` or the REPL that the current
 buffer is attached to.
 
 If the first argument of this command is `$NAME`, the function will attempt to
-send to the closest REPL with the specified `NAME`. If no count is supplied, it
-will try to send to the REPL that the current buffer is attached to. If the
-current buffer isn't attached to any REPL, it will use REPL 1. If you add a
-count `i`, it will send to REPL `i`.
+send to a REPL with the specified `NAME`. If no count is supplied, it first
+checks whether the current buffer is attached to a REPL with that name and uses
+it. If the buffer isn't attached to a matching REPL, it will use REPL 1 to find
+the closest match. If you add a count `i`, it will send to the closest REPL
+with that name relative to `i`.
 
 Here are examples of how to use this command:
 

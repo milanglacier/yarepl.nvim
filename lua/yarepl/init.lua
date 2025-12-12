@@ -246,27 +246,32 @@ end
 -- `name` is not nil or not an empty string, then will try to find the REPL
 -- with `name` relative to `id`.
 function M._get_repl(id, name, bufnr)
-    local repl
+    local has_name = name ~= nil and name ~= ''
+
+    -- No count: prefer the attached REPL; if a name is supplied, require it to match.
     if id == nil or id == 0 then
-        repl = M._bufnrs_to_repls[bufnr]
-        id = 1
-        if not repl_is_valid(repl) then
-            repl = M._repls[id]
+        local attached_repl = M._bufnrs_to_repls[bufnr]
+        if has_name and repl_is_valid(attached_repl) and attached_repl.name == name then
+            return attached_repl
         end
-    else
-        repl = M._repls[id]
+        if not has_name and repl_is_valid(attached_repl) then
+            return attached_repl
+        end
+
+        id = 1
     end
 
-    if name ~= nil and name ~= '' then
-        id = find_closest_repl_from_id_with_name(id, name)
-        repl = M._repls[id]
+    local repl = M._repls[id]
+
+    if has_name then
+        local closest_id = find_closest_repl_from_id_with_name(id, name)
+        repl = M._repls[closest_id]
     end
 
-    if not repl_is_valid(repl) then
-        return nil
+    if repl_is_valid(repl) then
+        return repl
     end
-
-    return repl
+    return nil
 end
 
 local function repl_win_scroll_to_bottom(repl)
@@ -534,10 +539,12 @@ end
 ---@param source_content boolean? Whether use source_syntax (defined by REPL meta) Default: false
 ---@param send_delayed_final_cr boolean? Default: depends on REPL meta or config.os.windows.
 -- Send a list of strings to the repl specified by `id` and `name` and `bufnr`.
--- If `id` is 0, then will try to find the REPL that `bufnr` is attached to, if
--- not find, will use `id = 1`. If `name` is not nil or not an empty string,
--- then will try to find the REPL with `name` relative to `id`. If `bufnr` is
--- nil or `bufnr` = 0, will find the REPL that current buffer is attached to.
+-- If `id` is 0, then will try to find the REPL that `bufnr` is attached to. If
+-- a `name` is provided and that attached REPL matches it, the attached REPL is
+-- used. Otherwise it will use `id = 1`. If `name` is not nil or not an empty
+-- string, then will try to find the REPL with `name` relative to `id`. If
+-- `bufnr` is nil or `bufnr` = 0, will find the REPL that current buffer is
+-- attached to.
 M._send_strings = function(id, name, bufnr, strings, use_formatter, source_content, send_delayed_final_cr)
     use_formatter = use_formatter == nil and true or use_formatter
     if bufnr == nil or bufnr == 0 then
