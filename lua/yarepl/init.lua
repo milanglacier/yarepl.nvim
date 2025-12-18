@@ -42,6 +42,7 @@ local default_config = function()
         scroll_to_bottom_after_sending = true,
         -- Format REPL buffer names as #repl_name#n (e.g., #ipython#1) instead of using terminal defaults
         format_repl_buffers_names = true,
+        highlight_on_send_operator = { enabled = false, hl_group = 'IncSearch', timeout = 150 },
         os = {
             windows = {
                 send_delayed_final_cr = true,
@@ -319,8 +320,9 @@ local function get_lines(mode, submode)
 end
 
 ---@param motion_type string
----@param is_visual boolean
-local function highlight_range(motion_type, is_visual)
+local function highlight_range(motion_type)
+    local highlight_config = M._config.highlight_on_send_operator
+
     local type_map = {
         line = 'V',
         char = 'v',
@@ -331,14 +333,9 @@ local function highlight_range(motion_type, is_visual)
     }
     local regtype = type_map[motion_type] or 'v'
 
-    if is_visual then
-        local start_pos = vim.fn.getpos "'<"
-        local end_pos = vim.fn.getpos "'>"
-        vim.fn.setpos("'[", start_pos)
-        vim.fn.setpos("']", end_pos)
-    end
-
     vim.highlight.on_yank {
+        higroup = highlight_config.hl_group,
+        timeout = highlight_config.timeout,
         event = {
             operator = 'y',
             regtype = regtype,
@@ -673,6 +670,9 @@ M._send_operator_internal = function(motion)
     end
 
     M._send_strings(id, name, current_bufnr, lines)
+    if M._config.highlight_on_send_operator.enabled then
+        highlight_range(motion)
+    end
 end
 
 M._source_operator_internal = function(motion)
@@ -695,7 +695,9 @@ M._source_operator_internal = function(motion)
     end
 
     M._send_strings(id, name, current_bufnr, lines, nil, true)
-    highlight_range(motion, false)
+    if M._config.highlight_on_send_operator.enabled then
+        highlight_range(motion)
+    end
 end
 
 function M.run_cmd_with_count(cmd)
@@ -992,11 +994,6 @@ M.commands.send_visual = function(opts)
     end
 
     M._send_strings(id, name, current_buffer, lines, nil, opts.source_content)
-
-    -- If sourcing content, provide visual highlight feedback
-    if opts.source_content then
-        highlight_range(visual_mode, true)
-    end
 end
 
 M.commands.send_line = function(opts)
