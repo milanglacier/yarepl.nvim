@@ -178,6 +178,8 @@ yarepl.setup {
     scroll_to_bottom_after_sending = true,
     -- Format REPL buffer names as #repl_name#n (e.g., #ipython#1) instead of using terminal defaults
     format_repl_buffers_names = true,
+    -- Highlight the operated range when using send/source operators
+    highlight_on_send_operator = { enabled = false, hl_group = 'IncSearch', timeout = 150 },
     os = {
         -- Some hacks for Windows. macOS and Linux users can simply ignore
         -- them. The default options are recommended for Windows user.
@@ -348,6 +350,10 @@ checks whether the current buffer is attached to a REPL with that name and uses
 it. If the buffer isn't attached to a matching REPL, it will use REPL 1 to find
 the closest match. If you add a count `i`, it will send to the closest REPL
 with that name relative to `i`.
+
+Optional highlighting for the operated range is available for both
+`REPLSendOperator` and `REPLSourceOperator` by setting
+`highlight_on_send_operator.enabled = true` in your setup.
 
 Here are examples of how to use this command:
 
