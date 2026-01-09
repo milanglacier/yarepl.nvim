@@ -215,8 +215,9 @@ launch and interact with Codex.
   (e.g., `:CodexSetArgs --model gpt-5`).
 - `CodexSend<Action>`: Send a predefined action to Codex. Available actions:
   `Abort` (Ctrl-C), `Exit` (Ctrl-D), `Diff`, `Status`, `Model`, `New`,
-  `Approvals`, `Compact`, `TranscriptEnter` (Ctrl-T), `TranscriptQuit` (q),
-  `TranscriptBegin` (Home), `TranscriptEnd` (End), `PageUp`, `PageDown`.
+  `Approvals`, `Compact`, `OpenEditor` (Ctrl-G), `TranscriptEnter` (Ctrl-T),
+  `TranscriptQuit` (q), `TranscriptBegin` (Home), `TranscriptEnd` (End),
+  `PageUp`, `PageDown`.
 - `CodexExec`: Type a prompt or slash command in the cmdline and send it to
   Codex, with completion for common prefixes like `/model`, `/approvals`,
   `/init`, `/new`, `/compact`, `/diff`, `/mention`, `/status`.
@@ -238,6 +239,7 @@ extra convenience maps:
 - `<Plug>(CodexSendNew)`
 - `<Plug>(CodexSendApprovals)`
 - `<Plug>(CodexSendCompact)`
+- `<Plug>(CodexSendOpenEditor)`: Ask Codex to open the editor (Ctrl-G)
 - `<Plug>(CodexSendTranscriptEnter)`
 - `<Plug>(CodexSendTranscriptQuit)`
 - `<Plug>(CodexSendTranscriptBegin)`: Send `<Home>`
@@ -257,6 +259,15 @@ require('yarepl').setup {
     codex = require('yarepl.extensions.codex').create_codex_meta(),
   },
 }
+```
+
+For the best editor-open experience, use the
+[neovim-remote](https://github.com/mhinz/neovim-remote) plugin (until Neovim
+implements an official `--remote-wait`), and set your `EDITOR` inside Neovim
+to an `nvr` command, for example:
+
+```lua
+vim.env.EDITOR = 'nvr -cc tabnew --remote-wait'
 ```
 
 ### Example keybinding Setup
@@ -282,6 +293,7 @@ keymap('n', '<Leader>cm', '<Plug>(CodexSendModel)', { desc = 'Model' })
 keymap('n', '<Leader>cn', '<Plug>(CodexSendNew)', { desc = 'New' })
 keymap('n', '<Leader>cA', '<Plug>(CodexSendApprovals)', { desc = 'Approvals' })
 keymap('n', '<Leader>cc', '<Plug>(CodexSendCompact)', { desc = 'Compact' })
+keymap('n', '<Leader>co', '<Plug>(CodexSendOpenEditor)', { desc = 'Open editor' })
 -- transcript and navigation helpers
 keymap('n', '<Leader>cte', '<Plug>(CodexSendTranscriptEnter)', { desc = 'Transcript mode' })
 keymap('n', '<Leader>ctq', '<Plug>(CodexSendTranscriptQuit)', { desc = 'Transcript quit' })
@@ -302,6 +314,8 @@ Default configuration:
 require('yarepl.extensions.codex').setup {
       codex_cmd = 'codex',
       codex_args = {},
+      -- Warn when $EDITOR is unset or not using nvr (for OpenEditor).
+      warn_on_EDITOR_env_var = true,
       -- Display a winbar (e.g., "codex#<id>") in the floating window.
       show_winbar_in_float_win = true,
       -- The default is a floating window at the bottom right corner; you can override it

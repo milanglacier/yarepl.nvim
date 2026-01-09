@@ -50,6 +50,7 @@ local codex_args = {
 M.codex_args = {}
 M.formatter = 'bracketed_pasting_delayed_cr'
 M.codex_cmd = 'codex'
+M.warn_on_EDITOR_env_var = true
 
 M.setup = function(params)
     M = vim.tbl_deep_extend('force', M, params or {})
@@ -94,6 +95,17 @@ local shortcuts = {
     { name = 'New', key = '/new', requires_cr = true },
     { name = 'Approvals', key = '/approvals', requires_cr = true },
     { name = 'Compact', key = '/compact', requires_cr = true },
+    -- Ctrl-g
+    {
+        name = 'OpenEditor',
+        key = '\7',
+        requires_cr = false,
+        pre_hook = function()
+            if M.warn_on_EDITOR_env_var and ((not vim.env.EDITOR) or (not vim.env.EDITOR:find 'nvr')) then
+                vim.notify('current $EDITOR command is not nvr, please consider using nvr', vim.log.levels.WARN)
+            end
+        end,
+    },
     --Ctrl-t
     { name = 'TranscriptEnter', key = '\20', requires_cr = false },
     { name = 'TranscriptQuit', key = 'q', requires_cr = false },
@@ -116,6 +128,9 @@ end, {
 
 for _, shortcut in ipairs(shortcuts) do
     vim.api.nvim_create_user_command('CodexSend' .. shortcut.name, function(opts)
+        if type(shortcut.pre_hook) == 'function' then
+            shortcut.pre_hook()
+        end
         local id = opts.count
         util.send_to_repl_raw('codex', id, shortcut.key, shortcut.requires_cr)
     end, { count = true })
