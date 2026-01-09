@@ -261,13 +261,22 @@ require('yarepl').setup {
 }
 ```
 
-For the best editor-open experience, use the
-[neovim-remote](https://github.com/mhinz/neovim-remote) plugin (until Neovim
-implements an official `--remote-wait`), and set your `EDITOR` inside Neovim
-to an `nvr` command, for example:
+For the best experience using the `Open Editor` (Ctrl‑G) command with Codex,
+install the [neovim-remote](https://github.com/mhinz/neovim-remote) plugin
+(until Neovim provides an official `--remote-wait`) and set your `EDITOR`
+inside Neovim to an `nvr` command. For example:
 
 ```lua
 vim.env.EDITOR = 'nvr -cc tabnew --remote-wait'
+```
+
+To return from an nvr instance to Codex, use `:w | bdelete` instead of `:wq`,
+as nvr only exits when the buffer is deleted, allowing Codex to receive the
+updated content. You can also define a convenient `WQ` command with this
+Vimscript one-liner:
+
+```vim
+command! WQ w | bdelete
 ```
 
 ### Example keybinding Setup
