@@ -217,6 +217,19 @@ local function repl_swap(id_1, id_2)
     repl_cleanup()
 end
 
+local function find_repl_by_name_index(name, index)
+    local count = 0
+    for _, repl in ipairs(M._repls) do
+        if repl_is_valid(repl) and repl.name == name then
+            count = count + 1
+            if count == index then
+                return repl
+            end
+        end
+    end
+    return nil
+end
+
 local function attach_buffer_to_repl(bufnr, repl)
     if not repl_is_valid(repl) then
         vim.notify [[REPL doesn't exist!]]
@@ -285,6 +298,20 @@ local function repl_win_scroll_to_bottom(repl)
     if repl_win ~= -1 then
         local lines = api.nvim_buf_line_count(repl.bufnr)
         api.nvim_win_set_cursor(repl_win, { lines, 0 })
+    end
+end
+
+local function post_create_repl(id, bufnr, opts)
+    if not repl_is_valid(M._repls[id]) then
+        return
+    end
+
+    if opts.bang then
+        attach_buffer_to_repl(bufnr, M._repls[id])
+    end
+
+    if M._config.scroll_to_bottom_after_sending then
+        repl_win_scroll_to_bottom(M._repls[id])
     end
 end
 
@@ -759,19 +786,19 @@ local function add_keymap(meta_name)
 end
 
 M.commands.start = function(opts)
-    -- if calling the command without any count, we want count to become 1.
     local repl_name = opts.args
-    local id = opts.count == 0 and #M._repls + 1 or opts.count
-    local repl = M._repls[id]
     local current_bufnr = api.nvim_get_current_buf()
 
-    if repl_is_valid(repl) then
-        vim.notify(string.format('REPL %d already exists', id))
-        focus_repl(repl)
-        return
-    end
-
     if repl_name == '' then
+        local id = opts.count == 0 and #M._repls + 1 or opts.count
+        local repl = M._repls[id]
+
+        if repl_is_valid(repl) then
+            vim.notify(string.format('REPL %d already exists', id))
+            focus_repl(repl)
+            return
+        end
+
         local repls = {}
         for name, _ in pairs(M._config.metas) do
             table.insert(repls, name)
@@ -786,25 +813,21 @@ M.commands.start = function(opts)
 
             repl_name = choice
             create_repl(id, repl_name)
-
-            if opts.bang then
-                attach_buffer_to_repl(current_bufnr, M._repls[id])
-            end
-
-            if M._config.scroll_to_bottom_after_sending then
-                repl_win_scroll_to_bottom(M._repls[id])
-            end
+            post_create_repl(id, current_bufnr, opts)
         end)
     else
+        local id = #M._repls + 1
+
+        if opts.count ~= 0 then
+            local repl = find_repl_by_name_index(repl_name, opts.count)
+            if repl then
+                focus_repl(repl)
+                return
+            end
+        end
+
         create_repl(id, repl_name)
-
-        if opts.bang then
-            attach_buffer_to_repl(current_bufnr, M._repls[id])
-        end
-
-        if M._config.scroll_to_bottom_after_sending then
-            repl_win_scroll_to_bottom(M._repls[id])
-        end
+        post_create_repl(id, current_bufnr, opts)
     end
 end
 

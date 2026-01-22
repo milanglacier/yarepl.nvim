@@ -216,9 +216,17 @@ You can create a REPL with a specific id by providing a count, such as
 increamental ID will be created. You can also provide a name as an argument. If
 no argument is given, you'll be prompted to select a REPL from the list of
 available ones. If the id is already in use, it will focus on the REPL with
-that id. If you append a `!` to the command, the current buffer will attach to
-the newly created REPL, for instance, `REPLStart!` or `3REPLStart!`. Note that
-attachment only happens when a new REPL is created.
+that id.
+
+When a name is provided and a count is also provided (for example, `2REPLStart
+ipython`), the count selects the Nth REPL with that name. If there are fewer
+than N existing REPLs with that name, a new one is created. When a name is
+provided without a count (`REPLStart ipython`), it always creates a new REPL of
+that name.
+
+If you append a `!` to the command, the current buffer will attach to the newly
+created REPL, for instance, `REPLStart!` or `3REPLStart!`. Note that attachment
+only happens when a new REPL is created.
 
 ### REPLAttachBufferToREPL
 
