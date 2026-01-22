@@ -1238,17 +1238,19 @@ M.setup = function(opts)
     end
 end
 
+local function list_metas()
+    local metas = {}
+    for name, _ in pairs(M._config.metas) do
+        table.insert(metas, name)
+    end
+    return metas
+end
+
 api.nvim_create_user_command('REPLStart', M.commands.start, {
     count = true,
     bang = true,
     nargs = '?',
-    complete = function()
-        local metas = {}
-        for name, _ in pairs(M._config.metas) do
-            table.insert(metas, name)
-        end
-        return metas
-    end,
+    complete = list_metas,
     desc = [[
 Create REPL `i` from the list of available REPLs.
 ]],
@@ -1258,13 +1260,7 @@ api.nvim_create_user_command('REPLStartOrFocusOrHide', M.commands.start_or_focus
     count = true,
     bang = true,
     nargs = '?',
-    complete = function()
-        local metas = {}
-        for name, _ in pairs(M._config.metas) do
-            table.insert(metas, name)
-        end
-        return metas
-    end,
+    complete = list_metas,
     desc = [[
 Start a REPL or toggle focus/hide on an existing REPL.
 ]],
