@@ -747,6 +747,7 @@ local function add_keymap(meta_name)
 
     local mode_commands = {
         { 'n', 'REPLStart' },
+        { 'n', 'REPLStartOrFocusOrHide' },
         { 'n', 'REPLFocus' },
         { 'n', 'REPLHide' },
         { 'n', 'REPLHideOrFocus' },
@@ -868,14 +869,8 @@ M.commands.hide = function(opts)
     end
 end
 
-M.commands.hide_or_focus = function(opts)
-    local id = opts.count
-    local name = opts.args
-    local current_buffer = api.nvim_get_current_buf()
-
-    local repl = M._get_repl(id, name, current_buffer)
-
-    if not repl then
+local function hide_or_focus_repl(repl)
+    if not repl_is_valid(repl) then
         vim.notify [[REPL doesn't exist!]]
         return
     end
@@ -890,6 +885,53 @@ M.commands.hide_or_focus = function(opts)
     else
         focus_repl(repl)
     end
+end
+
+M.commands.hide_or_focus = function(opts)
+    local id = opts.count
+    local name = opts.args
+    local current_buffer = api.nvim_get_current_buf()
+
+    local repl = M._get_repl(id, name, current_buffer)
+
+    if not repl then
+        vim.notify [[REPL doesn't exist!]]
+        return
+    end
+
+    hide_or_focus_repl(repl)
+end
+
+M.commands.start_or_focus_or_hide = function(opts)
+    local id = opts.count
+    local name = opts.args
+    local has_name = name ~= nil and name ~= ''
+    local repl
+
+    if id == 0 then
+        if has_name then
+            repl = find_repl_by_name_index(name, 1)
+        else
+            repl = M._repls[1]
+        end
+
+        if repl_is_valid(repl) then
+            hide_or_focus_repl(repl)
+            return
+        end
+    else
+        if has_name then
+            repl = find_repl_by_name_index(name, id)
+        else
+            repl = M._repls[id]
+        end
+        if repl_is_valid(repl) then
+            hide_or_focus_repl(repl)
+            return
+        end
+    end
+
+    M.commands.start(opts)
 end
 
 M.commands.close = function(opts)
@@ -1209,6 +1251,22 @@ api.nvim_create_user_command('REPLStart', M.commands.start, {
     end,
     desc = [[
 Create REPL `i` from the list of available REPLs.
+]],
+})
+
+api.nvim_create_user_command('REPLStartOrFocusOrHide', M.commands.start_or_focus_or_hide, {
+    count = true,
+    bang = true,
+    nargs = '?',
+    complete = function()
+        local metas = {}
+        for name, _ in pairs(M._config.metas) do
+            table.insert(metas, name)
+        end
+        return metas
+    end,
+    desc = [[
+Start a REPL or toggle focus/hide on an existing REPL.
 ]],
 })
 
