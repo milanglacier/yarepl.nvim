@@ -11,6 +11,11 @@ local is_win32 = vim.fn.has 'win32' == 1
 ---@field source_command_hint? table Configuration for showing source command hints
 ---@field send_delayed_final_cr? boolean Whether to send a delayed carriage return after commands
 
+---@class yarepl.REPLInstance
+---@field bufnr number
+---@field term number
+---@field name string
+
 M.formatter = {}
 M.commands = {}
 M._virt_text_ns_id = api.nvim_create_namespace 'YareplVirtualText'
@@ -57,7 +62,9 @@ local default_config = function()
     }
 end
 
+---@type yarepl.REPLInstance[]
 M._repls = {}
+---@type table<number, yarepl.REPLInstance>
 M._bufnrs_to_repls = {}
 
 local function repl_is_valid(repl)
@@ -251,10 +258,10 @@ M.bufnr_is_attached_to_repl = function(bufnr)
     end
 end
 
----@param id number|nil the id of the repl,
----@param name string|nil the name of the closest repl that will try to find
----@param bufnr number|nil the buffer number of the buffer
----@return table|nil repl the repl object or nil if not found
+---@param id number? the id of the repl,
+---@param name string? the name of the closest repl that will try to find
+---@param bufnr number? the buffer number of the buffer
+---@return yarepl.REPLInstance? repl the repl object or nil if not found
 -- get the repl specified by `id` and `name`. If `id` is 0, then will try to
 -- find the REPL `bufnr` is attached to, if not find, will use `id = 1`. If
 -- `name` is not nil or not an empty string, then will try to find the REPL
