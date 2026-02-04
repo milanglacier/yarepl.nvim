@@ -406,10 +406,9 @@ require('telescope').load_extension 'REPLShow'
 ```
 
 Once added, you can use `Telescope REPLShow` to preview the active REPL
-buffers. If you are using the default Telescope configuration, `<C-t>` opens a
-new tab for the selected REPL, `<C-v>` generates a vertical split window for
-the chosen REPL, and `<C-x>` creates a horizontal split window for your
-selected REPL.
+buffers. This integration allows you to preview active REPL buffers. Pressing
+`<CR>` will open the selected REPL buffer using `wincmd`, either with a
+meta-local `wincmd` or the global `wincmd`, depending on the context.
 
 # Fzf-lua Integration
 

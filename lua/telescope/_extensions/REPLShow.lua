@@ -15,6 +15,24 @@ local function REPLShow(opts)
         return
     end
 
+    local function focus_repl(prompt_bufnr)
+        local actions = require 'telescope.actions'
+        local action_state = require 'telescope.actions.state'
+        local selection = action_state.get_selected_entry()
+        if not selection then
+            return
+        end
+
+        for id, repl in ipairs(repls) do
+            if repl.bufnr == selection.bufnr then
+                actions.close(prompt_bufnr)
+                -- Open the REPL buffer with configured wincmd.
+                vim.cmd(id .. 'REPLFocus')
+                return
+            end
+        end
+    end
+
     pickers
         .new(opts, {
             prompt_title = 'REPL Buffers',
@@ -33,6 +51,11 @@ local function REPLShow(opts)
             previewer = conf.grep_previewer(opts),
             sorter = conf.generic_sorter(opts),
             default_selection_index = 1,
+            attach_mappings = function(_, _)
+                local actions = require 'telescope.actions'
+                actions.select_default:replace(focus_repl)
+                return true
+            end,
         })
         :find()
 end
