@@ -86,18 +86,19 @@ end
 
 local shortcuts = {
     -- Ctrl-c
-    { name = 'Abort', key = '\3', requires_cr = false },
+    { name = 'send_abort', legacy_name = 'Abort', key = '\3', requires_cr = false },
     -- Ctrl-d
-    { name = 'Exit', key = '\4', requires_cr = false },
-    { name = 'Diff', key = '/diff', requires_cr = true },
-    { name = 'Status', key = '/status', requires_cr = true },
-    { name = 'Model', key = '/model', requires_cr = true },
-    { name = 'New', key = '/new', requires_cr = true },
-    { name = 'Approvals', key = '/approvals', requires_cr = true },
-    { name = 'Compact', key = '/compact', requires_cr = true },
+    { name = 'send_exit', legacy_name = 'Exit', key = '\4', requires_cr = false },
+    { name = 'send_diff', legacy_name = 'Diff', key = '/diff', requires_cr = true },
+    { name = 'send_status', legacy_name = 'Status', key = '/status', requires_cr = true },
+    { name = 'send_model', legacy_name = 'Model', key = '/model', requires_cr = true },
+    { name = 'send_new', legacy_name = 'New', key = '/new', requires_cr = true },
+    { name = 'send_approvals', legacy_name = 'Approvals', key = '/approvals', requires_cr = true },
+    { name = 'send_compact', legacy_name = 'Compact', key = '/compact', requires_cr = true },
     -- Ctrl-g
     {
-        name = 'OpenEditor',
+        name = 'send_open_editor',
+        legacy_name = 'OpenEditor',
         key = '\7',
         requires_cr = false,
         pre_hook = function()
@@ -107,17 +108,99 @@ local shortcuts = {
         end,
     },
     --Ctrl-t
-    { name = 'TranscriptEnter', key = '\20', requires_cr = false },
-    { name = 'TranscriptQuit', key = 'q', requires_cr = false },
+    { name = 'send_transcript_enter', legacy_name = 'TranscriptEnter', key = '\20', requires_cr = false },
+    { name = 'send_transcript_quit', legacy_name = 'TranscriptQuit', key = 'q', requires_cr = false },
     -- Home
-    { name = 'TranscriptBegin', key = '\27[1~', requires_cr = false },
+    { name = 'send_transcript_begin', legacy_name = 'TranscriptBegin', key = '\27[1~', requires_cr = false },
     -- End
-    { name = 'TranscriptEnd', key = '\27[4~', requires_cr = false },
-    { name = 'PageUp', key = '\27[5~', requires_cr = false },
-    { name = 'PageDown', key = '\27[6~', requires_cr = false },
+    { name = 'send_transcript_end', legacy_name = 'TranscriptEnd', key = '\27[4~', requires_cr = false },
+    { name = 'send_page_up', legacy_name = 'PageUp', key = '\27[5~', requires_cr = false },
+    { name = 'send_page_down', legacy_name = 'PageDown', key = '\27[6~', requires_cr = false },
 }
 
+-------------------------------------
+-- New unified Yarepl codex commands
+-------------------------------------
+
+local codex_commands = {}
+local codex_completions = {}
+
+for _, shortcut in ipairs(shortcuts) do
+    codex_commands[shortcut.name] = function(opts)
+        if type(shortcut.pre_hook) == 'function' then
+            shortcut.pre_hook()
+        end
+        local id = opts.count
+        util.send_to_repl_raw('codex', id, shortcut.key, shortcut.requires_cr)
+    end
+    codex_completions[shortcut.name] = true
+end
+
+codex_commands.set_args = function(opts)
+    M.codex_args = opts.fargs or {}
+end
+codex_completions.set_args = function()
+    return codex_args
+end
+
+codex_commands.exec = function(opts)
+    local id = opts.count
+    local command = opts.args
+    util.send_to_repl_raw('codex', id, command, true)
+end
+codex_completions.exec = function()
+    return prefixes
+end
+
+local yarepl = require 'yarepl'
+
+yarepl.commands.codex = function(opts)
+    local fargs = opts.fargs
+    if #fargs == 0 then
+        vim.notify('Yarepl codex: subcommand required', vim.log.levels.ERROR)
+        return
+    end
+
+    local subcmd = table.remove(fargs, 1)
+    local handler = codex_commands[subcmd]
+    if not handler then
+        vim.notify('Yarepl codex: unknown subcommand: ' .. subcmd, vim.log.levels.ERROR)
+        return
+    end
+
+    handler { args = table.concat(fargs, ' '), fargs = fargs, count = opts.count, bang = opts.bang }
+end
+
+yarepl.completions.codex = codex_completions
+
+-------------------------------------
+-- New <Plug>(yarepl-codex-*) keymaps
+-------------------------------------
+
+for _, shortcut in ipairs(shortcuts) do
+    local plug_name = shortcut.name:gsub('_', '-')
+    keymap('n', '<Plug>(yarepl-codex-' .. plug_name .. ')', '', {
+        noremap = true,
+        callback = function()
+            util.run_cmd_with_count('Yarepl codex ' .. shortcut.name)
+        end,
+    })
+end
+
+keymap('n', '<Plug>(yarepl-codex-exec)', '', {
+    noremap = true,
+    callback = function()
+        return util.partial_cmd_with_count_expr 'Yarepl codex exec '
+    end,
+    expr = true,
+})
+
+-------------------------------------
+-- Legacy commands with deprecation notices
+-------------------------------------
+
 vim.api.nvim_create_user_command('CodexSetArgs', function(opts)
+    vim.deprecate('CodexSetArgs', 'Yarepl codex set_args', 'next release', 'yarepl.nvim', false)
     M.codex_args = opts.fargs or {}
 end, {
     nargs = '*',
@@ -127,23 +210,24 @@ end, {
 })
 
 for _, shortcut in ipairs(shortcuts) do
-    vim.api.nvim_create_user_command('CodexSend' .. shortcut.name, function(opts)
+    vim.api.nvim_create_user_command('CodexSend' .. shortcut.legacy_name, function(opts)
+        vim.deprecate(
+            'CodexSend' .. shortcut.legacy_name,
+            'Yarepl codex ' .. shortcut.name,
+            'next release',
+            'yarepl.nvim',
+            false
+        )
         if type(shortcut.pre_hook) == 'function' then
             shortcut.pre_hook()
         end
         local id = opts.count
         util.send_to_repl_raw('codex', id, shortcut.key, shortcut.requires_cr)
     end, { count = true })
-
-    keymap('n', string.format('<Plug>(CodexSend%s)', shortcut.name), '', {
-        noremap = true,
-        callback = function()
-            util.run_cmd_with_count('CodexSend' .. shortcut.name)
-        end,
-    })
 end
 
 vim.api.nvim_create_user_command('CodexExec', function(opts)
+    vim.deprecate('CodexExec', 'Yarepl codex exec', 'next release', 'yarepl.nvim', false)
     local id = opts.count
     local command = opts.args
     util.send_to_repl_raw('codex', id, command, true)
@@ -155,9 +239,26 @@ end, {
     end,
 })
 
+-------------------------------------
+-- Legacy <Plug>(Codex*) keymaps with deprecation notices
+-------------------------------------
+
+for _, shortcut in ipairs(shortcuts) do
+    local old_plug = '<Plug>(CodexSend' .. shortcut.legacy_name .. ')'
+    local new_plug = '<Plug>(yarepl-codex-' .. shortcut.name:gsub('_', '-') .. ')'
+    keymap('n', old_plug, '', {
+        noremap = true,
+        callback = function()
+            vim.deprecate(old_plug, new_plug, 'next release', 'yarepl.nvim', false)
+            util.run_cmd_with_count('CodexSend' .. shortcut.legacy_name)
+        end,
+    })
+end
+
 keymap('n', '<Plug>(CodexExec)', '', {
     noremap = true,
     callback = function()
+        vim.deprecate('<Plug>(CodexExec)', '<Plug>(yarepl-codex-exec)', 'next release', 'yarepl.nvim', false)
         return util.partial_cmd_with_count_expr 'CodexExec'
     end,
     expr = true,
