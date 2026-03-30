@@ -3,3 +3,5 @@
 scratch.lua
 .aider*
 .env
+.codex
+.nvim_log
