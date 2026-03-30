@@ -18,6 +18,7 @@ local is_win32 = vim.fn.has 'win32' == 1
 
 M.formatter = {}
 M.commands = {}
+M.completions = {}
 M._virt_text_ns_id = api.nvim_create_namespace 'YareplVirtualText'
 
 local default_config = function()
@@ -753,23 +754,30 @@ local function add_keymap(meta_name)
     local suffix = meta_name and ('-' .. meta_name) or ''
 
     local mode_commands = {
-        { 'n', 'REPLStart' },
-        { 'n', 'REPLStartOrFocusOrHide' },
-        { 'n', 'REPLFocus' },
-        { 'n', 'REPLHide' },
-        { 'n', 'REPLHideOrFocus' },
-        { 'n', 'REPLSendLine' },
-        { 'n', 'REPLSendOperator' },
-        { 'v', 'REPLSendVisual' },
-        { 'n', 'REPLSourceOperator' },
-        { 'v', 'REPLSourceVisual' },
-        { 'n', 'REPLClose' },
+        { 'n', 'REPLStart', 'start' },
+        { 'n', 'REPLStartOrFocusOrHide', 'start-or-focus-or-hide' },
+        { 'n', 'REPLFocus', 'focus' },
+        { 'n', 'REPLHide', 'hide' },
+        { 'n', 'REPLHideOrFocus', 'hide-or-focus' },
+        { 'n', 'REPLSendLine', 'send-line' },
+        { 'n', 'REPLSendOperator', 'send-operator' },
+        { 'v', 'REPLSendVisual', 'send-visual' },
+        { 'n', 'REPLSourceOperator', 'source-operator' },
+        { 'v', 'REPLSourceVisual', 'source-visual' },
+        { 'n', 'REPLClose', 'close' },
     }
 
     for _, spec in ipairs(mode_commands) do
         api.nvim_set_keymap(spec[1], string.format('<Plug>(%s%s)', spec[2], suffix), '', {
             noremap = true,
             callback = function()
+                vim.deprecate(
+                    string.format('<Plug>(%s%s)', spec[2], suffix),
+                    string.format('<Plug>(Yarepl-%s%s)', spec[3], suffix),
+                    '2026-06-01',
+                    'yarepl.nvim',
+                    false
+                )
                 if meta_name then
                     M.run_cmd_with_count(spec[2] .. ' ' .. meta_name)
                 else
@@ -783,6 +791,13 @@ local function add_keymap(meta_name)
     api.nvim_set_keymap('n', string.format('<Plug>(%s%s)', 'REPLExec', suffix), '', {
         noremap = true,
         callback = function()
+            vim.deprecate(
+                string.format('<Plug>(REPLExec%s)', suffix),
+                string.format('<Plug>(Yarepl-exec%s)', suffix),
+                '2026-06-01',
+                'yarepl.nvim',
+                false
+            )
             if meta_name then
                 return M.partial_cmd_with_count_expr('REPLExec $' .. meta_name)
             else
@@ -1207,6 +1222,58 @@ M.source_syntaxes.bash = 'source "{{file}}"'
 M.source_syntaxes.R = 'eval(parse(text = readr::read_file("{{file}}")))'
 M.source_syntaxes.aichat = '.file "{{file}}"'
 
+-- New <Plug>(Yarepl-*) keymaps
+
+local function add_yarepl_keymap(meta_name)
+    if meta_name then
+        meta_name = meta_name:gsub('[^%w-_]', '-')
+    end
+
+    local suffix = meta_name and ('-' .. meta_name) or ''
+
+    local mode_commands = {
+        { 'n', 'start' },
+        { 'n', 'start_or_focus_or_hide' },
+        { 'n', 'focus' },
+        { 'n', 'hide' },
+        { 'n', 'hide_or_focus' },
+        { 'n', 'send_line' },
+        { 'n', 'send_operator' },
+        { 'v', 'send_visual' },
+        { 'n', 'source_operator' },
+        { 'v', 'source_visual' },
+        { 'n', 'close' },
+    }
+
+    for _, spec in ipairs(mode_commands) do
+        local plug_name = spec[2]:gsub('_', '-')
+        api.nvim_set_keymap(spec[1], string.format('<Plug>(Yarepl-%s%s)', plug_name, suffix), '', {
+            noremap = true,
+            callback = function()
+                if meta_name then
+                    M.run_cmd_with_count('Yarepl ' .. spec[2] .. ' ' .. meta_name)
+                else
+                    M.run_cmd_with_count('Yarepl ' .. spec[2])
+                end
+            end,
+        })
+    end
+
+    api.nvim_set_keymap('n', string.format('<Plug>(Yarepl-exec%s)', suffix), '', {
+        noremap = true,
+        callback = function()
+            if meta_name then
+                return M.partial_cmd_with_count_expr('Yarepl exec $' .. meta_name)
+            else
+                return M.partial_cmd_with_count_expr 'Yarepl exec '
+            end
+        end,
+        expr = true,
+    })
+end
+
+M._add_yarepl_keymap = add_yarepl_keymap
+
 M.setup = function(opts)
     M._config = vim.tbl_deep_extend('force', default_config(), opts or {})
 
@@ -1215,7 +1282,7 @@ M.setup = function(opts)
         vim.deprecate(
             'os.windows.send_delayed_cr_after_sending',
             'os.windows.send_delayed_final_cr',
-            'next release',
+            '2026-06-01',
             'yarepl.nvim',
             false
         )
@@ -1239,9 +1306,11 @@ M.setup = function(opts)
     end
 
     add_keymap()
+    add_yarepl_keymap()
 
     for meta_name, _ in pairs(M._config.metas) do
         add_keymap(meta_name)
+        add_yarepl_keymap(meta_name)
     end
 end
 
@@ -1253,7 +1322,14 @@ local function list_metas()
     return metas
 end
 
-api.nvim_create_user_command('REPLStart', M.commands.start, {
+local function deprecate_command(old, new)
+    return function(opts)
+        vim.deprecate(old, 'Yarepl ' .. new, '2026-06-01', 'yarepl.nvim', false)
+        M.commands[new](opts)
+    end
+end
+
+api.nvim_create_user_command('REPLStart', deprecate_command('REPLStart', 'start'), {
     count = true,
     bang = true,
     nargs = '?',
@@ -1263,7 +1339,7 @@ Create REPL `i` from the list of available REPLs.
 ]],
 })
 
-api.nvim_create_user_command('REPLStartOrFocusOrHide', M.commands.start_or_focus_or_hide, {
+api.nvim_create_user_command('REPLStartOrFocusOrHide', deprecate_command('REPLStartOrFocusOrHide', 'start_or_focus_or_hide'), {
     count = true,
     bang = true,
     nargs = '?',
@@ -1275,11 +1351,11 @@ Start a REPL or toggle focus/hide on an existing REPL.
 
 api.nvim_create_user_command(
     'REPLCleanup',
-    M.commands.cleanup,
+    deprecate_command('REPLCleanup', 'cleanup'),
     { desc = 'clean invalid repls, and rearrange the repls order.' }
 )
 
-api.nvim_create_user_command('REPLFocus', M.commands.focus, {
+api.nvim_create_user_command('REPLFocus', deprecate_command('REPLFocus', 'focus'), {
     count = true,
     nargs = '?',
     desc = [[
@@ -1287,7 +1363,7 @@ Focus on REPL `i` or the REPL that current buffer is attached to.
 ]],
 })
 
-api.nvim_create_user_command('REPLHide', M.commands.hide, {
+api.nvim_create_user_command('REPLHide', deprecate_command('REPLHide', 'hide'), {
     count = true,
     nargs = '?',
     desc = [[
@@ -1295,7 +1371,7 @@ Hide REPL `i` or the REPL that current buffer is attached to.
 ]],
 })
 
-api.nvim_create_user_command('REPLHideOrFocus', M.commands.hide_or_focus, {
+api.nvim_create_user_command('REPLHideOrFocus', deprecate_command('REPLHideOrFocus', 'hide_or_focus'), {
     count = true,
     nargs = '?',
     desc = [[
@@ -1303,7 +1379,7 @@ Hide or focus REPL `i` or the REPL that current buffer is attached to.
 ]],
 })
 
-api.nvim_create_user_command('REPLClose', M.commands.close, {
+api.nvim_create_user_command('REPLClose', deprecate_command('REPLClose', 'close'), {
     count = true,
     nargs = '?',
     desc = [[
@@ -1311,12 +1387,12 @@ Close REPL `i` or the REPL that current buffer is attached to.
 ]],
 })
 
-api.nvim_create_user_command('REPLSwap', M.commands.swap, {
+api.nvim_create_user_command('REPLSwap', deprecate_command('REPLSwap', 'swap'), {
     desc = [[Swap two REPLs]],
     nargs = '*',
 })
 
-api.nvim_create_user_command('REPLAttachBufferToREPL', M.commands.attach_buffer, {
+api.nvim_create_user_command('REPLAttachBufferToREPL', deprecate_command('REPLAttachBufferToREPL', 'attach_buffer'), {
     count = true,
     bang = true,
     desc = [[
@@ -1324,12 +1400,12 @@ Attach current buffer to REPL `i`
 ]],
 })
 
-api.nvim_create_user_command('REPLDetachBufferToREPL', M.commands.detach_buffer, {
+api.nvim_create_user_command('REPLDetachBufferToREPL', deprecate_command('REPLDetachBufferToREPL', 'detach_buffer'), {
     count = true,
     desc = [[Detach current buffer to any REPL.]],
 })
 
-api.nvim_create_user_command('REPLSendVisual', M.commands.send_visual, {
+api.nvim_create_user_command('REPLSendVisual', deprecate_command('REPLSendVisual', 'send_visual'), {
     count = true,
     nargs = '?',
     desc = [[
@@ -1337,7 +1413,7 @@ Send visual range to REPL `i` or the REPL that current buffer is attached to.
 ]],
 })
 
-api.nvim_create_user_command('REPLSendLine', M.commands.send_line, {
+api.nvim_create_user_command('REPLSendLine', deprecate_command('REPLSendLine', 'send_line'), {
     count = true,
     nargs = '?',
     desc = [[
@@ -1345,7 +1421,7 @@ Send current line to REPL `i` or the REPL that current buffer is attached to.
 ]],
 })
 
-api.nvim_create_user_command('REPLSendOperator', M.commands.send_operator, {
+api.nvim_create_user_command('REPLSendOperator', deprecate_command('REPLSendOperator', 'send_operator'), {
     count = true,
     nargs = '?',
     desc = [[
@@ -1353,7 +1429,7 @@ The operator of send text to REPL `i` or the REPL that current buffer is attache
 ]],
 })
 
-api.nvim_create_user_command('REPLSourceVisual', M.commands.source_visual, {
+api.nvim_create_user_command('REPLSourceVisual', deprecate_command('REPLSourceVisual', 'source_visual'), {
     count = true,
     nargs = '?',
     desc = [[
@@ -1361,7 +1437,7 @@ Source visual range to REPL `i` or the REPL that current buffer is attached to.
 ]],
 })
 
-api.nvim_create_user_command('REPLSourceOperator', M.commands.source_operator, {
+api.nvim_create_user_command('REPLSourceOperator', deprecate_command('REPLSourceOperator', 'source_operator'), {
     count = true,
     nargs = '?',
     desc = [[
@@ -1369,12 +1445,98 @@ Source visual range to REPL `i` or the REPL that current buffer is attached to.
 ]],
 })
 
-api.nvim_create_user_command('REPLExec', M.commands.exec, {
+api.nvim_create_user_command('REPLExec', deprecate_command('REPLExec', 'exec'), {
     count = true,
     nargs = '*',
     desc = [[
 Execute a command in REPL `i` or the REPL that current buffer is attached to.
 ]],
+})
+
+-- Unified Yarepl command
+
+M.completions = {
+    start = list_metas,
+    start_or_focus_or_hide = list_metas,
+    cleanup = true,
+    focus = list_metas,
+    hide = list_metas,
+    hide_or_focus = list_metas,
+    close = list_metas,
+    swap = true,
+    attach_buffer = true,
+    detach_buffer = true,
+    send_visual = list_metas,
+    send_line = list_metas,
+    send_operator = list_metas,
+    source_visual = list_metas,
+    source_operator = list_metas,
+    exec = true,
+}
+
+local function yarepl_complete(arglead, cmdline, _)
+    cmdline = cmdline or ''
+    local parts = vim.split(vim.trim(cmdline), '%s+')
+
+    ---@type table|function
+    local node = M.completions
+
+    local n_fully_typed_parts = #parts
+    if arglead ~= '' and #parts > 0 then
+        n_fully_typed_parts = n_fully_typed_parts - 1
+    end
+
+    for i = 2, n_fully_typed_parts do
+        local part = parts[i]
+        if type(node) ~= 'table' or node[part] == nil then
+            return {}
+        end
+        node = node[part]
+    end
+
+    if type(node) == 'function' then
+        return vim.tbl_filter(function(item)
+            return vim.startswith(item, arglead)
+        end, node())
+    elseif type(node) == 'table' then
+        return vim.tbl_filter(function(item)
+            return vim.startswith(item, arglead)
+        end, vim.tbl_keys(node))
+    end
+
+    return {}
+end
+
+api.nvim_create_user_command('Yarepl', function(opts)
+    local fargs = opts.fargs
+    if #fargs == 0 then
+        vim.notify('Yarepl: subcommand required', vim.log.levels.ERROR)
+        return
+    end
+
+    local subcmd = table.remove(fargs, 1)
+
+    local handler = M.commands[subcmd]
+    if type(handler) ~= 'function' then
+        vim.notify('Yarepl: unknown subcommand: ' .. subcmd, vim.log.levels.ERROR)
+        return
+    end
+
+    -- Reconstruct the args string (everything after the subcommand)
+    local args = table.concat(fargs, ' ')
+
+    handler {
+        args = args,
+        fargs = fargs,
+        count = opts.count,
+        bang = opts.bang,
+    }
+end, {
+    count = true,
+    bang = true,
+    nargs = '+',
+    complete = yarepl_complete,
+    desc = 'Unified yarepl command. Usage: Yarepl <subcommand> [args]',
 })
 
 return M

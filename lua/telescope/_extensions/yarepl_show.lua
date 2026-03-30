@@ -3,10 +3,8 @@ local pickers = require 'telescope.pickers'
 
 local conf = require('telescope.config').values
 
-local function REPLShow(opts)
-    -- Deprecate REPLShow in favor of yarepl_show
-    vim.deprecate('REPLShow', 'yarepl_show', '2026-06-01', 'yarepl.nvim', false)
-    vim.cmd.REPLCleanup()
+local function yarepl_show(opts)
+    vim.cmd 'Yarepl cleanup'
 
     local repls = require('yarepl')._repls
     local buffers = {}
@@ -29,7 +27,7 @@ local function REPLShow(opts)
             if repl.bufnr == selection.bufnr then
                 actions.close(prompt_bufnr)
                 -- Open the REPL buffer with configured wincmd.
-                vim.cmd(id .. 'REPLFocus')
+                vim.cmd(id .. 'Yarepl focus')
                 return
             end
         end
@@ -64,6 +62,6 @@ end
 
 return require('telescope').register_extension {
     exports = {
-        REPLShow = REPLShow,
+        yarepl_show = yarepl_show,
     },
 }

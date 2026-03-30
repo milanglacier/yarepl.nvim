@@ -24,6 +24,25 @@
 - [Fzf-lua Integration](#fzf-lua-integration)
 - [Snacks.picker Integration](#snackspicker-integration)
 
+**Breaking change:** Aider and Codex now live under the unified `Yarepl`
+command tree. The old top-level commands are being replaced by forms like
+`:Yarepl aider exec`, `:Yarepl aider set_prefix /ask`, `:Yarepl codex
+send_status`, and `:Yarepl codex send_open_editor`. Their plug maps follow the
+same pattern, for example `<Plug>(yarepl-aider-send-visual)` and
+`<Plug>(yarepl-codex-send-open-editor)`.
+
+The legacy commands and keymaps still function for now, but they will be
+removed on `2026-06-01`.
+
+If you were used to `AiderExec`, `AiderSetPrefix`, `CodexExec`, or
+`<Plug>(AiderSendYes)`, the new names are the same actions with a more regular
+shape: snake-style subcommands on the command line, kebab-style names inside
+`<Plug>(...)`.
+
+This keeps the extension side predictable. You get one command namespace, the
+same completion behavior everywhere, and a single place to add new actions
+instead of another standalone command for each one.
+
 # Aider
 
 ## Overview
@@ -44,49 +63,63 @@ coding within your editor.
 
 ## Commands
 
-The `yarepl.extensions.aider` module offers command-line completions to help
-you configure Aider as needed.
+The `yarepl.extensions.aider` module offers command-line completions for the
+unified Aider subcommands.
 
-- `AiderSetPrefix`: Specify a `/` prefix for Aider commands, such as `/ask`,
-  `/architect`, `/context` etc. When sending buffer content to the Aider REPL,
-  the specified prefix will be prepended to the buffer content.
-- `AiderRemovePrefix`: Remove the current prefix
-- `AiderSend<Action>`: Send specific actions to aider (e.g., `:AiderSendYes`,
-  `:AiderSendNo`). Available action: `Yes`, `No`, `Abort`, `Diff`, `Paste`,
-  `Clear`, `Undo`, `Reset`, `Drop`, `Ls`, `AskMode`, `ArchMode`, `CodeMode`,
-  `ContextMode`.
+- `Yarepl aider set_prefix`: Specify a `/` prefix for Aider commands, such as
+  `/ask`, `/architect`, `/context`, etc. When sending buffer content to the
+  Aider REPL, the specified prefix will be prepended to the buffer content.
+- `Yarepl aider remove_prefix`: Remove the current prefix.
+- `Yarepl aider send_yes`: Send `y` to aider.
+- `Yarepl aider send_no`: Send `n` to aider.
+- `Yarepl aider send_abort`: Send abort signal (`C-c`) to aider.
+- `Yarepl aider send_exit`: Send exit signal (`C-d`) to aider.
+- `Yarepl aider send_diff`: Send `/diff` to aider.
+- `Yarepl aider send_paste`: Send `/paste` to aider, particularly useful for
+  sending images.
+- `Yarepl aider send_clear`: Send `/clear` to aider.
+- `Yarepl aider send_undo`: Send `/undo` to aider.
+- `Yarepl aider send_reset`: Send `/reset` to aider.
+- `Yarepl aider send_drop`: Send `/drop` to aider.
+- `Yarepl aider send_ls`: Send `/ls` to aider.
+- `Yarepl aider send_ask_mode`: Switch aider to _ask_ mode.
+- `Yarepl aider send_arch_mode`: Switch aider to _architect_ mode.
+- `Yarepl aider send_code_mode`: Switch aider to _code_ mode.
+- `Yarepl aider send_context_mode`: Switch aider to _context_ mode.
 
-  **Note**: `ContextMode` requires `aider v0.79.0+`
+  **Note**: `send_context_mode` requires `aider v0.79.0+`
 
-- `AiderExec`: Send the prompt written in cmdline to aider with `/` prefix completion
-- `AiderSetArgs`: set the command line args to launch aider with autocompletion (e.g. `AiderSetArgs --model gpt-4o`)
+- `Yarepl aider exec`: Send the prompt written in cmdline to aider with `/`
+  prefix completion.
+- `Yarepl aider set_args`: Set the command line args to launch aider with
+  autocompletion, for example `Yarepl aider set_args --model gpt-4o`.
 
 ## Keymaps
 
-In addition to the general `<plug>` keymap created by yarepl.nvim (for example
-`<Plug>(REPLSendLine-aider)`), aider.lua provides a set of additional `<Plug>`
-mappings to enhance the experience with aider. Here are the
-available `<Plug>` mappings:
+In addition to the general `<Plug>` maps created by yarepl.nvim, aider.lua
+provides a set of additional `<Plug>` mappings to enhance the experience with
+aider:
 
-- `<Plug>(REPLSendLine-aider)`: Send current line to aider
-- `<Plug>(REPLSendVisual-aider)`: Send visual selection to aider
-- `<Plug>(REPLSendOperator-aider)`: Operator to send text to aider
-- `<Plug>(AiderExec)`: Type the prompt in cmdline and send it to aider.
-- `<Plug>(AiderSendYes)`: Send 'y' (Yes) to aider
-- `<Plug>(AiderSendNo)`: Send 'n' (No) to aider
-- `<Plug>(AiderSendAbort)`: Send abort signal (C-c) to aider
-- `<Plug>(AiderSendExit)`: Send exit signal (C-d) to aider
-- `<Plug>(AiderSendDiff)`
-- `<Plug>(AiderSendPaste)`: send `/paste` command, particularly useful for sending images
-- `<Plug>(AiderSendClear)`
-- `<Plug>(AiderSendUndo)`
-- `<Plug>(AiderSendReset)`
-- `<Plug>(AiderSendDrop)`
-- `<Plug>(AiderSendLs)`
-- `<Plug>(AiderSendAskMode)`: switch aider to _ask_ mode
-- `<Plug>(AiderSendArchMode)`: switch aider to _architect_ mode
-- `<Plug>(AiderSendCodeMode)`: switch aider to _code_ mode
-- `<Plug>(AiderSendContextMode)`: switch aider to _context_ mode
+- `<Plug>(yarepl-aider-send-line)`: Send current line to aider.
+- `<Plug>(yarepl-aider-send-visual)`: Send visual selection to aider.
+- `<Plug>(yarepl-aider-send-operator)`: Operator to send text to aider.
+- `<Plug>(yarepl-aider-exec)`: Type the prompt in cmdline and send it to aider.
+- `<Plug>(yarepl-aider-send-yes)`: Send `y` to aider.
+- `<Plug>(yarepl-aider-send-no)`: Send `n` to aider.
+- `<Plug>(yarepl-aider-send-abort)`: Send abort signal (`C-c`) to aider.
+- `<Plug>(yarepl-aider-send-exit)`: Send exit signal (`C-d`) to aider.
+- `<Plug>(yarepl-aider-send-diff)`
+- `<Plug>(yarepl-aider-send-paste)`: Send `/paste`, particularly useful for
+  sending images.
+- `<Plug>(yarepl-aider-send-clear)`
+- `<Plug>(yarepl-aider-send-undo)`
+- `<Plug>(yarepl-aider-send-reset)`
+- `<Plug>(yarepl-aider-send-drop)`
+- `<Plug>(yarepl-aider-send-ls)`
+- `<Plug>(yarepl-aider-send-ask-mode)`: Switch aider to _ask_ mode.
+- `<Plug>(yarepl-aider-send-arch-mode)`: Switch aider to _architect_ mode.
+- `<Plug>(yarepl-aider-send-code-mode)`: Switch aider to _code_ mode.
+- `<Plug>(yarepl-aider-send-context-mode)`: Switch aider to _context_ mode.
 
 ## Usage
 
@@ -113,57 +146,57 @@ documentation](https://aider.chat/).
 local keymap = vim.api.nvim_set_keymap
 
 -- general keymap from yarepl
-keymap('n', '<Leader>as', '<Plug>(REPLStart-aider)', {
+keymap('n', '<Leader>as', '<Plug>(yarepl-aider-start)', {
     desc = 'Start an aider REPL',
 })
-keymap('n', '<Leader>af', '<Plug>(REPLFocus-aider)', {
+keymap('n', '<Leader>af', '<Plug>(yarepl-aider-focus)', {
     desc = 'Focus on aider REPL',
 })
-keymap('n', '<Leader>ah', '<Plug>(REPLHide-aider)', {
+keymap('n', '<Leader>ah', '<Plug>(yarepl-aider-hide)', {
     desc = 'Hide aider REPL',
 })
-keymap('v', '<Leader>ar', '<Plug>(REPLSendVisual-aider)', {
+keymap('v', '<Leader>ar', '<Plug>(yarepl-aider-send-visual)', {
     desc = 'Send visual region to aider',
 })
-keymap('n', '<Leader>arr', '<Plug>(REPLSendLine-aider)', {
+keymap('n', '<Leader>arr', '<Plug>(yarepl-aider-send-line)', {
     desc = 'Send lines to aider',
 })
-keymap('n', '<Leader>ar', '<Plug>(REPLSendOperator-aider)', {
+keymap('n', '<Leader>ar', '<Plug>(yarepl-aider-send-operator)', {
     desc = 'Send Operator to aider',
 })
 
 -- special keymap from aider
-keymap('n', '<Leader>ae', '<Plug>(AiderExec)', {
+keymap('n', '<Leader>ae', '<Plug>(yarepl-aider-exec)', {
     desc = 'Execute command in aider',
 })
-keymap('n', '<Leader>ay', '<Plug>(AiderSendYes)', {
+keymap('n', '<Leader>ay', '<Plug>(yarepl-aider-send-yes)', {
     desc = 'Send y to aider',
 })
-keymap('n', '<Leader>an', '<Plug>(AiderSendNo)', {
+keymap('n', '<Leader>an', '<Plug>(yarepl-aider-send-no)', {
     desc = 'Send n to aider',
 })
-keymap('n', '<Leader>ap', '<Plug>(AiderSendPaste)', {
+keymap('n', '<Leader>ap', '<Plug>(yarepl-aider-send-paste)', {
     desc = 'Send /paste to aider',
 })
-keymap('n', '<Leader>aa', '<Plug>(AiderSendAbort)', {
+keymap('n', '<Leader>aa', '<Plug>(yarepl-aider-send-abort)', {
     desc = 'Send abort to aider',
 })
-keymap('n', '<Leader>aq', '<Plug>(AiderSendExit)', {
+keymap('n', '<Leader>aq', '<Plug>(yarepl-aider-send-exit)', {
     desc = 'Send exit to aider',
 })
-keymap('n', '<Leader>ag', '<cmd>AiderSetPrefix<cr>', {
+keymap('n', '<Leader>ag', '<cmd>Yarepl aider set_prefix<cr>', {
     desc = 'set aider prefix',
 })
-keymap('n', '<Leader>ama', '<Plug>(AiderSendAskMode)', {
+keymap('n', '<Leader>ama', '<Plug>(yarepl-aider-send-ask-mode)', {
     desc = 'Switch aider to ask mode',
 })
-keymap('n', '<Leader>amA', '<Plug>(AiderSendArchMode)', {
+keymap('n', '<Leader>amA', '<Plug>(yarepl-aider-send-arch-mode)', {
     desc = 'Switch aider to architect mode',
 })
-keymap('n', '<Leader>amc', '<Plug>(AiderSendCodeMode)', {
+keymap('n', '<Leader>amc', '<Plug>(yarepl-aider-send-code-mode)', {
     desc = 'Switch aider to code mode',
 })
-keymap('n', '<Leader>aG', '<cmd>AiderRemovePrefix<cr>', {
+keymap('n', '<Leader>aG', '<cmd>Yarepl aider remove_prefix<cr>', {
     desc = 'remove aider prefix',
 })
 keymap('n', '<Leader>a<space>', '<cmd>checktime<cr>', {
@@ -211,41 +244,52 @@ launch and interact with Codex.
 
 ## Commands
 
-- `CodexSetArgs`: Set CLI arguments for launching Codex with completion support
-  (e.g., `:CodexSetArgs --model gpt-5`).
-- `CodexSend<Action>`: Send a predefined action to Codex. Available actions:
-  `Abort` (Ctrl-C), `Exit` (Ctrl-D), `Diff`, `Status`, `Model`, `New`,
-  `Approvals`, `Compact`, `OpenEditor` (Ctrl-G), `TranscriptEnter` (Ctrl-T),
-  `TranscriptQuit` (q), `TranscriptBegin` (Home), `TranscriptEnd` (End),
-  `PageUp`, `PageDown`.
-- `CodexExec`: Type a prompt or slash command in the cmdline and send it to
-  Codex, with completion for common prefixes like `/model`, `/approvals`,
-  `/init`, `/new`, `/compact`, `/diff`, `/mention`, `/status`.
+- `Yarepl codex set_args`: Set CLI arguments for launching Codex with
+  completion support, for example `Yarepl codex set_args --model gpt-5`.
+- `Yarepl codex send_abort`: Send Ctrl-C to Codex.
+- `Yarepl codex send_exit`: Send Ctrl-D to Codex.
+- `Yarepl codex send_diff`: Send `/diff` to Codex.
+- `Yarepl codex send_status`: Send `/status` to Codex.
+- `Yarepl codex send_model`: Send `/model` to Codex.
+- `Yarepl codex send_new`: Send `/new` to Codex.
+- `Yarepl codex send_approvals`: Send `/approvals` to Codex.
+- `Yarepl codex send_compact`: Send `/compact` to Codex.
+- `Yarepl codex send_open_editor`: Ask Codex to open the editor (`Ctrl-G`).
+- `Yarepl codex send_transcript_enter`: Send `Ctrl-T`.
+- `Yarepl codex send_transcript_quit`: Send `q`.
+- `Yarepl codex send_transcript_begin`: Send `Home`.
+- `Yarepl codex send_transcript_end`: Send `End`.
+- `Yarepl codex send_page_up`: Send `PageUp`.
+- `Yarepl codex send_page_down`: Send `PageDown`.
+- `Yarepl codex exec`: Type a prompt or slash command in the cmdline and send
+  it to Codex, with completion for common prefixes like `/model`,
+  `/approvals`, `/init`, `/new`, `/compact`, `/diff`, `/mention`, `/status`.
 
 All commands accept an optional count to target a specific Codex REPL id.
 
 ## Keymaps
 
 In addition to the general `<Plug>` maps created by yarepl once the `codex`
-meta is registered (e.g. `<Plug>(REPLSendLine-codex)`), this extension defines
-extra convenience maps:
+meta is registered (e.g. `<Plug>(yarepl-codex-send-line)`), this extension
+defines extra convenience maps:
 
-- `<Plug>(CodexExec)`: Type in cmdline and send to Codex
-- `<Plug>(CodexSendAbort)`: Send Ctrl-C
-- `<Plug>(CodexSendExit)`: Send Ctrl-D
-- `<Plug>(CodexSendDiff)`
-- `<Plug>(CodexSendStatus)`
-- `<Plug>(CodexSendModel)`
-- `<Plug>(CodexSendNew)`
-- `<Plug>(CodexSendApprovals)`
-- `<Plug>(CodexSendCompact)`
-- `<Plug>(CodexSendOpenEditor)`: Ask Codex to open the editor (Ctrl-G)
-- `<Plug>(CodexSendTranscriptEnter)`
-- `<Plug>(CodexSendTranscriptQuit)`
-- `<Plug>(CodexSendTranscriptBegin)`: Send `<Home>`
-- `<Plug>(CodexSendTranscriptEnd)`: Send `<End>`
-- `<Plug>(CodexSendPageUp)`
-- `<Plug>(CodexSendPageDown)`
+- `<Plug>(yarepl-codex-exec)`: Type in cmdline and send to Codex.
+- `<Plug>(yarepl-codex-send-abort)`: Send Ctrl-C.
+- `<Plug>(yarepl-codex-send-exit)`: Send Ctrl-D.
+- `<Plug>(yarepl-codex-send-diff)`
+- `<Plug>(yarepl-codex-send-status)`
+- `<Plug>(yarepl-codex-send-model)`
+- `<Plug>(yarepl-codex-send-new)`
+- `<Plug>(yarepl-codex-send-approvals)`
+- `<Plug>(yarepl-codex-send-compact)`
+- `<Plug>(yarepl-codex-send-open-editor)`: Ask Codex to open the editor
+  (`Ctrl-G`).
+- `<Plug>(yarepl-codex-send-transcript-enter)`
+- `<Plug>(yarepl-codex-send-transcript-quit)`
+- `<Plug>(yarepl-codex-send-transcript-begin)`: Send `<Home>`.
+- `<Plug>(yarepl-codex-send-transcript-end)`: Send `<End>`.
+- `<Plug>(yarepl-codex-send-page-up)`
+- `<Plug>(yarepl-codex-send-page-down)`
 
 You can prefix a count (e.g. `2`) before a mapping to target that REPL id.
 
@@ -285,31 +329,31 @@ command! WQ w | bdelete
 local keymap = vim.api.nvim_set_keymap
 
 -- general yarepl keymaps for the codex meta
-keymap('n', '<Leader>cs', '<Plug>(REPLStart-codex)', { desc = 'Start Codex' })
-keymap('n', '<Leader>cf', '<Plug>(REPLFocus-codex)', { desc = 'Focus Codex' })
-keymap('n', '<Leader>ch', '<Plug>(REPLHide-codex)', { desc = 'Hide Codex' })
-keymap('v', '<Leader>cr', '<Plug>(REPLSendVisual-codex)', { desc = 'Send visual to Codex' })
-keymap('n', '<Leader>crr', '<Plug>(REPLSendLine-codex)', { desc = 'Send line to Codex' })
-keymap('n', '<Leader>cr', '<Plug>(REPLSendOperator-codex)', { desc = 'Send operator to Codex' })
+keymap('n', '<Leader>cs', '<Plug>(yarepl-codex-start)', { desc = 'Start Codex' })
+keymap('n', '<Leader>cf', '<Plug>(yarepl-codex-focus)', { desc = 'Focus Codex' })
+keymap('n', '<Leader>ch', '<Plug>(yarepl-codex-hide)', { desc = 'Hide Codex' })
+keymap('v', '<Leader>cr', '<Plug>(yarepl-codex-send-visual)', { desc = 'Send visual to Codex' })
+keymap('n', '<Leader>crr', '<Plug>(yarepl-codex-send-line)', { desc = 'Send line to Codex' })
+keymap('n', '<Leader>cr', '<Plug>(yarepl-codex-send-operator)', { desc = 'Send operator to Codex' })
 
 -- codex-specific convenience keymaps
-keymap('n', '<Leader>ce', '<Plug>(CodexExec)', { desc = 'Exec in Codex' })
-keymap('n', '<Leader>ca', '<Plug>(CodexSendAbort)', { desc = 'Abort' })
-keymap('n', '<Leader>cD', '<Plug>(CodexSendExit)', { desc = 'Exit' })
-keymap('n', '<Leader>cd', '<Plug>(CodexSendDiff)', { desc = 'Diff' })
-keymap('n', '<Leader>ct', '<Plug>(CodexSendStatus)', { desc = 'Status' })
-keymap('n', '<Leader>cm', '<Plug>(CodexSendModel)', { desc = 'Model' })
-keymap('n', '<Leader>cn', '<Plug>(CodexSendNew)', { desc = 'New' })
-keymap('n', '<Leader>cA', '<Plug>(CodexSendApprovals)', { desc = 'Approvals' })
-keymap('n', '<Leader>cc', '<Plug>(CodexSendCompact)', { desc = 'Compact' })
-keymap('n', '<Leader>co', '<Plug>(CodexSendOpenEditor)', { desc = 'Open editor' })
+keymap('n', '<Leader>ce', '<Plug>(yarepl-codex-exec)', { desc = 'Exec in Codex' })
+keymap('n', '<Leader>ca', '<Plug>(yarepl-codex-send-abort)', { desc = 'Abort' })
+keymap('n', '<Leader>cD', '<Plug>(yarepl-codex-send-exit)', { desc = 'Exit' })
+keymap('n', '<Leader>cd', '<Plug>(yarepl-codex-send-diff)', { desc = 'Diff' })
+keymap('n', '<Leader>ct', '<Plug>(yarepl-codex-send-status)', { desc = 'Status' })
+keymap('n', '<Leader>cm', '<Plug>(yarepl-codex-send-model)', { desc = 'Model' })
+keymap('n', '<Leader>cn', '<Plug>(yarepl-codex-send-new)', { desc = 'New' })
+keymap('n', '<Leader>cA', '<Plug>(yarepl-codex-send-approvals)', { desc = 'Approvals' })
+keymap('n', '<Leader>cc', '<Plug>(yarepl-codex-send-compact)', { desc = 'Compact' })
+keymap('n', '<Leader>co', '<Plug>(yarepl-codex-send-open-editor)', { desc = 'Open editor' })
 -- transcript and navigation helpers
-keymap('n', '<Leader>cte', '<Plug>(CodexSendTranscriptEnter)', { desc = 'Transcript mode' })
-keymap('n', '<Leader>ctq', '<Plug>(CodexSendTranscriptQuit)', { desc = 'Transcript quit' })
-keymap('n', '<Leader>ctg', '<Plug>(CodexSendTranscriptBegin)', { desc = 'Transcript begin' })
-keymap('n', '<Leader>ctG', '<Plug>(CodexSendTranscriptEnd)', { desc = 'Transcript end' })
-keymap('n', '<Leader>ctk', '<Plug>(CodexSendPageUp)', { desc = 'Transcript page up' })
-keymap('n', '<Leader>ctj', '<Plug>(CodexSendPageDown)', { desc = 'Transcript page down' })
+keymap('n', '<Leader>cte', '<Plug>(yarepl-codex-send-transcript-enter)', { desc = 'Transcript mode' })
+keymap('n', '<Leader>ctq', '<Plug>(yarepl-codex-send-transcript-quit)', { desc = 'Transcript quit' })
+keymap('n', '<Leader>ctg', '<Plug>(yarepl-codex-send-transcript-begin)', { desc = 'Transcript begin' })
+keymap('n', '<Leader>ctG', '<Plug>(yarepl-codex-send-transcript-end)', { desc = 'Transcript end' })
+keymap('n', '<Leader>ctk', '<Plug>(yarepl-codex-send-page-up)', { desc = 'Transcript page up' })
+keymap('n', '<Leader>ctj', '<Plug>(yarepl-codex-send-page-down)', { desc = 'Transcript page down' })
 keymap('n', '<Leader>c<space>', '<cmd>checktime<cr>', {
     desc = 'sync file changes by codex to nvim buffer',
 })
@@ -393,7 +437,7 @@ Note: Use Lua patterns rather than Vim regex patterns.
 
 These text objects function in both operator-pending and visual modes.
 
-To send code cells to REPL, map `<Plug>(REPLSendOperator)` to `<Leader>s`, then
+To send code cells to REPL, map `<Plug>(Yarepl-send-operator)` to `<Leader>s`, then
 use `<Leader>sic` to send the current cell.
 
 # Telescope Integration
@@ -402,10 +446,10 @@ use `<Leader>sic` to send the current cell.
 following line to your config:
 
 ```lua
-require('telescope').load_extension 'REPLShow'
+require('telescope').load_extension 'yarepl_show'
 ```
 
-Once added, you can use `Telescope REPLShow` to preview the active REPL
+Once added, you can use `Telescope yarepl_show` to preview the active REPL
 buffers. This integration allows you to preview active REPL buffers. Pressing
 `<CR>` will open the selected REPL buffer using `wincmd`, either with a
 meta-local `wincmd` or the global `wincmd`, depending on the context.

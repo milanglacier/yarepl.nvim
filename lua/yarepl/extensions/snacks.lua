@@ -37,7 +37,7 @@ M.repl_show = function(opts)
                     -- the default action is to open the REPL buffer with configured wincmd
                     picker:close()
                     vim.schedule(function()
-                        vim.cmd(id .. 'REPLFocus')
+                        vim.cmd(id .. 'Yarepl focus')
                     end)
                     return
                 end
