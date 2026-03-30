@@ -1,3 +1,23 @@
+# Version 0.13.0 (2026-03-30)
+
+## Breaking Changes
+
+- **Unified Commands**: Replaced `REPL*`, `Codex*`, and `Aider*` commands with
+  a unified `Yarepl` command interface. Legacy commands remain functional but
+  show deprecation warnings.
+- **Unified Keymaps**: Replaced `<Plug>(REPL*)` keymaps with `<Plug>(Yarepl-*)`
+  keymaps.
+
+## Features
+
+- **Telescope Extension**: Changed default action to `REPLFocus` for better
+  workflow.
+
+## Bug Fixes
+
+- **Send Operator**: Fixed handling of missing, empty, or inverted ranges for
+  the `send_operator` command.
+
 # Version 0.12.0 (2026-01-23)
 
 ## Features
