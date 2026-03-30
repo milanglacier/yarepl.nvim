@@ -5,22 +5,22 @@
 - [Configuration](#configuration)
   - [Setup](#setup)
   - [Commands](#commands)
-    - [REPLStart](#replstart)
-    - [REPLStartOrFocusOrHide](#replstartorfocusorhide)
-    - [REPLAttachBufferToREPL](#replattachbuffertorepl)
-    - [REPLDetachBufferToREPL](#repldetachbuffertorepl)
-    - [REPLCleanup](#replcleanup)
-    - [REPLFocus](#replfocus)
-    - [REPLHide](#replhide)
-    - [REPLHideOrFocus](#replhideorfocus)
-    - [REPLClose](#replclose)
-    - [REPLSwap](#replswap)
-    - [REPLSendVisual](#replsendvisual)
-    - [REPLSourceVisual](#replsourcevisual)
-    - [REPLSendLine](#replsendline)
-    - [REPLSendOperator](#replsendoperator)
-    - [REPLSourceOperator](#replsourceoperator)
-    - [REPLExec](#replexec)
+    - [Yarepl start](#yarepl-start)
+    - [Yarepl start_or_focus_or_hide](#yarepl-start_or_focus_or_hide)
+    - [Yarepl attach_buffer](#yarepl-attach_buffer)
+    - [Yarepl detach_buffer](#yarepl-detach_buffer)
+    - [Yarepl cleanup](#yarepl-cleanup)
+    - [Yarepl focus](#yarepl-focus)
+    - [Yarepl hide](#yarepl-hide)
+    - [Yarepl hide_or_focus](#yarepl-hide_or_focus)
+    - [Yarepl close](#yarepl-close)
+    - [Yarepl swap](#yarepl-swap)
+    - [Yarepl send_visual](#yarepl-send_visual)
+    - [Yarepl source_visual](#yarepl-source_visual)
+    - [Yarepl send_line](#yarepl-send_line)
+    - [Yarepl send_operator](#yarepl-send_operator)
+    - [Yarepl source_operator](#yarepl-source_operator)
+    - [Yarepl exec](#yarepl-exec)
   - [Keymaps](#keymaps)
 - [Window configuration](#window-configuration)
 - [Customizing REPLs](#customizing-repls)
@@ -39,10 +39,28 @@
 - [FAQ](#faq)
   - [Why lazy loading with `lazy.nvim` doesn't work?](#why-lazy-loading-with-lazynvim-doesnt-work)
   - [How do I avoid clutter from the bufferline plugin?](#how-do-i-avoid-clutter-from-the-bufferline-plugin)
-  - [REPLSendVisual is not functioning properly](#replsendvisual-is-not-functioning-properly)
-  - [`<Plug>(REPLSendVisual)` Only Sends to First REPL](#plugreplsendvisual-only-sends-to-first-repl)
+  - [Yarepl send_visual is not functioning properly](#yarepl-send_visual-is-not-functioning-properly)
+  - [`<Plug>(Yarepl-send-visual)` Only Sends to First REPL](#plugyarepl-send-visual-only-sends-to-first-repl)
 - [Limitations](#limitations)
 - [Acknowledgements](#acknowledgements)
+
+**Breaking change:** the old `REPL*` commands and `<Plug>(REPL*)` maps are now
+named under `Yarepl`. Use commands like `:Yarepl start`, `:Yarepl attach_buffer`,
+`:Yarepl send_visual`, and `:Yarepl exec`. The matching plug maps are named
+like `<Plug>(Yarepl-start)` and `<Plug>(Yarepl-send-visual)`. The command part
+uses snake style, while `<Plug>` names use kebab style.
+
+The legacy commands and keymaps still function for now, but they will be
+removed on `2026-06-01`.
+
+If you previously used `REPLStart`, `REPLSendVisual`, or
+`<Plug>(REPLStart-ipython)`, the replacement is the same idea with a different
+wrapper: `:Yarepl start`, `:Yarepl send_visual`, and
+`<Plug>(Yarepl-start-ipython)`.
+
+The unified `Yarepl` entry point keeps the plugin easier to extend and makes
+completion, counts, and future subcommands behave consistently instead of
+spreading the same actions across a growing list of top-level commands.
 
 # yarepl.nvim
 
@@ -208,72 +226,71 @@ your favorite mappings.
 
 Here is a list of available commands:
 
-### REPLStart
+### Yarepl start
 
 Creates a REPL with id `i` from the list of available REPLs.
 
 You can create a REPL with a specific id by providing a count, such as
-`3REPLStart` for a REPL with id `3`. If no count is provided, a new REPL with
-increamental ID will be created. You can also provide a name as an argument. If
-no argument is given, you'll be prompted to select a REPL from the list of
-available ones. If the id is already in use, it will focus on the REPL with
-that id.
+`3Yarepl start` for a REPL with id `3`. If no count is provided, a new REPL
+with increamental ID will be created. You can also provide a name as an
+argument. If no argument is given, you'll be prompted to select a REPL from the
+list of available ones. If the id is already in use, it will focus on the REPL
+with that id.
 
-When a name is provided and a count is also provided (for example, `2REPLStart
-ipython`), the count selects the Nth REPL with that name. If there are fewer
-than N existing REPLs with that name, a new one is created. When a name is
-provided without a count (`REPLStart ipython`), it always creates a new REPL of
-that name.
+When a name is provided and a count is also provided (for example, `2Yarepl
+start ipython`), the count selects the Nth REPL with that name. If there are
+fewer than N existing REPLs with that name, a new one is created. When a name
+is provided without a count (`Yarepl start ipython`), it always creates a new
+REPL of that name.
 
 If you append a `!` to the command, the current buffer will attach to the newly
-created REPL, for instance, `REPLStart!` or `3REPLStart!`. Note that attachment
-only happens when a new REPL is created.
+created REPL, for instance, `Yarepl start!` or `3Yarepl start!`. Note that
+attachment only happens when a new REPL is created.
 
-### REPLStartOrFocusOrHide
+### Yarepl start_or_focus_or_hide
 
 Toggles the visibility (focus/hide) of an existing REPL, or creates a new one
 if it does not exist.
 
-The rules for counts and optional REPL names mirror those of `REPLStart`,
-including named selection logic like `2REPLStartOrFocusOrHide ipython`.
+The rules for counts and optional REPL names mirror those of `Yarepl start`,
+including named selection logic like `2Yarepl start_or_focus_or_hide ipython`.
 
 Here are examples of how to use this command:
 
-1. `REPLStartOrFocusOrHide` will hide or focus REPL 1 when it exists, otherwise
-   it creates a new REPL.
+1. `Yarepl start_or_focus_or_hide` will hide or focus REPL 1 when it exists,
+   otherwise it creates a new REPL.
 
-2. `REPLStartOrFocusOrHide ipython` will hide or focus the first `ipython`
-   REPL, otherwise it creates a new `ipython` REPL.
+2. `Yarepl start_or_focus_or_hide ipython` will hide or focus the first
+   `ipython` REPL, otherwise it creates a new `ipython` REPL.
 
-3. `3REPLStartOrFocusOrHide` will hide or focus REPL 3 when it exists, otherwise
-   it creates a new REPL.
+3. `3Yarepl start_or_focus_or_hide` will hide or focus REPL 3 when it exists,
+   otherwise it creates a new REPL.
 
-4. `3REPLStartOrFocusOrHide ipython` will hide or focus the 3rd `ipython`
-   REPL, otherwise it creates a new `ipython` REPL.
+4. `3Yarepl start_or_focus_or_hide ipython` will hide or focus the 3rd
+   `ipython` REPL, otherwise it creates a new `ipython` REPL.
 
-**Important difference**: without a count, `REPLStart` always attempts to start
-a new REPL, whereas `REPLStartOrFocusOrHide` first attempts to focus/hide an
-existing REPL and creates a new one only if none is found.
+**Important difference**: without a count, `Yarepl start` always attempts to
+start a new REPL, whereas `Yarepl start_or_focus_or_hide` first attempts to
+focus/hide an existing REPL and creates a new one only if none is found.
 
-### REPLAttachBufferToREPL
+### Yarepl attach_buffer
 
-Attaches the current buffer to REPL `i`, for instance,
-`3REPLAttachBufferToREPL` will attach the current buffer to REPL 3. If no count
-is provided, you'll be prompted to select the REPL you want to attach the
-current buffer to. If you add a trailing `!`, it will attempt to detach the
-current buffer from any REPL.
+Attaches the current buffer to REPL `i`, for instance, `3Yarepl attach_buffer`
+will attach the current buffer to REPL 3. If no count is provided, you'll be
+prompted to select the REPL you want to attach the current buffer to. If you
+add a trailing `!`, it will attempt to detach the current buffer from any REPL.
 
-### REPLDetachBufferToREPL
+### Yarepl detach_buffer
 
 Detach current buffer from any REPL.
 
-### REPLCleanup
+### Yarepl cleanup
 
 Cleans up any invalid REPLs and rearranges the sequence of REPL ids. Usually,
 there's no need to use this command manually since invalid REPLs are cleaned up
 automatically at the appropriate time.
 
-### REPLFocus
+### Yarepl focus
 
 Focuses on REPL `i` or the REPL that the current buffer is attached to.
 
@@ -285,96 +302,97 @@ it will focus on the REPL `i`.
 
 Here are some examples of how to use this command:
 
-1. `REPLFocus` will try to focus on the REPL that the current buffer is
+1. `Yarepl focus` will try to focus on the REPL that the current buffer is
    attached to. If the current buffer isn't attached to any REPL, it will use
    REPL 1.
 
-2. `REPLFocus ipython` will try to focus on the closest REPL with the name
+2. `Yarepl focus ipython` will try to focus on the closest REPL with the name
    `ipython` starting from id `1`.
 
-3. `3REPLFocus` will focus on REPL 3.
+3. `3Yarepl focus` will focus on REPL 3.
 
-4. `3REPLFocus ipython` will try to focus on the closest REPL with the name
+4. `3Yarepl focus ipython` will try to focus on the closest REPL with the name
    `ipython` starting from id `3`.
 
-### REPLHide
+### Yarepl hide
 
 Hides REPL `i` or the REPL that the current buffer is attached to.
 
 If you provide an optional argument, the function will attempt to hide the
 closest REPL with the specified name. When no count is supplied, it will try to
 hide the REPL that the current buffer is attached to. If the current buffer
-isn't attached to any REPL, it will use REPL 1. If you add a count `i`, it will
-hide REPL `i`.
+isn't attached to any REPL, it will use REPL 1. If you add a count `i`, it
+will hide REPL `i`.
 
 Here are examples of how to use this command:
 
-1. `REPLHide` will try to hide the REPL that the current buffer is attached to.
-   If the current buffer isn't attached to any REPL, it will use REPL 1.
+1. `Yarepl hide` will try to hide the REPL that the current buffer is attached
+   to. If the current buffer isn't attached to any REPL, it will use REPL 1.
 
-2. `REPLHide ipython` will try to hide the closest REPL with the name `ipython`
-   starting from id `1`.
+2. `Yarepl hide ipython` will try to hide the closest REPL with the name
+   `ipython` starting from id `1`.
 
-3. `3REPLHide` will hide REPL 3.
+3. `3Yarepl hide` will hide REPL 3.
 
-4. `3REPLHide ipython` will try to hide the closest REPL with the name
+4. `3Yarepl hide ipython` will try to hide the closest REPL with the name
    `ipython` starting from id `3`.
 
-### REPLHideOrFocus
+### Yarepl hide_or_focus
 
 Hides or focuses on REPL `i` or the REPL that the current buffer is attached
 to.
 
-If you provide an optional argument, the function will attempt to hide or focus
-on the closest REPL with the specified name. When no count is supplied, it will
-try to hide or focus on the REPL that the current buffer is attached to. If the
-current buffer isn't attached to any REPL, it will use REPL 1. If you add a
-count `i`, it will hide REPL `i`.
+If you provide an optional argument, the function will attempt to hide or
+focus on the closest REPL with the specified name. When no count is supplied,
+it will try to hide or focus on the REPL that the current buffer is attached to.
+If the current buffer isn't attached to any REPL, it will use REPL 1. If you
+add a count `i`, it will hide REPL `i`.
 
 Here are examples of how to use this command:
 
-1. `REPLHideOrFocus` will try to hide or focus on the REPL that the current
-   buffer is attached to. If the current buffer isn't attached to any REPL, it
-   will use REPL 1.
+1. `Yarepl hide_or_focus` will try to hide or focus on the REPL that the
+   current buffer is attached to. If the current buffer isn't attached to any
+   REPL, it will use REPL 1.
 
-2. `REPLHideOrFocus ipython` will try to hide or focus on the closest REPL with
-   the name `ipython` starting from id `1`.
+2. `Yarepl hide_or_focus ipython` will try to hide or focus on the closest
+   REPL with the name `ipython` starting from id `1`.
 
-3. `3REPLHideOrFocus` will hide or focus on REPL 3.
+3. `3Yarepl hide_or_focus` will hide or focus on REPL 3.
 
-4. `3REPLHideOrFocus ipython` will try to hide or focus on the closest REPL
-   with the name `ipython` starting from id `3`.
+4. `3Yarepl hide_or_focus ipython` will try to hide or focus on the closest
+   REPL with the name `ipython` starting from id `3`.
 
-### REPLClose
+### Yarepl close
 
 Closes REPL `i` or the REPL that the current buffer is attached to.
 
 If you provide an optional argument, the function will attempt to close the
 closest REPL with the specified name. If no count is supplied, it will try to
 close the REPL that the current buffer is attached to. If the current buffer
-isn't attached to any REPL, it will use REPL 1. If you add a count `i`, it will
-close REPL `i`.
+isn't attached to any REPL, it will use REPL 1. If you add a count `i`, it
+will close REPL `i`.
 
 Here are examples of how to use this command:
 
-1. `REPLClose` will try to close the REPL that the current buffer is attached
-   to. If the current buffer isn't attached to any REPL, it will use REPL 1.
+1. `Yarepl close` will try to close the REPL that the current buffer is
+   attached to. If the current buffer isn't attached to any REPL, it will use
+   REPL 1.
 
-2. `REPLClose ipython` will try to close the closest REPL with the name
+2. `Yarepl close ipython` will try to close the closest REPL with the name
    `ipython` and starting from id `1`.
 
-3. `3REPLClose` will close REPL 3.
+3. `3Yarepl close` will close REPL 3.
 
-4. `3REPLClose ipython` will try to close the closest REPL with the name
+4. `3Yarepl close ipython` will try to close the closest REPL with the name
    `ipython` starting from id `3`.
 
-### REPLSwap
+### Yarepl swap
 
 Swaps two REPLs. If no REPL ID is provided, you'll be prompted to select both
 REPLs. If you provide one REPL ID, you'll be prompted to select the second
 REPL.
 
-### REPLSendVisual
+### Yarepl send_visual
 
 Sends the visual range to REPL `i` or the REPL that the current buffer
 is attached to.
@@ -382,42 +400,43 @@ is attached to.
 If you provide an optional argument, the function will attempt to send to the
 closest REPL with the specified name. When no count is supplied, it first
 checks whether the current buffer is attached to a REPL with that name and uses
-it. If the buffer isn't attached to a matching REPL, it will use REPL 1 to find
-the closest match. If you add a count `i`, it will send to the closest REPL
-with that name relative to `i`.
+it. If the buffer isn't attached to a matching REPL, it will use REPL 1 to
+find the closest match. If you add a count `i`, it will send to the closest
+REPL with that name relative to `i`.
 
 Optional highlighting for the operated range is available for both
-`REPLSendOperator` and `REPLSourceOperator` by setting
+`Yarepl send_operator` and `Yarepl source_operator` by setting
 `highlight_on_send_operator.enabled = true` in your setup.
 
 Here are examples of how to use this command:
 
-1. `REPLSendVisual` sends the visual range to the REPL that the current buffer
-   is attached to. If the buffer is not attached to any REPL, it uses REPL 1.
+1. `Yarepl send_visual` sends the visual range to the REPL that the current
+   buffer is attached to. If the buffer is not attached to any REPL, it uses
+   REPL 1.
 
-2. `3REPLSendVisual` sends the visual range to REPL 3.
+2. `3Yarepl send_visual` sends the visual range to REPL 3.
 
-3. `REPLSendVisual ipython` sends the visual range to the attached ipython REPL
-   if there is one for the current buffer; otherwise, it uses the closest
+3. `Yarepl send_visual ipython` sends the visual range to the attached ipython
+   REPL if there is one for the current buffer; otherwise, it uses the closest
    ipython REPL relative to id `1`.
 
-4. `3REPLSendVisual ipython` sends the visual range to the closest ipython REPL
-   relative to id `3`.
+4. `3Yarepl send_visual ipython` sends the visual range to the closest ipython
+   REPL relative to id `3`.
 
-Note that due to a limitation of vim, when using `REPLSendVisual` via cmdline
-rather than in a keymap, you must press `Control+u` before using the command.
-For example, `V3j:<Control+u>3REPLSendVisual` sends the selected three lines to
-REPL `3`. However, you do not need to specify `Control+u` in your keymap as the
-function will do this for you.
+Note that due to a limitation of vim, when using `Yarepl send_visual` via
+cmdline rather than in a keymap, you must press `Control+u` before using the
+command. For example, `V3j:<Control+u>3Yarepl send_visual` sends the selected
+three lines to REPL `3`. However, you do not need to specify `Control+u` in
+your keymap as the function will do this for you.
 
-### REPLSourceVisual
+### Yarepl source_visual
 
-Similar to `REPLSendVisual`, the key distinction with `REPLSourceVisual` is
-that it first writes the visually selected code to a temporary file. It then
+Similar to `Yarepl send_visual`, the key distinction with `Yarepl source_visual`
+is that it first writes the visually selected code to a temporary file. It then
 sends a one-liner command to the REPL to source this file, instead of sending
 the content directly.
 
-The primary advantage of `REPLSourceVisual` lies in handling large code
+The primary advantage of `Yarepl source_visual` lies in handling large code
 content. Instead of sending huge code chunks directly to the REPL, it prevents
 cluttering your interaction history, maintaining a cleaner session.
 Additionally, on Windows, sourcing from a file mitigates potential issues with
@@ -426,7 +445,7 @@ approach significantly reduces the data read from the stdin.
 
 However, one notable drawback involves the security implications of temporary
 file creation. Since the REPL executes code from this file, any vulnerability
-in temporary file handling—such as exposure to malicious attack—could pose
+in temporary file handling, such as exposure to malicious attack, could pose
 security risks. Thus, while beneficial in certain scenarios, this method
 requires careful consideration of its potential drawbacks.
 
@@ -440,32 +459,33 @@ the first non-empty line of the code chunk displays as virtual text alongside
 the source command sent to the REPL, providing a useful hint about the actual
 command being executed.
 
-### REPLSendLine
+### Yarepl send_line
 
 Sends current line to REPL `i` or the REPL that current buffer is attached to.
 
 If you provide an optional argument, the function will attempt to send to the
 closest REPL with the specified name. When no count is supplied, it first
 checks whether the current buffer is attached to a REPL with that name and uses
-it. If the buffer isn't attached to a matching REPL, it will use REPL 1 to find
-the closest match. If you add a count `i`, it will send to the closest REPL
-with that name relative to `i`.
+it. If the buffer isn't attached to a matching REPL, it will use REPL 1 to
+find the closest match. If you add a count `i`, it will send to the closest
+REPL with that name relative to `i`.
 
 Here are examples of how to use this command:
 
-1. `REPLSendLine` sends the current line to the REPL that the current buffer
-   is attached to. If the buffer is not attached to any REPL, it uses REPL 1.
+1. `Yarepl send_line` sends the current line to the REPL that the current
+   buffer is attached to. If the buffer is not attached to any REPL, it uses
+   REPL 1.
 
-2. `3REPLSendLine` sends the current line to REPL 3.
+2. `3Yarepl send_line` sends the current line to REPL 3.
 
-3. `REPLSendLine ipython` sends the current line to the attached ipython REPL
-   if there is one for the current buffer; otherwise, it uses the closest
+3. `Yarepl send_line ipython` sends the current line to the attached ipython
+   REPL if there is one for the current buffer; otherwise, it uses the closest
    ipython REPL relative to id `1`.
 
-4. `3REPLSendLine ipython` sends the current line to the closest ipython REPL
-   relative to id `3`.
+4. `3Yarepl send_line ipython` sends the current line to the closest ipython
+   REPL relative to id `3`.
 
-### REPLSendOperator
+### Yarepl send_operator
 
 The operator to send the text to REPL `i` or the REPL that the current buffer
 is attached to.
@@ -473,37 +493,38 @@ is attached to.
 If you provide an optional argument, the function will attempt to send to the
 closest REPL with the specified name. When no count is supplied, it first
 checks whether the current buffer is attached to a REPL with that name and uses
-it. If the buffer isn't attached to a matching REPL, it will use REPL 1 to find
-the closest match. If you add a count `i`, it will send to the closest REPL
-with that name relative to `i`.
+it. If the buffer isn't attached to a matching REPL, it will use REPL 1 to
+find the closest match. If you add a count `i`, it will send to the closest
+REPL with that name relative to `i`.
 
 Here are examples of how to use this command:
 
-1. `REPLSendOperator` acts as the operator to send the text to the REPL that
-   the current buffer is attached to. If the buffer is not attached to any
+1. `Yarepl send_operator` acts as the operator to send the text to the REPL
+   that the current buffer is attached to. If the buffer is not attached to any
    REPL, it uses REPL 1.
 
-2. `3REPLSendOperator` sends the motion to REPL 3.
+2. `3Yarepl send_operator` sends the motion to REPL 3.
 
-3. `REPLSendOperator ipython` sends the motion to the attached ipython REPL if
-   there is one for the current buffer; otherwise, it uses the closest ipython
-   REPL relative to id `1`.
+3. `Yarepl send_operator ipython` sends the motion to the attached ipython REPL
+   if there is one for the current buffer; otherwise, it uses the closest
+   ipython REPL relative to id `1`.
 
-4. `3REPLSendOperator ipython` sends the motion to the closest ipython REPL
-   relative to id `3`.
+4. `3Yarepl send_operator ipython` sends the motion to the closest ipython
+   REPL relative to id `3`.
 
-`REPLSendOperator` is **dot-repeatable**, you do not need to install
+`Yarepl send_operator` is **dot-repeatable**, you do not need to install
 vim-repeat to make it work.
 
-### REPLSourceOperator
+### Yarepl source_operator
 
-The `REPLSourceOperator` is analogous to the `REPLSendOperator`. To understand
-the distinction between these two operators, refer to the section on
-`REPLSourceVisual`, which contrasts `REPLSendVisual` with `REPLSourceVisual`.
-This comparison provides a clear analogy that highlights the differences
-between `REPLSendOperator` and `REPLSourceOperator`.
+The `Yarepl source_operator` is analogous to the `Yarepl send_operator`. To
+understand the distinction between these two operators, refer to the section on
+`Yarepl source_visual`, which contrasts `Yarepl send_visual` with
+`Yarepl source_visual`. This comparison provides a clear analogy that
+highlights the differences between `Yarepl send_operator` and
+`Yarepl source_operator`.
 
-### REPLExec
+### Yarepl exec
 
 Sends the command typed in the cmdline to REPL `i` or the REPL that the current
 buffer is attached to.
@@ -511,23 +532,25 @@ buffer is attached to.
 If the first argument of this command is `$NAME`, the function will attempt to
 send to a REPL with the specified `NAME`. If no count is supplied, it first
 checks whether the current buffer is attached to a REPL with that name and uses
-it. If the buffer isn't attached to a matching REPL, it will use REPL 1 to find
-the closest match. If you add a count `i`, it will send to the closest REPL
-with that name relative to `i`.
+it. If the buffer isn't attached to a matching REPL, it will use REPL 1 to
+find the closest match. If you add a count `i`, it will send to the closest
+REPL with that name relative to `i`.
 
 Here are examples of how to use this command:
 
-1. `REPLExec %run a_file.py` will send the command `%run a_file.py` to the REPL 1.
+1. `Yarepl exec %run a_file.py` will send the command `%run a_file.py` to the
+   REPL 1.
 
-2. `3REPLExec print("hello world")` will send the command `print("hello world")` to the REPL 3.
+2. `3Yarepl exec print("hello world")` will send the command `print("hello
+world")` to the REPL 3.
 
-3. `REPLExec $ipython %whos` will send the command `%whos` to the closest
+3. `Yarepl exec $ipython %whos` will send the command `%whos` to the closest
    ipython REPL relative to id 1.
 
-4. `REPLExec $ipython %whos` will send the command `%whos` to the closest
+4. `Yarepl exec $ipython %whos` will send the command `%whos` to the closest
    ipython REPL relative to id 3.
 
-5. `REPLExec print("hello world")^Mprint("hello world again")` will send the
+5. `Yarepl exec print("hello world")^Mprint("hello world again")` will send the
    following two lines to the REPL current buffer is attached to or REPL 1.
 
 ```python
@@ -541,55 +564,57 @@ Note:
    `<Ctrl-v> <Enter>` rather than directly type `Enter`.
 
 2. Some neovim command will interpolate `%` to the file name of current buffer.
-   But `REPLExec` will not do this for you. The interpolation only happens for
+   But `Yarepl exec` will not do this for you. The interpolation only happens for
    the first `$` to get the desired `REPL` name.
 
 ## Keymaps
 
 `yarepl` provides the following keymaps:
 
-- `<Plug>(REPLStart)`
-- `<Plug>(REPLStartOrFocusOrHide)`
-- `<Plug>(REPLFocus)`
-- `<Plug>(REPLHide)`
-- `<Plug>(REPLHideOrFocus)`
-- `<Plug>(REPLSendLine)`
-- `<Plug>(REPLSendOperator)`
-- `<Plug>(REPLSendVisual)`
-- `<Plug>(REPLSourceOperator)`
-- `<Plug>(REPLSourceVisual)`
-- `<Plug>(REPLClose)`
-- `<Plug>(REPLExec)`
+- `<Plug>(Yarepl-start)`
+- `<Plug>(Yarepl-start-or-focus-or-hide)`
+- `<Plug>(Yarepl-focus)`
+- `<Plug>(Yarepl-hide)`
+- `<Plug>(Yarepl-hide-or-focus)`
+- `<Plug>(Yarepl-send-line)`
+- `<Plug>(Yarepl-send-operator)`
+- `<Plug>(Yarepl-send-visual)`
+- `<Plug>(Yarepl-source-operator)`
+- `<Plug>(Yarepl-source-visual)`
+- `<Plug>(Yarepl-close)`
+- `<Plug>(Yarepl-exec)`
 
 The keymap variant behaves exactly the same as its command variant. For
-example, you map `<Leader>s` to `<Plug>(REPLStart)`, then type `<Leader>s` is
-equivalent to `:REPLStart`. Type `3<Leader>s` is equivalent to `:3REPLStart`.
+example, you map `<Leader>s` to `<Plug>(Yarepl-start)`, then type `<Leader>s`
+is equivalent to `:Yarepl start`. Type `3<Leader>s` is equivalent to
+`:3Yarepl start`.
 
 And for each meta you registered (say you have a meta named `ipython`), the following keymaps will be registered:
 
-- `<Plug>(REPLStart-ipython)`
-- `<Plug>(REPLStartOrFocusOrHide-ipython)`
-- `<Plug>(REPLFocus-ipython)`
-- `<Plug>(REPLHide-ipython)`
-- `<Plug>(REPLHideOrFocus-ipython)`
-- `<Plug>(REPLSendLine-ipython)`
-- `<Plug>(REPLSendOperator-ipython)`
-- `<Plug>(REPLSendVisual-ipython)`
-- `<Plug>(REPLSourceOperator-ipython)`
-- `<Plug>(REPLSourceVisual-ipython)`
-- `<Plug>(REPLClose-ipython)`
-- `<Plug>(REPLExec-ipython)`
+- `<Plug>(Yarepl-start-ipython)`
+- `<Plug>(Yarepl-start-or-focus-or-hide-ipython)`
+- `<Plug>(Yarepl-focus-ipython)`
+- `<Plug>(Yarepl-hide-ipython)`
+- `<Plug>(Yarepl-hide-or-focus-ipython)`
+- `<Plug>(Yarepl-send-line-ipython)`
+- `<Plug>(Yarepl-send-operator-ipython)`
+- `<Plug>(Yarepl-send-visual-ipython)`
+- `<Plug>(Yarepl-source-operator-ipython)`
+- `<Plug>(Yarepl-source-visual-ipython)`
+- `<Plug>(Yarepl-close-ipython)`
+- `<Plug>(Yarepl-exec-ipython)`
 
 For keymaps with a meta, as you would expected, say you bind `<LocalLeader>s`
-to `<Plug>(REPLStart-ipython)`, then type `<LocalLeader>s` is equivalent to
-`:REPLStart ipython`. Type `3<LocalLeader>s` is equivalent to `:3REPLStart ipython`.
+to `<Plug>(Yarepl-start-ipython)`, then type `<LocalLeader>s` is equivalent to
+`:Yarepl start ipython`. Type `3<LocalLeader>s` is equivalent to
+`:3Yarepl start ipython`.
 
 Note that any letters that are not alphanumeric or `-`/`_` will be replaced
 with `-`. Say you have a meta named `python a`, the corresponding keymap to
-access them will be `<Plug>(REPLStart-python-a)`.
+access them will be `<Plug>(Yarepl-start-python-a)`.
 
 When you are binding those plug keymaps to your own keybindings, make sure this is
-a recursive map. e.g. `vim.keymap.set('n', '<Plug>(REPLStart-ipython)', { noremap = false })`.
+a recursive map. e.g. `vim.keymap.set('n', '<Plug>(Yarepl-start-ipython)', { noremap = false })`.
 
 # Window configuration
 
@@ -877,7 +902,7 @@ metas = {
 
 # Customizing the Source Syntax
 
-To utilize `REPLSourceOperator` and `REPLSourceVisual`, your REPL meta
+To utilize `Yarepl source_operator` and `Yarepl source_visual`, your REPL meta
 configuration must include either `source_syntax`.
 
 Here's an example setup using `yarepl` with a source syntax:
@@ -955,34 +980,34 @@ Here is the keybindings setup from the maintainer:
 local keymap = vim.api.nvim_set_keymap
 local bufmap = vim.api.nvim_buf_set_keymap
 
-keymap('n', '<Leader>cs', '<Plug>(REPLStart-aichat)', {
+keymap('n', '<Leader>cs', '<Plug>(Yarepl-start-aichat)', {
     desc = 'Start an Aichat REPL',
 })
-keymap('n', '<Leader>cf', '<Plug>(REPLFocus-aichat)', {
+keymap('n', '<Leader>cf', '<Plug>(Yarepl-focus-aichat)', {
     desc = 'Focus on Aichat REPL',
 })
-keymap('n', '<Leader>ch', '<Plug>(REPLHide-aichat)', {
+keymap('n', '<Leader>ch', '<Plug>(Yarepl-hide-aichat)', {
     desc = 'Hide Aichat REPL',
 })
-keymap('v', '<Leader>cr', '<Plug>(REPLSendVisual-aichat)', {
+keymap('v', '<Leader>cr', '<Plug>(Yarepl-send-visual-aichat)', {
     desc = 'Send visual region to Aichat',
 })
-keymap('v', '<Leader>cR', '<Plug>(REPLSourceVisual-aichat)', {
+keymap('v', '<Leader>cR', '<Plug>(Yarepl-source-visual-aichat)', {
     desc = 'Source visual region to Aichat',
 })
-keymap('n', '<Leader>crr', '<Plug>(REPLSendLine-aichat)', {
+keymap('n', '<Leader>crr', '<Plug>(Yarepl-send-line-aichat)', {
     desc = 'Send lines to Aichat',
 })
-keymap('n', '<Leader>cr', '<Plug>(REPLSendOperator-aichat)', {
+keymap('n', '<Leader>cr', '<Plug>(Yarepl-send-operator-aichat)', {
     desc = 'Send Operator to Aichat',
 })
-keymap('n', '<Leader>cr', '<Plug>(REPLSourceOperator-aichat)', {
+keymap('n', '<Leader>cr', '<Plug>(Yarepl-source-operator-aichat)', {
     desc = 'Source Operator to Aichat',
 })
-keymap('n', '<Leader>ce', '<Plug>(REPLExec-aichat)', {
+keymap('n', '<Leader>ce', '<Plug>(Yarepl-exec-aichat)', {
     desc = 'Execute command in aichat',
 })
-keymap('n', '<Leader>cq', '<Plug>(REPLClose-aichat)', {
+keymap('n', '<Leader>cq', '<Plug>(Yarepl-close-aichat)', {
     desc = 'Quit Aichat',
 })
 
@@ -1005,53 +1030,53 @@ autocmd('FileType', {
         local repl = ft_to_repl[vim.bo.filetype]
         repl = repl and ('-' .. repl) or ''
 
-        bufmap(0, 'n', '<LocalLeader>rs', string.format('<Plug>(REPLStart%s)', repl), {
+        bufmap(0, 'n', '<LocalLeader>rs', string.format('<Plug>(Yarepl-start%s)', repl), {
             desc = 'Start an REPL',
         })
-        bufmap(0, 'n', '<LocalLeader>rf', '<Plug>(REPLFocus)', {
+        bufmap(0, 'n', '<LocalLeader>rf', '<Plug>(Yarepl-focus)', {
             desc = 'Focus on REPL',
         })
-        bufmap(0, 'n', '<LocalLeader>rv', '<CMD>Telescope REPLShow<CR>', {
+        bufmap(0, 'n', '<LocalLeader>rv', '<CMD>Telescope yarepl_show<CR>', {
             desc = 'View REPLs in telescope',
         })
-        bufmap(0, 'n', '<LocalLeader>rh', '<Plug>(REPLHide)', {
+        bufmap(0, 'n', '<LocalLeader>rh', '<Plug>(Yarepl-hide)', {
             desc = 'Hide REPL',
         })
-        bufmap(0, 'v', '<LocalLeader>s', '<Plug>(REPLSendVisual)', {
+        bufmap(0, 'v', '<LocalLeader>s', '<Plug>(Yarepl-send-visual)', {
             desc = 'Send visual region to REPL',
         })
-        bufmap(0, 'v', '<LocalLeader>S', '<Plug>(REPLSourceVisual)', {
+        bufmap(0, 'v', '<LocalLeader>S', '<Plug>(Yarepl-source-visual)', {
             desc = 'Source visual region to REPL',
         })
-        bufmap(0, 'n', '<LocalLeader>ss', '<Plug>(REPLSendLine)', {
+        bufmap(0, 'n', '<LocalLeader>ss', '<Plug>(Yarepl-send-line)', {
             desc = 'Send line to REPL',
         })
-        bufmap(0, 'n', '<LocalLeader>s', '<Plug>(REPLSendOperator)', {
+        bufmap(0, 'n', '<LocalLeader>s', '<Plug>(Yarepl-send-operator)', {
             desc = 'Send operator to REPL',
         })
-        bufmap(0, 'n', '<LocalLeader>S', '<Plug>(REPLSourceOperator)', {
+        bufmap(0, 'n', '<LocalLeader>S', '<Plug>(Yarepl-source-operator)', {
             desc = 'Source operator to REPL',
         })
-        bufmap(0, 'n', '<LocalLeader>re', '<Plug>(REPLExec)', {
+        bufmap(0, 'n', '<LocalLeader>re', '<Plug>(Yarepl-exec)', {
             desc = 'Execute command in REPL',
             expr = true,
         })
-        bufmap(0, 'n', '<LocalLeader>rq', '<Plug>(REPLClose)', {
+        bufmap(0, 'n', '<LocalLeader>rq', '<Plug>(Yarepl-close)', {
             desc = 'Quit REPL',
         })
-        bufmap(0, 'n', '<LocalLeader>rc', '<CMD>REPLCleanup<CR>', {
+        bufmap(0, 'n', '<LocalLeader>rc', '<CMD>Yarepl cleanup<CR>', {
             desc = 'Clear REPLs.',
         })
-        bufmap(0, 'n', '<LocalLeader>rS', '<CMD>REPLSwap<CR>', {
+        bufmap(0, 'n', '<LocalLeader>rS', '<CMD>Yarepl swap<CR>', {
             desc = 'Swap REPLs.',
         })
-        bufmap(0, 'n', '<LocalLeader>r?', '<Plug>(REPLStart)', {
+        bufmap(0, 'n', '<LocalLeader>r?', '<Plug>(Yarepl-start)', {
             desc = 'Start an REPL from available REPL metas',
         })
-        bufmap(0, 'n', '<LocalLeader>ra', '<CMD>REPLAttachBufferToREPL<CR>', {
+        bufmap(0, 'n', '<LocalLeader>ra', '<CMD>Yarepl attach_buffer<CR>', {
             desc = 'Attach current buffer to a REPL',
         })
-        bufmap(0, 'n', '<LocalLeader>rd', '<CMD>REPLDetachBufferToREPL<CR>', {
+        bufmap(0, 'n', '<LocalLeader>rd', '<CMD>Yarepl detach_buffer<CR>', {
             desc = 'Detach current buffer to any REPL',
         })
     end,
@@ -1097,7 +1122,7 @@ CLI](https://github.com/openai/codex) integration.
 ## code-cell
 
 This module simplifies the creation of code cell text objects, allowing you to
-utilize them with `REPLSendOperator` or other operators such as paste, delete,
+utilize them with `Yarepl send_operator` or other operators such as paste, delete,
 and formatting.
 
 ## fzf-lua
@@ -1213,8 +1238,8 @@ return {
 return {
     'milanglacier/yarepl.nvim',
     keys = {
-        { '<Leader>s', '<Plug>(REPLStart)', noremap = false, mode = 'n' },
-        { '<LocalLeader>o', '<Plug>(REPLStart-ipython)', noremap = false, ft = 'python', mode = 'n' },
+        { '<Leader>s', '<Plug>(Yarepl-start)', noremap = false, mode = 'n' },
+        { '<LocalLeader>o', '<Plug>(Yarepl-start-ipython)', noremap = false, ft = 'python', mode = 'n' },
     },
     config = function()
         -- your config here
@@ -1228,29 +1253,29 @@ If you are using a bufferline plugin and do not want the REPL buffers to
 clutter your bufferline, pass `buflisted = false` in the `setup` function.
 
 In case you have unlisted the REPLs and need to view the running ones, use
-`Telescope REPLShow`.
+`Telescope yarepl_show`.
 
-## REPLSendVisual is not functioning properly
+## Yarepl send_visual is not functioning properly
 
-Refer to [REPLSendVisual](#replsendvisual)
+Refer to [Yarepl send_visual](#yarepl-send_visual)
 
-## `<Plug>(REPLSendVisual)` Only Sends to First REPL
+## `<Plug>(Yarepl-send-visual)` Only Sends to First REPL
 
-When using which-key.nvim and binding `<Plug>(REPLSendVisual)` or its variants
-(like `<Plug>(REPLSendVisual-ipython)`) to keybindings that start with leader
+When using which-key.nvim and binding `<Plug>(Yarepl-send-visual)` or its variants
+(like `<Plug>(Yarepl-send-visual-ipython)`) to keybindings that start with leader
 or local leader keys, visual selections will always be sent to the first REPL,
 regardless of any numeric prefix entered.
 
 This behavior occurs due to a conflict with which-key.nvim, as it consumes the
-count input before it reaches `<Plug>(REPLSendVisual)`, resulting in a count
+count input before it reaches `<Plug>(Yarepl-send-visual)`, resulting in a count
 value of `0`.
 
 To resolve this issue, you have several options:
 
 1. Disable which-key.nvim in visual mode
-2. Bind `<Plug>(REPLSendVisual)` to key sequences that don't trigger which-key
+2. Bind `<Plug>(Yarepl-send-visual)` to key sequences that don't trigger which-key
    (e.g., `<A-s>`)
-3. Use alternative methods such as `REPLAttachBufferToREPL` to connect the
+3. Use alternative methods such as `Yarepl attach_buffer` to connect the
    current buffer to a REPL other than the first one
 
 # Limitations
