@@ -558,7 +558,7 @@ local function show_source_command_hint(repl, original_content, source_command)
     local code_part_for_display = ''
     if original_content and #original_content > 0 then
         for _, line_str in ipairs(original_content) do
-            local trimmed_line = vim.fn.trim(line_str)
+            local trimmed_line = vim.trim(line_str)
             if #trimmed_line > 0 then
                 code_part_for_display = trimmed_line
                 break
