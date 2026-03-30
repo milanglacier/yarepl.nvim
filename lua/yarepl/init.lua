@@ -338,6 +338,15 @@ local function get_lines(mode, submode)
     local end_line = end_pos[2]
     local end_col = end_pos[3]
 
+    if
+        begin_line == 0
+        or end_line == 0
+        or begin_line > end_line
+        or (begin_line == end_line and begin_col > end_col)
+    then
+        return {}
+    end
+
     if submode == 'char' or submode == 'v' then
         local lines = api.nvim_buf_get_text(0, begin_line - 1, begin_col - 1, end_line - 1, -1, {})
         if #lines > 0 and #lines[#lines] > 0 then
