@@ -1350,15 +1350,19 @@ Create REPL `i` from the list of available REPLs.
 ]],
 })
 
-api.nvim_create_user_command('REPLStartOrFocusOrHide', deprecate_command('REPLStartOrFocusOrHide', 'start_or_focus_or_hide'), {
-    count = true,
-    bang = true,
-    nargs = '?',
-    complete = list_metas,
-    desc = [[
+api.nvim_create_user_command(
+    'REPLStartOrFocusOrHide',
+    deprecate_command('REPLStartOrFocusOrHide', 'start_or_focus_or_hide'),
+    {
+        count = true,
+        bang = true,
+        nargs = '?',
+        complete = list_metas,
+        desc = [[
 Start a REPL or toggle focus/hide on an existing REPL.
 ]],
-})
+    }
+)
 
 api.nvim_create_user_command(
     'REPLCleanup',
