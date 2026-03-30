@@ -338,6 +338,8 @@ local function get_lines(mode, submode)
     local end_line = end_pos[2]
     local end_col = end_pos[3]
 
+    -- https://github.com/milanglacier/yarepl.nvim/pull/42 Handle missing,
+    -- empty, or inverted ranges that occur when canceling a leap.nvim motion.
     if
         begin_line == 0
         or end_line == 0
