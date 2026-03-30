@@ -200,7 +200,7 @@ keymap('n', '<Plug>(yarepl-codex-exec)', '', {
 -------------------------------------
 
 vim.api.nvim_create_user_command('CodexSetArgs', function(opts)
-    vim.deprecate('CodexSetArgs', 'Yarepl codex set_args', 'next release', 'yarepl.nvim', false)
+    vim.deprecate('CodexSetArgs', 'Yarepl codex set_args', '2026-06-01', 'yarepl.nvim', false)
     M.codex_args = opts.fargs or {}
 end, {
     nargs = '*',
@@ -214,7 +214,7 @@ for _, shortcut in ipairs(shortcuts) do
         vim.deprecate(
             'CodexSend' .. shortcut.legacy_name,
             'Yarepl codex ' .. shortcut.name,
-            'next release',
+            '2026-06-01',
             'yarepl.nvim',
             false
         )
@@ -227,7 +227,7 @@ for _, shortcut in ipairs(shortcuts) do
 end
 
 vim.api.nvim_create_user_command('CodexExec', function(opts)
-    vim.deprecate('CodexExec', 'Yarepl codex exec', 'next release', 'yarepl.nvim', false)
+    vim.deprecate('CodexExec', 'Yarepl codex exec', '2026-06-01', 'yarepl.nvim', false)
     local id = opts.count
     local command = opts.args
     util.send_to_repl_raw('codex', id, command, true)
@@ -249,7 +249,7 @@ for _, shortcut in ipairs(shortcuts) do
     keymap('n', old_plug, '', {
         noremap = true,
         callback = function()
-            vim.deprecate(old_plug, new_plug, 'next release', 'yarepl.nvim', false)
+            vim.deprecate(old_plug, new_plug, '2026-06-01', 'yarepl.nvim', false)
             util.run_cmd_with_count('CodexSend' .. shortcut.legacy_name)
         end,
     })
@@ -258,7 +258,7 @@ end
 keymap('n', '<Plug>(CodexExec)', '', {
     noremap = true,
     callback = function()
-        vim.deprecate('<Plug>(CodexExec)', '<Plug>(yarepl-codex-exec)', 'next release', 'yarepl.nvim', false)
+        vim.deprecate('<Plug>(CodexExec)', '<Plug>(yarepl-codex-exec)', '2026-06-01', 'yarepl.nvim', false)
         return util.partial_cmd_with_count_expr 'CodexExec'
     end,
     expr = true,

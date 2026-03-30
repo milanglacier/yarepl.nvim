@@ -774,7 +774,7 @@ local function add_keymap(meta_name)
                 vim.deprecate(
                     string.format('<Plug>(%s%s)', spec[2], suffix),
                     string.format('<Plug>(Yarepl-%s%s)', spec[3], suffix),
-                    'next release',
+                    '2026-06-01',
                     'yarepl.nvim',
                     false
                 )
@@ -794,7 +794,7 @@ local function add_keymap(meta_name)
             vim.deprecate(
                 string.format('<Plug>(REPLExec%s)', suffix),
                 string.format('<Plug>(Yarepl-exec%s)', suffix),
-                'next release',
+                '2026-06-01',
                 'yarepl.nvim',
                 false
             )
@@ -1282,7 +1282,7 @@ M.setup = function(opts)
         vim.deprecate(
             'os.windows.send_delayed_cr_after_sending',
             'os.windows.send_delayed_final_cr',
-            'next release',
+            '2026-06-01',
             'yarepl.nvim',
             false
         )
@@ -1324,7 +1324,7 @@ end
 
 local function deprecate_command(old, new)
     return function(opts)
-        vim.deprecate(old, 'Yarepl ' .. new, 'next release', 'yarepl.nvim', false)
+        vim.deprecate(old, 'Yarepl ' .. new, '2026-06-01', 'yarepl.nvim', false)
         M.commands[new](opts)
     end
 end

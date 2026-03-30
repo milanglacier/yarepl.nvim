@@ -354,7 +354,7 @@ keymap('n', '<Plug>(yarepl-aider-exec)', '', {
 -------------------------------------
 
 vim.api.nvim_create_user_command('AiderSetArgs', function(opts)
-    vim.deprecate('AiderSetArgs', 'Yarepl aider set_args', 'next release', 'yarepl.nvim', false)
+    vim.deprecate('AiderSetArgs', 'Yarepl aider set_args', '2026-06-01', 'yarepl.nvim', false)
     M.aider_args = opts.fargs or {}
 end, {
     nargs = '*',
@@ -364,7 +364,7 @@ end, {
 })
 
 vim.api.nvim_create_user_command('AiderSetPrefix', function(opts)
-    vim.deprecate('AiderSetPrefix', 'Yarepl aider set_prefix', 'next release', 'yarepl.nvim', false)
+    vim.deprecate('AiderSetPrefix', 'Yarepl aider set_prefix', '2026-06-01', 'yarepl.nvim', false)
     local prefix = opts.args
 
     if prefix == '' then
@@ -388,7 +388,7 @@ end, {
 })
 
 vim.api.nvim_create_user_command('AiderRemovePrefix', function()
-    vim.deprecate('AiderRemovePrefix', 'Yarepl aider remove_prefix', 'next release', 'yarepl.nvim', false)
+    vim.deprecate('AiderRemovePrefix', 'Yarepl aider remove_prefix', '2026-06-01', 'yarepl.nvim', false)
     M.set_prefix ''
 end, {})
 
@@ -397,7 +397,7 @@ for _, shortcut in ipairs(shortcuts) do
         vim.deprecate(
             'AiderSend' .. shortcut.legacy_name,
             'Yarepl aider ' .. shortcut.name,
-            'next release',
+            '2026-06-01',
             'yarepl.nvim',
             false
         )
@@ -407,7 +407,7 @@ for _, shortcut in ipairs(shortcuts) do
 end
 
 vim.api.nvim_create_user_command('AiderExec', function(opts)
-    vim.deprecate('AiderExec', 'Yarepl aider exec', 'next release', 'yarepl.nvim', false)
+    vim.deprecate('AiderExec', 'Yarepl aider exec', '2026-06-01', 'yarepl.nvim', false)
     local id = opts.count
     local command = opts.args
     util.send_to_repl_raw('aider', id, command .. '\r')
@@ -429,7 +429,7 @@ for _, shortcut in ipairs(shortcuts) do
     keymap('n', old_plug, '', {
         noremap = true,
         callback = function()
-            vim.deprecate(old_plug, new_plug, 'next release', 'yarepl.nvim', false)
+            vim.deprecate(old_plug, new_plug, '2026-06-01', 'yarepl.nvim', false)
             util.run_cmd_with_count('AiderSend' .. shortcut.legacy_name)
         end,
     })
@@ -438,7 +438,7 @@ end
 keymap('n', '<Plug>(AiderExec)', '', {
     noremap = true,
     callback = function()
-        vim.deprecate('<Plug>(AiderExec)', '<Plug>(yarepl-aider-exec)', 'next release', 'yarepl.nvim', false)
+        vim.deprecate('<Plug>(AiderExec)', '<Plug>(yarepl-aider-exec)', '2026-06-01', 'yarepl.nvim', false)
         return util.partial_cmd_with_count_expr 'AiderExec'
     end,
     expr = true,

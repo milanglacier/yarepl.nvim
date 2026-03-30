@@ -5,7 +5,7 @@ local conf = require('telescope.config').values
 
 local function REPLShow(opts)
     -- Deprecate REPLShow in favor of yarepl_show
-    vim.deprecate('REPLShow', 'yarepl_show', 'next release', 'yarepl.nvim', false)
+    vim.deprecate('REPLShow', 'yarepl_show', '2026-06-01', 'yarepl.nvim', false)
     vim.cmd.REPLCleanup()
 
     local repls = require('yarepl')._repls
