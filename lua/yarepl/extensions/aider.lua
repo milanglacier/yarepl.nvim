@@ -231,7 +231,130 @@ M.create_aider_meta = function()
     }
 end
 
+local shortcuts = {
+    { name = 'send_yes', legacy_name = 'Yes', key = 'y' },
+    { name = 'send_no', legacy_name = 'No', key = 'n' },
+    { name = 'send_abort', legacy_name = 'Abort', key = '\3' }, -- Ctrl-c
+    { name = 'send_exit', legacy_name = 'Exit', key = '\4' }, -- Ctrl-d
+    { name = 'send_diff', legacy_name = 'Diff', key = '/diff' },
+    { name = 'send_paste', legacy_name = 'Paste', key = '/paste' },
+    { name = 'send_clear', legacy_name = 'Clear', key = '/clear' },
+    { name = 'send_undo', legacy_name = 'Undo', key = '/undo' },
+    { name = 'send_reset', legacy_name = 'Reset', key = '/reset' },
+    { name = 'send_drop', legacy_name = 'Drop', key = '/drop' },
+    { name = 'send_ls', legacy_name = 'Ls', key = '/ls' },
+    { name = 'send_ask_mode', legacy_name = 'AskMode', key = '/ask' },
+    { name = 'send_arch_mode', legacy_name = 'ArchMode', key = '/architect' },
+    { name = 'send_code_mode', legacy_name = 'CodeMode', key = '/code' },
+    { name = 'send_context_mode', legacy_name = 'ContextMode', key = '/context' },
+}
+
+-------------------------------------
+-- New unified Yarepl aider commands
+-------------------------------------
+
+local aider_commands = {}
+local aider_completions = {}
+
+for _, shortcut in ipairs(shortcuts) do
+    aider_commands[shortcut.name] = function(opts)
+        local id = opts.count
+        util.send_to_repl_raw('aider', id, shortcut.key .. '\r')
+    end
+    aider_completions[shortcut.name] = true
+end
+
+aider_commands.set_args = function(opts)
+    M.aider_args = opts.fargs or {}
+end
+aider_completions.set_args = function()
+    return aider_args
+end
+
+aider_commands.set_prefix = function(opts)
+    local prefix = opts.args
+
+    if prefix == '' then
+        vim.ui.select(prefixes, {
+            prompt = 'Select prefix: ',
+        }, function(choice)
+            if not choice then
+                return
+            end
+
+            M.set_prefix(choice)
+        end)
+    else
+        M.set_prefix(prefix)
+    end
+end
+aider_completions.set_prefix = function()
+    return prefixes
+end
+
+aider_commands.remove_prefix = function()
+    M.set_prefix ''
+end
+aider_completions.remove_prefix = true
+
+aider_commands.exec = function(opts)
+    local id = opts.count
+    local command = opts.args
+    util.send_to_repl_raw('aider', id, command .. '\r')
+end
+aider_completions.exec = function()
+    return prefixes
+end
+
+local yarepl = require 'yarepl'
+
+yarepl.commands.aider = function(opts)
+    local fargs = opts.fargs
+    if #fargs == 0 then
+        vim.notify('Yarepl aider: subcommand required', vim.log.levels.ERROR)
+        return
+    end
+
+    local subcmd = table.remove(fargs, 1)
+    local handler = aider_commands[subcmd]
+    if not handler then
+        vim.notify('Yarepl aider: unknown subcommand: ' .. subcmd, vim.log.levels.ERROR)
+        return
+    end
+
+    handler { args = table.concat(fargs, ' '), fargs = fargs, count = opts.count, bang = opts.bang }
+end
+
+yarepl.completions.aider = aider_completions
+
+-------------------------------------
+-- New <Plug>(yarepl-aider-*) keymaps
+-------------------------------------
+
+for _, shortcut in ipairs(shortcuts) do
+    local plug_name = shortcut.name:gsub('_', '-')
+    keymap('n', '<Plug>(yarepl-aider-' .. plug_name .. ')', '', {
+        noremap = true,
+        callback = function()
+            util.run_cmd_with_count('Yarepl aider ' .. shortcut.name)
+        end,
+    })
+end
+
+keymap('n', '<Plug>(yarepl-aider-exec)', '', {
+    noremap = true,
+    callback = function()
+        return util.partial_cmd_with_count_expr 'Yarepl aider exec '
+    end,
+    expr = true,
+})
+
+-------------------------------------
+-- Legacy commands with deprecation notices
+-------------------------------------
+
 vim.api.nvim_create_user_command('AiderSetArgs', function(opts)
+    vim.deprecate('AiderSetArgs', 'Yarepl aider set_args', 'next release', 'yarepl.nvim', false)
     M.aider_args = opts.fargs or {}
 end, {
     nargs = '*',
@@ -241,6 +364,7 @@ end, {
 })
 
 vim.api.nvim_create_user_command('AiderSetPrefix', function(opts)
+    vim.deprecate('AiderSetPrefix', 'Yarepl aider set_prefix', 'next release', 'yarepl.nvim', false)
     local prefix = opts.args
 
     if prefix == '' then
@@ -264,42 +388,26 @@ end, {
 })
 
 vim.api.nvim_create_user_command('AiderRemovePrefix', function()
+    vim.deprecate('AiderRemovePrefix', 'Yarepl aider remove_prefix', 'next release', 'yarepl.nvim', false)
     M.set_prefix ''
 end, {})
 
-local shortcuts = {
-    { name = 'Yes', key = 'y' },
-    { name = 'No', key = 'n' },
-    { name = 'Abort', key = '\3' }, -- Ctrl-c
-    { name = 'Exit', key = '\4' }, -- Ctrl-d
-    { name = 'Diff', key = '/diff' },
-    { name = 'Paste', key = '/paste' },
-    { name = 'Clear', key = '/clear' },
-    { name = 'Undo', key = '/undo' },
-    { name = 'Reset', key = '/reset' },
-    { name = 'Drop', key = '/drop' },
-    { name = 'Ls', key = '/ls' },
-    { name = 'AskMode', key = '/ask' },
-    { name = 'ArchMode', key = '/architect' },
-    { name = 'CodeMode', key = '/code' },
-    { name = 'ContextMode', key = '/context' },
-}
-
 for _, shortcut in ipairs(shortcuts) do
-    vim.api.nvim_create_user_command('AiderSend' .. shortcut.name, function(opts)
+    vim.api.nvim_create_user_command('AiderSend' .. shortcut.legacy_name, function(opts)
+        vim.deprecate(
+            'AiderSend' .. shortcut.legacy_name,
+            'Yarepl aider ' .. shortcut.name,
+            'next release',
+            'yarepl.nvim',
+            false
+        )
         local id = opts.count
         util.send_to_repl_raw('aider', id, shortcut.key .. '\r')
     end, { count = true })
-
-    keymap('n', string.format('<Plug>(AiderSend%s)', shortcut.name), '', {
-        noremap = true,
-        callback = function()
-            util.run_cmd_with_count('AiderSend' .. shortcut.name)
-        end,
-    })
 end
 
 vim.api.nvim_create_user_command('AiderExec', function(opts)
+    vim.deprecate('AiderExec', 'Yarepl aider exec', 'next release', 'yarepl.nvim', false)
     local id = opts.count
     local command = opts.args
     util.send_to_repl_raw('aider', id, command .. '\r')
@@ -311,9 +419,26 @@ end, {
     end,
 })
 
+-------------------------------------
+-- Legacy <Plug>(Aider*) keymaps with deprecation notices
+-------------------------------------
+
+for _, shortcut in ipairs(shortcuts) do
+    local old_plug = '<Plug>(AiderSend' .. shortcut.legacy_name .. ')'
+    local new_plug = '<Plug>(yarepl-aider-' .. shortcut.name:gsub('_', '-') .. ')'
+    keymap('n', old_plug, '', {
+        noremap = true,
+        callback = function()
+            vim.deprecate(old_plug, new_plug, 'next release', 'yarepl.nvim', false)
+            util.run_cmd_with_count('AiderSend' .. shortcut.legacy_name)
+        end,
+    })
+end
+
 keymap('n', '<Plug>(AiderExec)', '', {
     noremap = true,
     callback = function()
+        vim.deprecate('<Plug>(AiderExec)', '<Plug>(yarepl-aider-exec)', 'next release', 'yarepl.nvim', false)
         return util.partial_cmd_with_count_expr 'AiderExec'
     end,
     expr = true,
