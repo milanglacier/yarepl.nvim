@@ -878,9 +878,9 @@ final CR with a delay (to let the REPL realize that we want to evaluate that
 command). In general we should ignore this option (keep it as the default
 `false`). When you do enable this option, prefer using the
 `bracketed_pasting_delayed_cr` formatter so that the final CR is not included
-in the initial stream (it will be sent by the delayed event). The two observed
-exceptions are Claude Code and OpenAI Codex which should use `true`. PRs are
-welcome if you find other REPLs that require setting this option to `true`.
+in the initial stream (it will be sent by the delayed event). The observed
+exceptions are Claude Code, Codex, and Opencode which should use `true`. PRs
+are welcome if you find other REPLs that require setting this option to `true`.
 
 Example usage:
 

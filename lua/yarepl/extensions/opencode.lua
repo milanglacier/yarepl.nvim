@@ -64,7 +64,7 @@ local slash_commands = {
     '/unshare',
 }
 
-M.formatter = 'bracketed_pasting'
+M.formatter = 'bracketed_pasting_delayed_cr'
 M.opencode_args = {}
 M.opencode_cmd = 'opencode'
 
@@ -93,6 +93,7 @@ M.create_opencode_meta = function()
         end,
         formatter = M.formatter,
         wincmd = M.wincmd,
+        send_delayed_final_cr = true,
     }
 end
 
