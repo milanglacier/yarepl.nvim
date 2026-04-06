@@ -15,10 +15,18 @@
   - [Usage](#usage-1)
     - [Example keybinding Setup](#example-keybinding-setup-1)
   - [Customization](#customization-1)
-- [Code Cell](#code-cell)
+- [OpenCode](#opencode)
   - [Overview](#overview-2)
   - [Features](#features-2)
+  - [Commands](#commands-2)
+  - [Keymaps](#keymaps-2)
   - [Usage](#usage-2)
+    - [Example keybinding Setup](#example-keybinding-setup-2)
+  - [Customization](#customization-2)
+- [Code Cell](#code-cell)
+  - [Overview](#overview-3)
+  - [Features](#features-3)
+  - [Usage](#usage-3)
     - [Example Configuration](#example-configuration)
 - [Telescope Integration](#telescope-integration)
 - [Fzf-lua Integration](#fzf-lua-integration)
@@ -373,6 +381,122 @@ require('yarepl.extensions.codex').setup {
       show_winbar_in_float_win = true,
       -- The default is a floating window at the bottom right corner; you can override it
       wincmd = require('yarepl.extensions.codex').wincmd,
+}
+```
+
+# OpenCode
+
+## Overview
+
+This extension integrates the OpenCode with yarepl. It provides a ready to use
+REPL meta, completions for common slash commands, and convenience commands for
+the most used TUI keybinds.
+
+## Features
+
+- Seamless yarepl integration for OpenCode sessions
+- Completions for common OpenCode slash commands
+- Convenience shortcuts for OpenCode's `ctrl+x` leader commands
+- Configurable OpenCode command and arguments
+- Floating window default for a focused REPL experience
+
+## Commands
+
+- `Yarepl opencode set_args`: Set CLI arguments for launching OpenCode with
+  completion support, for example `Yarepl opencode set_args --model xxx`
+- `Yarepl opencode send_compact`: Send `/compact` to OpenCode.
+- `Yarepl opencode send_connect`: Send `/connect` to OpenCode.
+- `Yarepl opencode send_open_editor`: Send `ctrl+x e` to OpenCode.
+- `Yarepl opencode send_exit`: Send `/exit` to OpenCode.
+- `Yarepl opencode send_export`: Send `/export` to OpenCode.
+- `Yarepl opencode send_help`: Send `/help` to OpenCode.
+- `Yarepl opencode send_init`: Send `/init` to OpenCode.
+- `Yarepl opencode send_models`: Send `/models` to OpenCode.
+- `Yarepl opencode send_new`: Send `/new` to OpenCode.
+- `Yarepl opencode send_redo`: Send `/redo` to OpenCode.
+- `Yarepl opencode send_sessions`: Send `/sessions` to OpenCode.
+- `Yarepl opencode send_share`: Send `/share` to OpenCode.
+- `Yarepl opencode send_thinking`: Send `/thinking` to OpenCode.
+- `Yarepl opencode send_undo`: Send `/undo` to OpenCode.
+- `Yarepl opencode send_unshare`: Send `/unshare` to OpenCode.
+- `Yarepl opencode send_scroll_up`: Send `ctrl+alt+u` to OpenCode.
+- `Yarepl opencode send_scroll_down`: Send `ctrl+alt+d` to OpenCode.
+- `Yarepl opencode exec`: Send the prompt written in cmdline to OpenCode, with
+  completion for common prefixes like `/compact`, `/connect`, `/editor`,
+  `/models`, `/sessions`, `/thinking`, and `/undo`.
+
+All commands accept an optional count to target a specific OpenCode REPL id.
+
+## Keymaps
+
+In addition to the general `<Plug>` maps created by yarepl once the `opencode`
+meta is registered, this extension defines extra convenience maps:
+
+- `<Plug>(yarepl-opencode-exec)`: Type in cmdline and send to OpenCode.
+- `<Plug>(yarepl-opencode-send-compact)`
+- `<Plug>(yarepl-opencode-send-connect)`
+- `<Plug>(yarepl-opencode-send-open-editor)`: Send `ctrl+x e`.
+- `<Plug>(yarepl-opencode-send-exit)`
+- `<Plug>(yarepl-opencode-send-export)`
+- `<Plug>(yarepl-opencode-send-help)`
+- `<Plug>(yarepl-opencode-send-init)`
+- `<Plug>(yarepl-opencode-send-models)`
+- `<Plug>(yarepl-opencode-send-new)`
+- `<Plug>(yarepl-opencode-send-redo)`
+- `<Plug>(yarepl-opencode-send-sessions)`
+- `<Plug>(yarepl-opencode-send-share)`
+- `<Plug>(yarepl-opencode-send-thinking)`
+- `<Plug>(yarepl-opencode-send-undo)`
+- `<Plug>(yarepl-opencode-send-unshare)`
+- `<Plug>(yarepl-opencode-send-scroll-up)`: Send `ctrl+alt+u`.
+- `<Plug>(yarepl-opencode-send-scroll-down)`: Send `ctrl+alt+d`.
+
+You can prefix a count (e.g. `2`) before a mapping to target that REPL id.
+
+## Usage
+
+Add the OpenCode meta to your setup:
+
+```lua
+require('yarepl').setup {
+  metas = {
+    opencode = require('yarepl.extensions.opencode').create_opencode_meta(),
+  },
+}
+```
+
+### Example keybinding Setup
+
+```lua
+local keymap = vim.api.nvim_set_keymap
+
+-- general yarepl keymaps for the opencode meta
+keymap('n', '<Leader>os', '<Plug>(yarepl-opencode-start)', { desc = 'Start OpenCode' })
+keymap('n', '<Leader>of', '<Plug>(yarepl-opencode-focus)', { desc = 'Focus OpenCode' })
+keymap('n', '<Leader>oh', '<Plug>(yarepl-opencode-hide)', { desc = 'Hide OpenCode' })
+keymap('v', '<Leader>or', '<Plug>(yarepl-opencode-send-visual)', { desc = 'Send visual to OpenCode' })
+keymap('n', '<Leader>orr', '<Plug>(yarepl-opencode-send-line)', { desc = 'Send line to OpenCode' })
+keymap('n', '<Leader>or', '<Plug>(yarepl-opencode-send-operator)', { desc = 'Send operator to OpenCode' })
+
+-- opencode-specific convenience keymaps
+keymap('n', '<Leader>oe', '<Plug>(yarepl-opencode-exec)', { desc = 'Exec in OpenCode' })
+keymap('n', '<Leader>oo', '<Plug>(yarepl-opencode-send-open-editor)', { desc = 'Open editor' })
+keymap('n', '<Leader>ou', '<Plug>(yarepl-opencode-send-scroll-up)', { desc = 'Scroll up' })
+keymap('n', '<Leader>od', '<Plug>(yarepl-opencode-send-scroll-down)', { desc = 'Scroll down' })
+```
+
+## Customization
+
+Default configuration:
+
+```lua
+require('yarepl.extensions.opencode').setup {
+      opencode_cmd = 'opencode',
+      opencode_args = {},
+      -- Display a winbar (e.g., "opencode#<id>") in the floating window.
+      show_winbar_in_float_window = true,
+      -- The default is a floating window at the bottom right corner; you can override it
+      wincmd = require('yarepl.extensions.opencode').wincmd,
 }
 ```
 

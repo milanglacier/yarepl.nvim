@@ -30,6 +30,7 @@
 - [Extensions](#extensions)
   - [aider](#aider)
   - [codex](#codex)
+  - [opencode](#opencode)
   - [code-cell](#code-cell)
   - [fzf-lua](#fzf-lua)
   - [telescope](#telescope)
@@ -77,8 +78,9 @@ effortlessly interact with multiple CLI Apps through various paradigms:
 - Send text from a single buffer to multiple CLI Apps (same program or different)
 - Attach a buffer to a dedicated CLI Apps
 
-The plugin features integration with `aider.chat` and `OpenAI Codex CLI`, and
-provides convenient code cell text object definitions. Choose your preferred
+The plugin features integration with `aider.chat`, `OpenAI Codex CLI`, and
+`OpenCode`, and provides convenient code cell text object definitions. Choose
+your preferred
 fuzzy finder among `telescope`, `fzf-lua`, or `Snacks.picker` to preview active
 REPLs. These features are available as [extensions](#extensions).
 
@@ -1118,6 +1120,11 @@ This module enhances AI-assisted coding capabilities through
 
 This module enhances AI-assisted coding capabilities through [OpenAI's Codex
 CLI](https://github.com/openai/codex) integration.
+
+## opencode
+
+This module enhances AI-assisted coding capabilities through
+[OpenCode](https://opencode.ai) integration.
 
 ## code-cell
 
