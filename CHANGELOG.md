@@ -1,3 +1,16 @@
+# Version 0.14.0 (2026-04-05)
+
+## Breaking Changes
+
+- **Lowercase `<Plug>` Keymaps**: Renamed `<Plug>(Yarepl-*)` mappings to
+  `<Plug>(yarepl-*)` to follow the more common Vim plugin convention of using
+  lowercase `<Plug>` names. This also applies to extension mappings such as
+  `<Plug>(yarepl-opencode-*)`.
+
+## Features
+
+- **OpenCode Extension**: a lightweight minimal extension for `opencode`.
+
 # Version 0.13.0 (2026-03-30)
 
 ## Breaking Changes
