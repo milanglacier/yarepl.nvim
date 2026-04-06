@@ -45,14 +45,20 @@
 - [Limitations](#limitations)
 - [Acknowledgements](#acknowledgements)
 
-**Breaking change:** the old `REPL*` commands and `<Plug>(REPL*)` maps are now
-named under `Yarepl`. Use commands like `:Yarepl start`, `:Yarepl attach_buffer`,
+**Breaking change:** `<Plug>` mappings now use lowercase `yarepl` names. If you
+previously mapped `<Plug>(Yarepl-start)` or `<Plug>(Yarepl-codex-exec)`, update
+them to `<Plug>(yarepl-start)` and `<Plug>(yarepl-codex-exec)`. This change
+aligns with the common convention of using lowercase `<Plug>` names across Vim
+plugins. This change also takes effect immediately.
+
+The old `REPL*` commands and `<Plug>(REPL*)` maps are now named under
+`Yarepl`. Use commands like `:Yarepl start`, `:Yarepl attach_buffer`,
 `:Yarepl send_visual`, and `:Yarepl exec`. The matching plug maps are named
 like `<Plug>(yarepl-start)` and `<Plug>(yarepl-send-visual)`. The command part
 uses snake style, while `<Plug>` names use kebab style.
 
-The legacy commands and keymaps still function for now, but they will be
-removed on `2026-06-01`.
+The legacy commands and keymaps (`REPL*`) still function for now, but they will
+be removed on `2026-06-01`.
 
 If you previously used `REPLStart`, `REPLSendVisual`, or
 `<Plug>(REPLStart-ipython)`, the replacement is the same idea with a different
@@ -1124,7 +1130,9 @@ CLI](https://github.com/openai/codex) integration.
 ## opencode
 
 This module enhances AI-assisted coding capabilities through
-[OpenCode](https://opencode.ai) integration.
+[OpenCode](https://opencode.ai) integration. Its extension-specific `<Plug>`
+maps follow the same lowercase naming pattern, for example
+`<Plug>(yarepl-opencode-exec)`.
 
 ## code-cell
 
