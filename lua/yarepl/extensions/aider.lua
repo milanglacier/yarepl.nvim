@@ -425,7 +425,7 @@ end, {
 
 for _, shortcut in ipairs(shortcuts) do
     local old_plug = '<Plug>(AiderSend' .. shortcut.legacy_name .. ')'
-    local new_plug = '<Plug(Yarepl-aider-' .. shortcut.name:gsub('_', '-') .. ')'
+    local new_plug = '<Plug>(Yarepl-aider-' .. shortcut.name:gsub('_', '-') .. ')'
     keymap('n', old_plug, '', {
         noremap = true,
         callback = function()
@@ -438,7 +438,7 @@ end
 keymap('n', '<Plug>(AiderExec)', '', {
     noremap = true,
     callback = function()
-        vim.deprecate('<Plug>(AiderExec)', '<Plug(Yarepl-aider-exec)', '2026-06-01', 'yarepl.nvim', false)
+        vim.deprecate('<Plug>(AiderExec)', '<Plug>(Yarepl-aider-exec)', '2026-06-01', 'yarepl.nvim', false)
         return util.partial_cmd_with_count_expr 'AiderExec'
     end,
     expr = true,
