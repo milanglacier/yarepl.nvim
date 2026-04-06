@@ -41,14 +41,14 @@
   - [Why lazy loading with `lazy.nvim` doesn't work?](#why-lazy-loading-with-lazynvim-doesnt-work)
   - [How do I avoid clutter from the bufferline plugin?](#how-do-i-avoid-clutter-from-the-bufferline-plugin)
   - [Yarepl send_visual is not functioning properly](#yarepl-send_visual-is-not-functioning-properly)
-  - [`<Plug>(Yarepl-send-visual)` Only Sends to First REPL](#plugyarepl-send-visual-only-sends-to-first-repl)
+  - [`<Plug>(yarepl-send-visual)` Only Sends to First REPL](#plugyarepl-send-visual-only-sends-to-first-repl)
 - [Limitations](#limitations)
 - [Acknowledgements](#acknowledgements)
 
 **Breaking change:** the old `REPL*` commands and `<Plug>(REPL*)` maps are now
 named under `Yarepl`. Use commands like `:Yarepl start`, `:Yarepl attach_buffer`,
 `:Yarepl send_visual`, and `:Yarepl exec`. The matching plug maps are named
-like `<Plug>(Yarepl-start)` and `<Plug>(Yarepl-send-visual)`. The command part
+like `<Plug>(yarepl-start)` and `<Plug>(yarepl-send-visual)`. The command part
 uses snake style, while `<Plug>` names use kebab style.
 
 The legacy commands and keymaps still function for now, but they will be
@@ -57,7 +57,7 @@ removed on `2026-06-01`.
 If you previously used `REPLStart`, `REPLSendVisual`, or
 `<Plug>(REPLStart-ipython)`, the replacement is the same idea with a different
 wrapper: `:Yarepl start`, `:Yarepl send_visual`, and
-`<Plug>(Yarepl-start-ipython)`.
+`<Plug>(yarepl-start-ipython)`.
 
 The unified `Yarepl` entry point keeps the plugin easier to extend and makes
 completion, counts, and future subcommands behave consistently instead of
@@ -573,50 +573,50 @@ Note:
 
 `yarepl` provides the following keymaps:
 
-- `<Plug>(Yarepl-start)`
-- `<Plug>(Yarepl-start-or-focus-or-hide)`
-- `<Plug>(Yarepl-focus)`
-- `<Plug>(Yarepl-hide)`
-- `<Plug>(Yarepl-hide-or-focus)`
-- `<Plug>(Yarepl-send-line)`
-- `<Plug>(Yarepl-send-operator)`
-- `<Plug>(Yarepl-send-visual)`
-- `<Plug>(Yarepl-source-operator)`
-- `<Plug>(Yarepl-source-visual)`
-- `<Plug>(Yarepl-close)`
-- `<Plug>(Yarepl-exec)`
+- `<Plug>(yarepl-start)`
+- `<Plug>(yarepl-start-or-focus-or-hide)`
+- `<Plug>(yarepl-focus)`
+- `<Plug>(yarepl-hide)`
+- `<Plug>(yarepl-hide-or-focus)`
+- `<Plug>(yarepl-send-line)`
+- `<Plug>(yarepl-send-operator)`
+- `<Plug>(yarepl-send-visual)`
+- `<Plug>(yarepl-source-operator)`
+- `<Plug>(yarepl-source-visual)`
+- `<Plug>(yarepl-close)`
+- `<Plug>(yarepl-exec)`
 
 The keymap variant behaves exactly the same as its command variant. For
-example, you map `<Leader>s` to `<Plug>(Yarepl-start)`, then type `<Leader>s`
+example, you map `<Leader>s` to `<Plug>(yarepl-start)`, then type `<Leader>s`
 is equivalent to `:Yarepl start`. Type `3<Leader>s` is equivalent to
 `:3Yarepl start`.
 
 And for each meta you registered (say you have a meta named `ipython`), the following keymaps will be registered:
 
-- `<Plug>(Yarepl-start-ipython)`
-- `<Plug>(Yarepl-start-or-focus-or-hide-ipython)`
-- `<Plug>(Yarepl-focus-ipython)`
-- `<Plug>(Yarepl-hide-ipython)`
-- `<Plug>(Yarepl-hide-or-focus-ipython)`
-- `<Plug>(Yarepl-send-line-ipython)`
-- `<Plug>(Yarepl-send-operator-ipython)`
-- `<Plug>(Yarepl-send-visual-ipython)`
-- `<Plug>(Yarepl-source-operator-ipython)`
-- `<Plug>(Yarepl-source-visual-ipython)`
-- `<Plug>(Yarepl-close-ipython)`
-- `<Plug>(Yarepl-exec-ipython)`
+- `<Plug>(yarepl-start-ipython)`
+- `<Plug>(yarepl-start-or-focus-or-hide-ipython)`
+- `<Plug>(yarepl-focus-ipython)`
+- `<Plug>(yarepl-hide-ipython)`
+- `<Plug>(yarepl-hide-or-focus-ipython)`
+- `<Plug>(yarepl-send-line-ipython)`
+- `<Plug>(yarepl-send-operator-ipython)`
+- `<Plug>(yarepl-send-visual-ipython)`
+- `<Plug>(yarepl-source-operator-ipython)`
+- `<Plug>(yarepl-source-visual-ipython)`
+- `<Plug>(yarepl-close-ipython)`
+- `<Plug>(yarepl-exec-ipython)`
 
 For keymaps with a meta, as you would expected, say you bind `<LocalLeader>s`
-to `<Plug>(Yarepl-start-ipython)`, then type `<LocalLeader>s` is equivalent to
+to `<Plug>(yarepl-start-ipython)`, then type `<LocalLeader>s` is equivalent to
 `:Yarepl start ipython`. Type `3<LocalLeader>s` is equivalent to
 `:3Yarepl start ipython`.
 
 Note that any letters that are not alphanumeric or `-`/`_` will be replaced
 with `-`. Say you have a meta named `python a`, the corresponding keymap to
-access them will be `<Plug>(Yarepl-start-python-a)`.
+access them will be `<Plug>(yarepl-start-python-a)`.
 
 When you are binding those plug keymaps to your own keybindings, make sure this is
-a recursive map. e.g. `vim.keymap.set('n', '<Plug>(Yarepl-start-ipython)', { noremap = false })`.
+a recursive map. e.g. `vim.keymap.set('n', '<Plug>(yarepl-start-ipython)', { noremap = false })`.
 
 # Window configuration
 
@@ -982,34 +982,34 @@ Here is the keybindings setup from the maintainer:
 local keymap = vim.api.nvim_set_keymap
 local bufmap = vim.api.nvim_buf_set_keymap
 
-keymap('n', '<Leader>cs', '<Plug>(Yarepl-start-aichat)', {
+keymap('n', '<Leader>cs', '<Plug>(yarepl-start-aichat)', {
     desc = 'Start an Aichat REPL',
 })
-keymap('n', '<Leader>cf', '<Plug>(Yarepl-focus-aichat)', {
+keymap('n', '<Leader>cf', '<Plug>(yarepl-focus-aichat)', {
     desc = 'Focus on Aichat REPL',
 })
-keymap('n', '<Leader>ch', '<Plug>(Yarepl-hide-aichat)', {
+keymap('n', '<Leader>ch', '<Plug>(yarepl-hide-aichat)', {
     desc = 'Hide Aichat REPL',
 })
-keymap('v', '<Leader>cr', '<Plug>(Yarepl-send-visual-aichat)', {
+keymap('v', '<Leader>cr', '<Plug>(yarepl-send-visual-aichat)', {
     desc = 'Send visual region to Aichat',
 })
-keymap('v', '<Leader>cR', '<Plug>(Yarepl-source-visual-aichat)', {
+keymap('v', '<Leader>cR', '<Plug>(yarepl-source-visual-aichat)', {
     desc = 'Source visual region to Aichat',
 })
-keymap('n', '<Leader>crr', '<Plug>(Yarepl-send-line-aichat)', {
+keymap('n', '<Leader>crr', '<Plug>(yarepl-send-line-aichat)', {
     desc = 'Send lines to Aichat',
 })
-keymap('n', '<Leader>cr', '<Plug>(Yarepl-send-operator-aichat)', {
+keymap('n', '<Leader>cr', '<Plug>(yarepl-send-operator-aichat)', {
     desc = 'Send Operator to Aichat',
 })
-keymap('n', '<Leader>cr', '<Plug>(Yarepl-source-operator-aichat)', {
+keymap('n', '<Leader>cr', '<Plug>(yarepl-source-operator-aichat)', {
     desc = 'Source Operator to Aichat',
 })
-keymap('n', '<Leader>ce', '<Plug>(Yarepl-exec-aichat)', {
+keymap('n', '<Leader>ce', '<Plug>(yarepl-exec-aichat)', {
     desc = 'Execute command in aichat',
 })
-keymap('n', '<Leader>cq', '<Plug>(Yarepl-close-aichat)', {
+keymap('n', '<Leader>cq', '<Plug>(yarepl-close-aichat)', {
     desc = 'Quit Aichat',
 })
 
@@ -1032,38 +1032,38 @@ autocmd('FileType', {
         local repl = ft_to_repl[vim.bo.filetype]
         repl = repl and ('-' .. repl) or ''
 
-        bufmap(0, 'n', '<LocalLeader>rs', string.format('<Plug>(Yarepl-start%s)', repl), {
+        bufmap(0, 'n', '<LocalLeader>rs', string.format('<Plug>(yarepl-start%s)', repl), {
             desc = 'Start an REPL',
         })
-        bufmap(0, 'n', '<LocalLeader>rf', '<Plug>(Yarepl-focus)', {
+        bufmap(0, 'n', '<LocalLeader>rf', '<Plug>(yarepl-focus)', {
             desc = 'Focus on REPL',
         })
         bufmap(0, 'n', '<LocalLeader>rv', '<CMD>Telescope yarepl_show<CR>', {
             desc = 'View REPLs in telescope',
         })
-        bufmap(0, 'n', '<LocalLeader>rh', '<Plug>(Yarepl-hide)', {
+        bufmap(0, 'n', '<LocalLeader>rh', '<Plug>(yarepl-hide)', {
             desc = 'Hide REPL',
         })
-        bufmap(0, 'v', '<LocalLeader>s', '<Plug>(Yarepl-send-visual)', {
+        bufmap(0, 'v', '<LocalLeader>s', '<Plug>(yarepl-send-visual)', {
             desc = 'Send visual region to REPL',
         })
-        bufmap(0, 'v', '<LocalLeader>S', '<Plug>(Yarepl-source-visual)', {
+        bufmap(0, 'v', '<LocalLeader>S', '<Plug>(yarepl-source-visual)', {
             desc = 'Source visual region to REPL',
         })
-        bufmap(0, 'n', '<LocalLeader>ss', '<Plug>(Yarepl-send-line)', {
+        bufmap(0, 'n', '<LocalLeader>ss', '<Plug>(yarepl-send-line)', {
             desc = 'Send line to REPL',
         })
-        bufmap(0, 'n', '<LocalLeader>s', '<Plug>(Yarepl-send-operator)', {
+        bufmap(0, 'n', '<LocalLeader>s', '<Plug>(yarepl-send-operator)', {
             desc = 'Send operator to REPL',
         })
-        bufmap(0, 'n', '<LocalLeader>S', '<Plug>(Yarepl-source-operator)', {
+        bufmap(0, 'n', '<LocalLeader>S', '<Plug>(yarepl-source-operator)', {
             desc = 'Source operator to REPL',
         })
-        bufmap(0, 'n', '<LocalLeader>re', '<Plug>(Yarepl-exec)', {
+        bufmap(0, 'n', '<LocalLeader>re', '<Plug>(yarepl-exec)', {
             desc = 'Execute command in REPL',
             expr = true,
         })
-        bufmap(0, 'n', '<LocalLeader>rq', '<Plug>(Yarepl-close)', {
+        bufmap(0, 'n', '<LocalLeader>rq', '<Plug>(yarepl-close)', {
             desc = 'Quit REPL',
         })
         bufmap(0, 'n', '<LocalLeader>rc', '<CMD>Yarepl cleanup<CR>', {
@@ -1072,7 +1072,7 @@ autocmd('FileType', {
         bufmap(0, 'n', '<LocalLeader>rS', '<CMD>Yarepl swap<CR>', {
             desc = 'Swap REPLs.',
         })
-        bufmap(0, 'n', '<LocalLeader>r?', '<Plug>(Yarepl-start)', {
+        bufmap(0, 'n', '<LocalLeader>r?', '<Plug>(yarepl-start)', {
             desc = 'Start an REPL from available REPL metas',
         })
         bufmap(0, 'n', '<LocalLeader>ra', '<CMD>Yarepl attach_buffer<CR>', {
@@ -1245,8 +1245,8 @@ return {
 return {
     'milanglacier/yarepl.nvim',
     keys = {
-        { '<Leader>s', '<Plug>(Yarepl-start)', noremap = false, mode = 'n' },
-        { '<LocalLeader>o', '<Plug>(Yarepl-start-ipython)', noremap = false, ft = 'python', mode = 'n' },
+        { '<Leader>s', '<Plug>(yarepl-start)', noremap = false, mode = 'n' },
+        { '<LocalLeader>o', '<Plug>(yarepl-start-ipython)', noremap = false, ft = 'python', mode = 'n' },
     },
     config = function()
         -- your config here
@@ -1266,21 +1266,21 @@ In case you have unlisted the REPLs and need to view the running ones, use
 
 Refer to [Yarepl send_visual](#yarepl-send_visual)
 
-## `<Plug>(Yarepl-send-visual)` Only Sends to First REPL
+## `<Plug>(yarepl-send-visual)` Only Sends to First REPL
 
-When using which-key.nvim and binding `<Plug>(Yarepl-send-visual)` or its variants
-(like `<Plug>(Yarepl-send-visual-ipython)`) to keybindings that start with leader
+When using which-key.nvim and binding `<Plug>(yarepl-send-visual)` or its variants
+(like `<Plug>(yarepl-send-visual-ipython)`) to keybindings that start with leader
 or local leader keys, visual selections will always be sent to the first REPL,
 regardless of any numeric prefix entered.
 
 This behavior occurs due to a conflict with which-key.nvim, as it consumes the
-count input before it reaches `<Plug>(Yarepl-send-visual)`, resulting in a count
+count input before it reaches `<Plug>(yarepl-send-visual)`, resulting in a count
 value of `0`.
 
 To resolve this issue, you have several options:
 
 1. Disable which-key.nvim in visual mode
-2. Bind `<Plug>(Yarepl-send-visual)` to key sequences that don't trigger which-key
+2. Bind `<Plug>(yarepl-send-visual)` to key sequences that don't trigger which-key
    (e.g., `<A-s>`)
 3. Use alternative methods such as `Yarepl attach_buffer` to connect the
    current buffer to a REPL other than the first one

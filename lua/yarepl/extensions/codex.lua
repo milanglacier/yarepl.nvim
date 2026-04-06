@@ -174,12 +174,12 @@ end
 yarepl.completions.codex = codex_completions
 
 -------------------------------------
--- New <Plug(Yarepl-codex-*) keymaps
+-- New <Plug(yarepl-codex-*) keymaps
 -------------------------------------
 
 for _, shortcut in ipairs(shortcuts) do
     local plug_name = shortcut.name:gsub('_', '-')
-    keymap('n', '<Plug>(Yarepl-codex-' .. plug_name .. ')', '', {
+    keymap('n', '<Plug>(yarepl-codex-' .. plug_name .. ')', '', {
         noremap = true,
         callback = function()
             util.run_cmd_with_count('Yarepl codex ' .. shortcut.name)
@@ -187,7 +187,7 @@ for _, shortcut in ipairs(shortcuts) do
     })
 end
 
-keymap('n', '<Plug>(Yarepl-codex-exec)', '', {
+keymap('n', '<Plug>(yarepl-codex-exec)', '', {
     noremap = true,
     callback = function()
         return util.partial_cmd_with_count_expr 'Yarepl codex exec '
@@ -245,7 +245,7 @@ end, {
 
 for _, shortcut in ipairs(shortcuts) do
     local old_plug = '<Plug>(CodexSend' .. shortcut.legacy_name .. ')'
-    local new_plug = '<Plug>(Yarepl-codex-' .. shortcut.name:gsub('_', '-') .. ')'
+    local new_plug = '<Plug>(yarepl-codex-' .. shortcut.name:gsub('_', '-') .. ')'
     keymap('n', old_plug, '', {
         noremap = true,
         callback = function()
@@ -258,7 +258,7 @@ end
 keymap('n', '<Plug>(CodexExec)', '', {
     noremap = true,
     callback = function()
-        vim.deprecate('<Plug>(CodexExec)', '<Plug>(Yarepl-codex-exec)', '2026-06-01', 'yarepl.nvim', false)
+        vim.deprecate('<Plug>(CodexExec)', '<Plug>(yarepl-codex-exec)', '2026-06-01', 'yarepl.nvim', false)
         return util.partial_cmd_with_count_expr 'CodexExec'
     end,
     expr = true,

@@ -182,7 +182,7 @@ yarepl.completions.opencode = opencode_completions
 
 for _, shortcut in ipairs(shortcuts) do
     local plug_name = shortcut.name:gsub('_', '-')
-    keymap('n', '<Plug>(Yarepl-opencode-' .. plug_name .. ')', '', {
+    keymap('n', '<Plug>(yarepl-opencode-' .. plug_name .. ')', '', {
         noremap = true,
         callback = function()
             util.run_cmd_with_count('Yarepl opencode ' .. shortcut.name)
@@ -190,7 +190,7 @@ for _, shortcut in ipairs(shortcuts) do
     })
 end
 
-keymap('n', '<Plug>(Yarepl-opencode-exec)', '', {
+keymap('n', '<Plug>(yarepl-opencode-exec)', '', {
     noremap = true,
     callback = function()
         return util.partial_cmd_with_count_expr 'Yarepl opencode exec '

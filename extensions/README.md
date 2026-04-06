@@ -549,7 +549,7 @@ Note: Use Lua patterns rather than Vim regex patterns.
 
 These text objects function in both operator-pending and visual modes.
 
-To send code cells to REPL, map `<Plug>(Yarepl-send-operator)` to `<Leader>s`, then
+To send code cells to REPL, map `<Plug>(yarepl-send-operator)` to `<Leader>s`, then
 use `<Leader>sic` to send the current cell.
 
 # Telescope Integration

@@ -784,7 +784,7 @@ local function add_keymap(meta_name)
             callback = function()
                 vim.deprecate(
                     string.format('<Plug>(%s%s)', spec[2], suffix),
-                    string.format('<Plug>(Yarepl-%s%s)', spec[3], suffix),
+                    string.format('<Plug>(yarepl-%s%s)', spec[3], suffix),
                     '2026-06-01',
                     'yarepl.nvim',
                     false
@@ -804,7 +804,7 @@ local function add_keymap(meta_name)
         callback = function()
             vim.deprecate(
                 string.format('<Plug>(REPLExec%s)', suffix),
-                string.format('<Plug>(Yarepl-exec%s)', suffix),
+                string.format('<Plug>(yarepl-exec%s)', suffix),
                 '2026-06-01',
                 'yarepl.nvim',
                 false
@@ -1233,7 +1233,7 @@ M.source_syntaxes.bash = 'source "{{file}}"'
 M.source_syntaxes.R = 'eval(parse(text = readr::read_file("{{file}}")))'
 M.source_syntaxes.aichat = '.file "{{file}}"'
 
--- New <Plug>(Yarepl-*) keymaps
+-- New <Plug>(yarepl-*) keymaps
 
 local function add_yarepl_keymap(meta_name)
     if meta_name then
@@ -1258,7 +1258,7 @@ local function add_yarepl_keymap(meta_name)
 
     for _, spec in ipairs(mode_commands) do
         local plug_name = spec[2]:gsub('_', '-')
-        api.nvim_set_keymap(spec[1], string.format('<Plug>(Yarepl-%s%s)', plug_name, suffix), '', {
+        api.nvim_set_keymap(spec[1], string.format('<Plug>(yarepl-%s%s)', plug_name, suffix), '', {
             noremap = true,
             callback = function()
                 if meta_name then
@@ -1270,7 +1270,7 @@ local function add_yarepl_keymap(meta_name)
         })
     end
 
-    api.nvim_set_keymap('n', string.format('<Plug>(Yarepl-exec%s)', suffix), '', {
+    api.nvim_set_keymap('n', string.format('<Plug>(yarepl-exec%s)', suffix), '', {
         noremap = true,
         callback = function()
             if meta_name then

@@ -5,7 +5,7 @@
 - **Unified Commands**: Replaced `REPL*`, `Codex*`, and `Aider*` commands with
   a unified `Yarepl` command interface. Legacy commands remain functional but
   show deprecation warnings.
-- **Unified Keymaps**: Replaced `<Plug>(REPL*)` keymaps with `<Plug>(Yarepl-*)`
+- **Unified Keymaps**: Replaced `<Plug>(REPL*)` keymaps with `<Plug>(yarepl-*)`
   keymaps.
 
 ## Features
