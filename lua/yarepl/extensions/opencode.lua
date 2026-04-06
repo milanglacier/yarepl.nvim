@@ -67,6 +67,7 @@ local slash_commands = {
 M.formatter = 'bracketed_pasting_delayed_cr'
 M.opencode_args = {}
 M.opencode_cmd = 'opencode'
+M.warn_on_EDITOR_env_var = true
 
 M.setup = function(params)
     M = vim.tbl_deep_extend('force', M, params or {})
@@ -100,7 +101,16 @@ end
 local shortcuts = {
     { name = 'send_compact', key = '/compact', requires_cr = true },
     { name = 'send_connect', key = '/connect', requires_cr = true },
-    { name = 'send_open_editor', key = '\24e', requires_cr = false },
+    {
+        name = 'send_open_editor',
+        key = '\24e',
+        requires_cr = false,
+        pre_hook = function()
+            if M.warn_on_EDITOR_env_var and ((not vim.env.EDITOR) or (not vim.env.EDITOR:find 'nvr')) then
+                vim.notify('current $EDITOR command is not nvr, please consider using nvr', vim.log.levels.WARN)
+            end
+        end,
+    },
     { name = 'send_exit', key = '/exit', requires_cr = true },
     { name = 'send_export', key = '/export', requires_cr = true },
     { name = 'send_help', key = '/help', requires_cr = true },
@@ -122,6 +132,9 @@ local opencode_completions = {}
 
 for _, shortcut in ipairs(shortcuts) do
     opencode_commands[shortcut.name] = function(opts)
+        if type(shortcut.pre_hook) == 'function' then
+            shortcut.pre_hook()
+        end
         local id = opts.count
         util.send_to_repl_raw('opencode', id, shortcut.key, shortcut.requires_cr)
     end
@@ -169,7 +182,7 @@ yarepl.completions.opencode = opencode_completions
 
 for _, shortcut in ipairs(shortcuts) do
     local plug_name = shortcut.name:gsub('_', '-')
-    keymap('n', '<Plug>(yarepl-opencode-' .. plug_name .. ')', '', {
+    keymap('n', '<Plug>(Yarepl-opencode-' .. plug_name .. ')', '', {
         noremap = true,
         callback = function()
             util.run_cmd_with_count('Yarepl opencode ' .. shortcut.name)
@@ -177,7 +190,7 @@ for _, shortcut in ipairs(shortcuts) do
     })
 end
 
-keymap('n', '<Plug>(yarepl-opencode-exec)', '', {
+keymap('n', '<Plug>(Yarepl-opencode-exec)', '', {
     noremap = true,
     callback = function()
         return util.partial_cmd_with_count_expr 'Yarepl opencode exec '
