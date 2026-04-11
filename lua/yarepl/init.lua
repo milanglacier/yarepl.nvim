@@ -4,7 +4,7 @@ local fn = vim.fn
 local is_win32 = vim.fn.has 'win32' == 1
 
 ---@class yarepl.REPLMeta
----@field cmd string[]|string|fun(): string The command to start the REPL or a function that returns the command
+---@field cmd string[]|string|fun(): string|string[] The command to start the REPL, a builtin cmd name (e.g., 'builtin:ipython'), or a function that returns the command
 ---@field formatter string|fun(lines: string[]): string[] The formatter name or function to process lines before sending
 ---@field source_syntax string The syntax type for sourcing code (e.g., 'python', 'R', 'bash')
 ---@field wincmd? string|fun(bufnr: number, name: string) The window command or function to create/focus the REPL window
@@ -17,6 +17,7 @@ local is_win32 = vim.fn.has 'win32' == 1
 ---@field name string
 
 M.formatter = {}
+M.cmd_builtin = {}
 M.commands = {}
 M.completions = {}
 M._virt_text_ns_id = api.nvim_create_namespace 'YareplVirtualText'
@@ -31,8 +32,8 @@ local default_config = function()
         metas = {
             aichat = { cmd = 'aichat', formatter = 'bracketed_pasting', source_syntax = 'aichat' },
             radian = { cmd = 'radian', formatter = 'bracketed_pasting_no_final_new_line', source_syntax = 'R' },
-            ipython = { cmd = 'ipython', formatter = 'bracketed_pasting', source_syntax = 'ipython' },
-            python = { cmd = 'python', formatter = 'trim_empty_lines', source_syntax = 'python' },
+            ipython = { cmd = 'builtin:ipython', formatter = 'bracketed_pasting', source_syntax = 'ipython' },
+            python = { cmd = 'builtin:python', formatter = 'trim_empty_lines', source_syntax = 'python' },
             R = { cmd = 'R', formatter = 'trim_empty_lines', source_syntax = 'R' },
             -- bash version >= 4.4 supports bracketed paste mode. but macos
             -- shipped with bash 3.2, so we don't use bracketed paste mode for
@@ -400,6 +401,59 @@ local function get_formatter(formatter)
         return M.formatter[formatter] or error('Unknown formatter: ' .. formatter)
     end
     return formatter
+end
+
+---Search upward from cwd for a binary inside a configurable directory using vim.fs.
+---@param search_root string The relative directory to search in (e.g., '.venv/bin', 'venv/bin')
+---@param binary_name string The binary name to search for (e.g., 'ipython', 'python3')
+---@param fallback_binary? string The fallback command to return if nothing is found
+---@return string The full path if found, otherwise the fallback command
+function M.cmd_builtin.find_binary(search_root, binary_name, fallback_binary)
+    local binary_path = vim.fs.joinpath(search_root, binary_name)
+
+    local paths = vim.fs.find(binary_path, {
+        upward = true,
+        type = 'file',
+    })
+
+    if #paths > 0 and vim.fn.executable(paths[1]) == 1 then
+        return paths[1]
+    end
+
+    return fallback_binary or binary_name
+end
+
+---Backward-compatible helper for finding binaries in a virtualenv layout.
+---@param binary_name string The binary name to search for
+---@param fallback_binary? string The fallback command to return if nothing is found
+---@return string The full path if found, otherwise the fallback command
+function M.cmd_builtin.find_venv_binary(binary_name, fallback_binary)
+    local search_root = is_win32 and '.venv/Scripts' or '.venv/bin'
+    local binary = is_win32 and binary_name .. '.exe' or binary_name
+    return M.cmd_builtin.find_binary(search_root, binary, fallback_binary)
+end
+
+M.cmd_builtin['builtin:ipython'] = function()
+    local search_root = is_win32 and '.venv/Scripts' or '.venv/bin'
+    local binary = is_win32 and 'ipython.exe' or 'ipython'
+    return M.cmd_builtin.find_binary(search_root, binary, 'ipython')
+end
+
+M.cmd_builtin['builtin:python'] = function()
+    local search_root = is_win32 and '.venv/Scripts' or '.venv/bin'
+    local binary = is_win32 and 'python.exe' or 'python3'
+    local fallback_binary = is_win32 and 'python' or 'python3'
+    return M.cmd_builtin.find_binary(search_root, binary, fallback_binary)
+end
+
+---Resolve the cmd from either a string name or function
+---@param cmd string|string[]|function The cmd name, cmd list, or function
+---@return string|string[]|function The resolved cmd or function
+local function resolve_cmd(cmd)
+    if type(cmd) == 'string' and M.cmd_builtin[cmd] then
+        return M.cmd_builtin[cmd]
+    end
+    return cmd
 end
 
 function M.formatter.factory(opts)
@@ -1309,6 +1363,11 @@ M.setup = function(opts)
             -- Convert string formatter names to actual formatter functions
             if meta.formatter then
                 meta.formatter = get_formatter(meta.formatter)
+            end
+
+            -- Resolve string cmd names to builtin cmd functions
+            if meta.cmd then
+                meta.cmd = resolve_cmd(meta.cmd)
             end
 
             meta.source_command_hint =
