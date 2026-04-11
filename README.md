@@ -187,8 +187,9 @@ yarepl.setup {
     metas = {
         aichat = { cmd = 'aichat', formatter = 'bracketed_pasting', source_syntax = 'aichat' },
         radian = { cmd = 'radian', formatter = 'bracketed_pasting_no_final_new_line', source_syntax = 'R' },
-        ipython = { cmd = 'ipython', formatter = 'bracketed_pasting', source_syntax = 'ipython' },
-        python = { cmd = 'python', formatter = 'trim_empty_lines', source_syntax = 'python' },
+        -- builtin command names search a .venv/bin/ipython first, then fall back to PATH
+        ipython = { cmd = 'builtin:ipython', formatter = 'bracketed_pasting', source_syntax = 'ipython' },
+        python = { cmd = 'builtin:python', formatter = 'trim_empty_lines', source_syntax = 'python' },
         R = { cmd = 'R', formatter = 'trim_empty_lines', source_syntax = 'R' },
         bash = {
             cmd = 'bash',
@@ -713,6 +714,10 @@ metas = {
 }
 ```
 
+The built-in command names `builtin:ipython` and `builtin:python` look for
+`.venv/bin` on Unix-like systems or `.venv/Scripts` on Windows before falling
+back to the executable on `PATH`.
+
 You can add your own REPL meta by following this example:
 
 ```lua
@@ -722,11 +727,13 @@ function send_line_verbatim(lines)
 end
 
 function ipython_or_python()
-    if vim.fn.executable 'ipython' == 1 then
-        return { 'ipython', '--simple-prompt' }
-    else
-        return 'python'
+    local ipython_cmd = yarepl.cmd_builtin.find_binary(".venv/bin", "ipython", 'ipython')
+
+    if vim.fn.executable(ipython_cmd) == 1 then
+        return { ipython_cmd, '--simple-prompt' }
     end
+
+    return yarepl.cmd_builtin.find_binary(".venv/bin", "python3", 'python3')
 end
 
 function ipython_or_python_formatter(lines)
@@ -745,7 +752,14 @@ metas = {
 ```
 
 `cmd` can be three types: a string, a list of strings, or a function that
-returns either a string or list of strings.
+returns either a string or list of strings. It can also be one of yarepl's
+builtin command names, such as `builtin:ipython` or `builtin:python`.
+
+If you want to build your own path lookup logic, use
+`require('yarepl').cmd_builtin.find_binary(search_root, binary_name, fallback_binary)`
+inside a custom `cmd` function. The helper searches upward from the current
+directory for `search_root/binary_name` and returns `fallback_binary` when no
+matching binary is found.
 
 `formatter` can be either:
 
