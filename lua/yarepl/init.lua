@@ -423,16 +423,6 @@ function M.cmd_builtin.find_binary(search_root, binary_name, fallback_binary)
     return fallback_binary or binary_name
 end
 
----Backward-compatible helper for finding binaries in a virtualenv layout.
----@param binary_name string The binary name to search for
----@param fallback_binary? string The fallback command to return if nothing is found
----@return string The full path if found, otherwise the fallback command
-function M.cmd_builtin.find_venv_binary(binary_name, fallback_binary)
-    local search_root = is_win32 and '.venv/Scripts' or '.venv/bin'
-    local binary = is_win32 and binary_name .. '.exe' or binary_name
-    return M.cmd_builtin.find_binary(search_root, binary, fallback_binary)
-end
-
 M.cmd_builtin['builtin:ipython'] = function()
     local search_root = is_win32 and '.venv/Scripts' or '.venv/bin'
     local binary = is_win32 and 'ipython.exe' or 'ipython'
