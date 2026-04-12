@@ -2,9 +2,8 @@ local keymap = vim.api.nvim_set_keymap
 local util = require 'yarepl.extensions.utility'
 
 local M = {}
-M.show_winbar_in_float_window = true
 
-M.wincmd = function(bufnr, name)
+local function default_wincmd(bufnr, name)
     local winid = vim.api.nvim_open_win(bufnr, true, {
         relative = 'laststatus',
         row = 0,
@@ -16,7 +15,7 @@ M.wincmd = function(bufnr, name)
         border = 'rounded',
         title_pos = 'center',
     })
-    if M.show_winbar_in_float_window then
+    if M.config.show_winbar_in_float_window then
         vim.wo[winid].winbar = '%t'
     end
 end
@@ -195,28 +194,31 @@ end
 -- Initialize the prefix handler
 local prefix_handler = create_prefix_handler()
 
--- Expose the sender function
-M.formatter = prefix_handler.formatter
 M.set_prefix = prefix_handler.set_prefix
-M.aider_args = { '--watch-files' }
-M.aider_cmd = 'aider'
+M.config = {
+    show_winbar_in_float_window = true,
+    wincmd = default_wincmd,
+    formatter = prefix_handler.formatter,
+    aider_args = { '--watch-files' },
+    aider_cmd = 'aider',
+}
 
 M.setup = function(params)
-    M = vim.tbl_deep_extend('force', M, params or {})
+    M.config = vim.tbl_deep_extend('force', M.config, params or {})
 end
 
 M.create_aider_meta = function()
     return {
         cmd = function()
             local args
-            -- build up the command to launch aider based on M.aider_args (the
-            -- command line options) and the M.aider_cmd.
-            if type(M.aider_cmd) == 'string' then
-                args = vim.deepcopy(M.aider_args)
-                table.insert(args, 1, M.aider_cmd)
-            elseif type(M.aider_cmd == 'table') then
-                args = vim.deepcopy(M.aider_cmd)
-                for _, arg in ipairs(M.aider_args) do
+            -- build up the command to launch aider based on M.config.aider_args
+            -- (the command line options) and the M.config.aider_cmd.
+            if type(M.config.aider_cmd) == 'string' then
+                args = vim.deepcopy(M.config.aider_args)
+                table.insert(args, 1, M.config.aider_cmd)
+            elseif type(M.config.aider_cmd) == 'table' then
+                args = vim.deepcopy(M.config.aider_cmd)
+                for _, arg in ipairs(M.config.aider_args) do
                     table.insert(args, arg)
                 end
             else
@@ -226,8 +228,8 @@ M.create_aider_meta = function()
 
             return args
         end,
-        formatter = M.formatter,
-        wincmd = M.wincmd,
+        formatter = M.config.formatter,
+        wincmd = M.config.wincmd,
     }
 end
 
@@ -265,7 +267,7 @@ for _, shortcut in ipairs(shortcuts) do
 end
 
 aider_commands.set_args = function(opts)
-    M.aider_args = opts.fargs or {}
+    M.config.aider_args = opts.fargs or {}
 end
 aider_completions.set_args = function()
     return aider_args
@@ -355,7 +357,7 @@ keymap('n', '<Plug>(yarepl-aider-exec)', '', {
 
 vim.api.nvim_create_user_command('AiderSetArgs', function(opts)
     vim.deprecate('AiderSetArgs', 'Yarepl aider set_args', '2026-06-01', 'yarepl.nvim', false)
-    M.aider_args = opts.fargs or {}
+    M.config.aider_args = opts.fargs or {}
 end, {
     nargs = '*',
     complete = function()

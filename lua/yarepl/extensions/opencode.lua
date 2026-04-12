@@ -2,9 +2,8 @@ local keymap = vim.api.nvim_set_keymap
 local util = require 'yarepl.extensions.utility'
 
 local M = {}
-M.show_winbar_in_float_window = true
 
-M.wincmd = function(bufnr, name)
+local function default_wincmd(bufnr, name)
     local winid = vim.api.nvim_open_win(bufnr, true, {
         relative = 'laststatus',
         row = 0,
@@ -16,7 +15,7 @@ M.wincmd = function(bufnr, name)
         border = 'rounded',
         title_pos = 'center',
     })
-    if M.show_winbar_in_float_window then
+    if M.config.show_winbar_in_float_window then
         vim.wo[winid].winbar = '%t'
     end
 end
@@ -64,25 +63,29 @@ local slash_commands = {
     '/unshare',
 }
 
-M.formatter = 'bracketed_pasting_delayed_cr'
-M.opencode_args = {}
-M.opencode_cmd = 'opencode'
-M.warn_on_EDITOR_env_var = true
+M.config = {
+    show_winbar_in_float_window = true,
+    wincmd = default_wincmd,
+    formatter = 'bracketed_pasting_delayed_cr',
+    opencode_args = {},
+    opencode_cmd = 'opencode',
+    warn_on_EDITOR_env_var = true,
+}
 
 M.setup = function(params)
-    M = vim.tbl_deep_extend('force', M, params or {})
+    M.config = vim.tbl_deep_extend('force', M.config, params or {})
 end
 
 M.create_opencode_meta = function()
     return {
         cmd = function()
             local args
-            if type(M.opencode_cmd) == 'string' then
-                args = vim.deepcopy(M.opencode_args)
-                table.insert(args, 1, M.opencode_cmd)
-            elseif type(M.opencode_cmd) == 'table' then
-                args = vim.deepcopy(M.opencode_cmd)
-                for _, arg in ipairs(M.opencode_args) do
+            if type(M.config.opencode_cmd) == 'string' then
+                args = vim.deepcopy(M.config.opencode_args)
+                table.insert(args, 1, M.config.opencode_cmd)
+            elseif type(M.config.opencode_cmd) == 'table' then
+                args = vim.deepcopy(M.config.opencode_cmd)
+                for _, arg in ipairs(M.config.opencode_args) do
                     table.insert(args, arg)
                 end
             else
@@ -92,8 +95,8 @@ M.create_opencode_meta = function()
 
             return args
         end,
-        formatter = M.formatter,
-        wincmd = M.wincmd,
+        formatter = M.config.formatter,
+        wincmd = M.config.wincmd,
         send_delayed_final_cr = true,
     }
 end
@@ -106,7 +109,7 @@ local shortcuts = {
         key = '\24e',
         requires_cr = false,
         pre_hook = function()
-            if M.warn_on_EDITOR_env_var and ((not vim.env.EDITOR) or (not vim.env.EDITOR:find 'nvr')) then
+            if M.config.warn_on_EDITOR_env_var and ((not vim.env.EDITOR) or (not vim.env.EDITOR:find 'nvr')) then
                 vim.notify('current $EDITOR command is not nvr, please consider using nvr', vim.log.levels.WARN)
             end
         end,
@@ -152,7 +155,7 @@ opencode_completions.exec = function()
 end
 
 opencode_commands.set_args = function(opts)
-    M.opencode_args = opts.fargs or {}
+    M.config.opencode_args = opts.fargs or {}
 end
 
 opencode_completions.set_args = function()

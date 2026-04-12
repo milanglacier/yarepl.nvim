@@ -214,7 +214,7 @@ require('yarepl.extensions.aider').setup {
     -- Display a winbar (e.g., "aider#<id>") in the floating window.
     show_winbar_in_float_win = true,
     -- The default wincmd is to open aider in a floating window at the bottom-right corner
-    wincmd = require('yarepl.extensions.aider').wincmd,
+    wincmd = require('yarepl.extensions.aider').config.wincmd,
 }
 ```
 
@@ -370,7 +370,7 @@ require('yarepl.extensions.codex').setup {
       -- Display a winbar (e.g., "codex#<id>") in the floating window.
       show_winbar_in_float_win = true,
       -- The default is a floating window at the bottom right corner; you can override it
-      wincmd = require('yarepl.extensions.codex').wincmd,
+      wincmd = require('yarepl.extensions.codex').config.wincmd,
 }
 ```
 
@@ -486,7 +486,7 @@ require('yarepl.extensions.opencode').setup {
       -- Display a winbar (e.g., "opencode#<id>") in the floating window.
       show_winbar_in_float_window = true,
       -- The default is a floating window at the bottom right corner; you can override it
-      wincmd = require('yarepl.extensions.opencode').wincmd,
+      wincmd = require('yarepl.extensions.opencode').config.wincmd,
 }
 ```
 

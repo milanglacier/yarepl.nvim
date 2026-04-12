@@ -2,9 +2,8 @@ local keymap = vim.api.nvim_set_keymap
 local util = require 'yarepl.extensions.utility'
 
 local M = {}
-M.show_winbar_in_float_window = true
 
-M.wincmd = function(bufnr, name)
+local function default_wincmd(bufnr, name)
     local winid = vim.api.nvim_open_win(bufnr, true, {
         relative = 'laststatus',
         row = 0,
@@ -16,12 +15,10 @@ M.wincmd = function(bufnr, name)
         border = 'rounded',
         title_pos = 'center',
     })
-    if M.show_winbar_in_float_window then
+    if M.config.show_winbar_in_float_window then
         vim.wo[winid].winbar = '%t'
     end
 end
-
-M.source_syntax = 'read the instruction from {{file}}'
 
 local prefixes = {
     '/model',
@@ -47,27 +44,32 @@ local codex_args = {
     '--cd',
 }
 
-M.codex_args = {}
-M.formatter = 'bracketed_pasting_delayed_cr'
-M.codex_cmd = 'codex'
-M.warn_on_EDITOR_env_var = true
+M.config = {
+    show_winbar_in_float_window = true,
+    wincmd = default_wincmd,
+    source_syntax = 'read the instruction from {{file}}',
+    codex_args = {},
+    formatter = 'bracketed_pasting_delayed_cr',
+    codex_cmd = 'codex',
+    warn_on_EDITOR_env_var = true,
+}
 
 M.setup = function(params)
-    M = vim.tbl_deep_extend('force', M, params or {})
+    M.config = vim.tbl_deep_extend('force', M.config, params or {})
 end
 
 M.create_codex_meta = function()
     return {
         cmd = function()
             local args
-            -- build up the command to launch codex based on M.codex_args (the
-            -- command line options) and the M.codex_cmd.
-            if type(M.codex_cmd) == 'string' then
-                args = vim.deepcopy(M.codex_args)
-                table.insert(args, 1, M.codex_cmd)
-            elseif type(M.codex_cmd == 'table') then
-                args = vim.deepcopy(M.codex_cmd)
-                for _, arg in ipairs(M.codex_args) do
+            -- build up the command to launch codex based on M.config.codex_args
+            -- (the command line options) and the M.config.codex_cmd.
+            if type(M.config.codex_cmd) == 'string' then
+                args = vim.deepcopy(M.config.codex_args)
+                table.insert(args, 1, M.config.codex_cmd)
+            elseif type(M.config.codex_cmd) == 'table' then
+                args = vim.deepcopy(M.config.codex_cmd)
+                for _, arg in ipairs(M.config.codex_args) do
                     table.insert(args, arg)
                 end
             else
@@ -77,9 +79,9 @@ M.create_codex_meta = function()
 
             return args
         end,
-        formatter = M.formatter,
-        wincmd = M.wincmd,
-        source_syntax = M.source_syntax,
+        formatter = M.config.formatter,
+        wincmd = M.config.wincmd,
+        source_syntax = M.config.source_syntax,
         send_delayed_final_cr = true,
     }
 end
@@ -102,7 +104,7 @@ local shortcuts = {
         key = '\7',
         requires_cr = false,
         pre_hook = function()
-            if M.warn_on_EDITOR_env_var and ((not vim.env.EDITOR) or (not vim.env.EDITOR:find 'nvr')) then
+            if M.config.warn_on_EDITOR_env_var and ((not vim.env.EDITOR) or (not vim.env.EDITOR:find 'nvr')) then
                 vim.notify('current $EDITOR command is not nvr, please consider using nvr', vim.log.levels.WARN)
             end
         end,
@@ -137,7 +139,7 @@ for _, shortcut in ipairs(shortcuts) do
 end
 
 codex_commands.set_args = function(opts)
-    M.codex_args = opts.fargs or {}
+    M.config.codex_args = opts.fargs or {}
 end
 codex_completions.set_args = function()
     return codex_args
@@ -201,7 +203,7 @@ keymap('n', '<Plug>(yarepl-codex-exec)', '', {
 
 vim.api.nvim_create_user_command('CodexSetArgs', function(opts)
     vim.deprecate('CodexSetArgs', 'Yarepl codex set_args', '2026-06-01', 'yarepl.nvim', false)
-    M.codex_args = opts.fargs or {}
+    M.config.codex_args = opts.fargs or {}
 end, {
     nargs = '*',
     complete = function()
