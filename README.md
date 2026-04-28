@@ -727,12 +727,17 @@ function send_line_verbatim(lines)
 end
 
 function ipython_or_python()
+    -- find_binary searches upward from the current directory until it finds the binary
+    -- search_root: relative path to search (e.g., ".venv/bin")
+    -- binary_name: executable to locate (e.g., "ipython")
+    -- fallback_binary: returned if no match is found (e.g., 'ipython' from PATH)
     local ipython_cmd = yarepl.cmd_builtin.find_binary(".venv/bin", "ipython", 'ipython')
 
     if vim.fn.executable(ipython_cmd) == 1 then
         return { ipython_cmd, '--simple-prompt' }
     end
 
+    -- Fall back to python3 using the same search logic
     return yarepl.cmd_builtin.find_binary(".venv/bin", "python3", 'python3')
 end
 
