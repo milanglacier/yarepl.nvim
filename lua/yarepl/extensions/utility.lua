@@ -52,7 +52,8 @@ end
 ---@param shortcut_name string
 ---@return string
 function M.plug_name(shortcut_name)
-    return shortcut_name:gsub('_', '-')
+    local name = shortcut_name:gsub('_', '-')
+    return name
 end
 
 -- Execute a user command with a count prefix, using the current v:count.
