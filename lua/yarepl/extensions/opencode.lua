@@ -3,22 +3,9 @@ local util = require 'yarepl.extensions.utility'
 
 local M = {}
 
-local function default_wincmd(bufnr, name)
-    local winid = vim.api.nvim_open_win(bufnr, true, {
-        relative = 'laststatus',
-        row = 0,
-        col = math.floor(vim.o.columns * 0.5),
-        width = math.floor(vim.o.columns * 0.5),
-        height = math.floor(vim.o.lines * 0.7),
-        style = 'minimal',
-        title = name,
-        border = 'rounded',
-        title_pos = 'center',
-    })
-    if M.config.show_winbar_in_float_window then
-        vim.wo[winid].winbar = '%t'
-    end
-end
+local default_wincmd = util.default_float_wincmd(function()
+    return M.config
+end)
 
 local opencode_args = {
     '--continue',
@@ -87,25 +74,7 @@ end
 M.create_opencode_meta = function()
     return {
         cmd = function()
-            ---@type string[]
-            local args
-            local cmd = M.config.opencode_cmd
-            if type(cmd) == 'string' then
-                args = vim.deepcopy(M.config.opencode_args)
-                table.insert(args, 1, cmd)
-            elseif type(cmd) == 'table' then
-                ---@type string[]
-                local cmd_args = cmd
-                args = vim.deepcopy(cmd_args)
-                for _, arg in ipairs(M.config.opencode_args) do
-                    table.insert(args, arg)
-                end
-            else
-                vim.notify('invalid opencode cmd type', vim.log.levels.ERROR)
-                return
-            end
-
-            return args
+            return util.build_cmd('opencode', M.config.opencode_cmd, M.config.opencode_args)
         end,
         formatter = M.config.formatter,
         wincmd = M.config.wincmd,
@@ -121,9 +90,7 @@ local shortcuts = {
         key = '\24e',
         requires_cr = false,
         pre_hook = function()
-            if M.config.warn_on_EDITOR_env_var and ((not vim.env.EDITOR) or (not vim.env.EDITOR:find 'nvr')) then
-                vim.notify('current $EDITOR command is not nvr, please consider using nvr', vim.log.levels.WARN)
-            end
+            util.warn_editor_not_nvr(M.config.warn_on_EDITOR_env_var)
         end,
     },
     { name = 'send_exit', key = '/exit', requires_cr = true },
@@ -196,7 +163,7 @@ end
 yarepl.completions.opencode = opencode_completions
 
 for _, shortcut in ipairs(shortcuts) do
-    local plug_name = shortcut.name:gsub('_', '-')
+    local plug_name = util.plug_name(shortcut.name)
     keymap('n', '<Plug>(yarepl-opencode-' .. plug_name .. ')', '', {
         noremap = true,
         callback = function()

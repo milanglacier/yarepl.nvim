@@ -3,22 +3,9 @@ local util = require 'yarepl.extensions.utility'
 
 local M = {}
 
-local function default_wincmd(bufnr, name)
-    local winid = vim.api.nvim_open_win(bufnr, true, {
-        relative = 'laststatus',
-        row = 0,
-        col = math.floor(vim.o.columns * 0.5),
-        width = math.floor(vim.o.columns * 0.5),
-        height = math.floor(vim.o.lines * 0.7),
-        style = 'minimal',
-        title = name,
-        border = 'rounded',
-        title_pos = 'center',
-    })
-    if M.config.show_winbar_in_float_window then
-        vim.wo[winid].winbar = '%t'
-    end
-end
+local default_wincmd = util.default_float_wincmd(function()
+    return M.config
+end)
 
 -- Predefined prefix setters
 local prefixes = {
@@ -217,27 +204,7 @@ end
 M.create_aider_meta = function()
     return {
         cmd = function()
-            ---@type string[]
-            local args
-            -- build up the command to launch aider based on M.config.aider_args
-            -- (the command line options) and the M.config.aider_cmd.
-            local cmd = M.config.aider_cmd
-            if type(cmd) == 'string' then
-                args = vim.deepcopy(M.config.aider_args)
-                table.insert(args, 1, cmd)
-            elseif type(cmd) == 'table' then
-                ---@type string[]
-                local cmd_args = cmd
-                args = vim.deepcopy(cmd_args)
-                for _, arg in ipairs(M.config.aider_args) do
-                    table.insert(args, arg)
-                end
-            else
-                vim.notify('invalid aider cmd type', vim.log.levels.ERROR)
-                return
-            end
-
-            return args
+            return util.build_cmd('aider', M.config.aider_cmd, M.config.aider_args)
         end,
         formatter = M.config.formatter,
         wincmd = M.config.wincmd,
@@ -345,7 +312,7 @@ yarepl.completions.aider = aider_completions
 -------------------------------------
 
 for _, shortcut in ipairs(shortcuts) do
-    local plug_name = shortcut.name:gsub('_', '-')
+    local plug_name = util.plug_name(shortcut.name)
     keymap('n', '<Plug>(yarepl-aider-' .. plug_name .. ')', '', {
         noremap = true,
         callback = function()
@@ -438,7 +405,7 @@ end, {
 
 for _, shortcut in ipairs(shortcuts) do
     local old_plug = '<Plug>(AiderSend' .. shortcut.legacy_name .. ')'
-    local new_plug = '<Plug>(yarepl-aider-' .. shortcut.name:gsub('_', '-') .. ')'
+    local new_plug = '<Plug>(yarepl-aider-' .. util.plug_name(shortcut.name) .. ')'
     keymap('n', old_plug, '', {
         noremap = true,
         callback = function()
