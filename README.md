@@ -31,6 +31,7 @@
   - [aider](#aider)
   - [codex](#codex)
   - [opencode](#opencode)
+  - [pi](#pi)
   - [code-cell](#code-cell)
   - [fzf-lua](#fzf-lua)
   - [telescope](#telescope)
@@ -84,8 +85,9 @@ effortlessly interact with multiple CLI Apps through various paradigms:
 - Send text from a single buffer to multiple CLI Apps (same program or different)
 - Attach a buffer to a dedicated CLI Apps
 
-The plugin features integration with `aider.chat`, `OpenAI Codex CLI`, and
-`OpenCode`, and provides convenient code cell text object definitions. Choose
+The plugin features integration with `aider.chat`, `OpenAI Codex CLI`,
+`OpenCode`, and `pi`, and provides convenient code cell text object
+definitions. Choose
 your preferred
 fuzzy finder among `telescope`, `fzf-lua`, or `Snacks.picker` to preview active
 REPLs. These features are available as [extensions](#extensions).
@@ -924,6 +926,8 @@ metas = {
     },
     -- yarepl provides builtin extension to use with codex.
     codex = require('yarepl.extensions.codex').create_codex_meta(),
+    -- yarepl provides builtin extension to use with pi.
+    pi = require('yarepl.extensions.pi').create_pi_meta(),
 }
 ```
 
@@ -1152,6 +1156,13 @@ This module enhances AI-assisted coding capabilities through
 [OpenCode](https://opencode.ai) integration. Its extension-specific `<Plug>`
 maps follow the same lowercase naming pattern, for example
 `<Plug>(yarepl-opencode-exec)`.
+
+## pi
+
+This module enhances AI-assisted coding capabilities through
+[pi](https://pi.dev) integration. Its extension-specific `<Plug>`
+maps follow the same lowercase naming pattern, for example
+`<Plug>(yarepl-pi-exec)`.
 
 ## code-cell
 

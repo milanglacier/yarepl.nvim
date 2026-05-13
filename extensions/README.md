@@ -23,10 +23,18 @@
   - [Usage](#usage-2)
     - [Example keybinding Setup](#example-keybinding-setup-2)
   - [Customization](#customization-2)
-- [Code Cell](#code-cell)
+- [Pi](#pi)
   - [Overview](#overview-3)
   - [Features](#features-3)
+  - [Commands](#commands-3)
+  - [Keymaps](#keymaps-3)
   - [Usage](#usage-3)
+    - [Example keybinding Setup](#example-keybinding-setup-3)
+  - [Customization](#customization-3)
+- [Code Cell](#code-cell)
+  - [Overview](#overview-4)
+  - [Features](#features-4)
+  - [Usage](#usage-4)
     - [Example Configuration](#example-configuration)
 - [Telescope Integration](#telescope-integration)
 - [Fzf-lua Integration](#fzf-lua-integration)
@@ -36,10 +44,11 @@
 names. Update old forms like `<Plug>(Yarepl-aider-send-visual)`, to
 `<Plug>(yarepl-aider-send-visual)`,
 
-Aider, Codex, and OpenCode also live under the unified `Yarepl` command tree.
+Aider, Codex, OpenCode, and Pi also live under the unified `Yarepl` command tree.
 The old top-level commands are being replaced by forms like `:Yarepl aider
 exec`, `:Yarepl aider set_prefix /ask`, `:Yarepl codex send_status`, `:Yarepl
-codex send_open_editor`, and `:Yarepl opencode send_models`.
+codex send_open_editor`, `:Yarepl opencode send_models`, and `:Yarepl pi
+send_open_editor`.
 
 If you were used to `AiderExec`, `AiderSetPrefix`, `CodexExec`, or
 `<Plug>(AiderSendYes)`, the new names are the same actions with a more regular
@@ -487,6 +496,110 @@ require('yarepl.extensions.opencode').setup {
       show_winbar_in_float_window = true,
       -- The default is a floating window at the bottom right corner; you can override it
       wincmd = require('yarepl.extensions.opencode').config.wincmd,
+}
+```
+
+# Pi
+
+## Overview
+
+This extension integrates the [pi](https://pi.dev) AI coding assistant with
+yarepl. It provides a ready-to-use REPL meta, completions for common slash
+commands, and convenience commands for the most used interactive keybinds.
+
+## Features
+
+- Seamless yarepl integration for pi sessions
+- Completions for common pi slash commands
+- Convenience shortcuts for abort, exit, and open-editor
+- Configurable pi command and arguments
+- Floating window default for a focused REPL experience
+
+## Commands
+
+- `Yarepl pi set_args`: Set CLI arguments for launching pi with completion
+  support, for example `Yarepl pi set_args --model sonnet:high`.
+- `Yarepl pi send_abort`: Send Ctrl-C to pi.
+- `Yarepl pi send_exit`: Send Ctrl-D to pi.
+- `Yarepl pi send_open_editor`: Ask pi to open the editor (`Ctrl-G`).
+- `Yarepl pi exec`: Type a prompt or slash command in the cmdline and send it
+  to pi, with completion for common prefixes like `/model`, `/compact`,
+  `/export`, `/new`, `/quit`, `/session`, `/settings`, `/share`, and `/tree`.
+
+All commands accept an optional count to target a specific pi REPL id.
+
+## Keymaps
+
+In addition to the general `<Plug>` maps created by yarepl once the `pi` meta
+is registered, this extension defines extra convenience maps:
+
+- `<Plug>(yarepl-pi-exec)`: Type in cmdline and send to pi.
+- `<Plug>(yarepl-pi-send-abort)`: Send Ctrl-C.
+- `<Plug>(yarepl-pi-send-exit)`: Send Ctrl-D.
+- `<Plug>(yarepl-pi-send-open-editor)`: Ask pi to open the editor (`Ctrl-G`).
+
+You can prefix a count (e.g. `2`) before a mapping to target that REPL id.
+
+## Usage
+
+Add the pi meta to your setup:
+
+```lua
+require('yarepl').setup {
+  metas = {
+    pi = require('yarepl.extensions.pi').create_pi_meta(),
+  },
+}
+```
+
+For the best experience using the `Open Editor` (`Ctrl-G`) command with pi,
+install [neovim-remote](https://github.com/mhinz/neovim-remote) and set your
+`EDITOR` inside Neovim to an `nvr` command. For example:
+
+```lua
+vim.env.EDITOR = 'nvr -cc tabnew --remote-wait'
+```
+
+To return from an nvr instance to pi, use `:w | bdelete` instead of `:wq`,
+as nvr only exits when the buffer is deleted.
+
+### Example keybinding Setup
+
+```lua
+local keymap = vim.api.nvim_set_keymap
+
+-- general yarepl keymaps for the pi meta
+keymap('n', '<Leader>ps', '<Plug>(yarepl-start-pi)', { desc = 'Start pi' })
+keymap('n', '<Leader>pf', '<Plug>(yarepl-focus-pi)', { desc = 'Focus pi' })
+keymap('n', '<Leader>ph', '<Plug>(yarepl-hide-pi)', { desc = 'Hide pi' })
+keymap('v', '<Leader>pr', '<Plug>(yarepl-send-visual-pi)', { desc = 'Send visual to pi' })
+keymap('n', '<Leader>prr', '<Plug>(yarepl-send-line-pi)', { desc = 'Send line to pi' })
+keymap('n', '<Leader>pr', '<Plug>(yarepl-send-operator-pi)', { desc = 'Send operator to pi' })
+
+-- pi-specific convenience keymaps
+keymap('n', '<Leader>pe', '<Plug>(yarepl-pi-exec)', { desc = 'Exec in pi' })
+keymap('n', '<Leader>pa', '<Plug>(yarepl-pi-send-abort)', { desc = 'Abort' })
+keymap('n', '<Leader>pD', '<Plug>(yarepl-pi-send-exit)', { desc = 'Exit' })
+keymap('n', '<Leader>po', '<Plug>(yarepl-pi-send-open-editor)', { desc = 'Open editor' })
+keymap('n', '<Leader>p<space>', '<cmd>checktime<cr>', {
+    desc = 'sync file changes by pi to nvim buffer',
+})
+```
+
+## Customization
+
+Default configuration:
+
+```lua
+require('yarepl.extensions.pi').setup {
+      pi_cmd = 'pi',
+      pi_args = {},
+      -- Warn when $EDITOR is unset or not using nvr (for OpenEditor).
+      warn_on_EDITOR_env_var = true,
+      -- Display a winbar (e.g., "pi#<id>") in the floating window.
+      show_winbar_in_float_window = true,
+      -- The default is a floating window at the bottom right corner; you can override it
+      wincmd = require('yarepl.extensions.pi').config.wincmd,
 }
 ```
 
