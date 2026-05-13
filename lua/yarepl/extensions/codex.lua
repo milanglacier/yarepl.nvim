@@ -44,6 +44,15 @@ local codex_args = {
     '--cd',
 }
 
+---@class yarepl.extensions.CodexConfig
+---@field show_winbar_in_float_window boolean
+---@field wincmd fun(bufnr: number, name: string)
+---@field source_syntax string
+---@field codex_args string[]
+---@field formatter string
+---@field codex_cmd string|string[]
+---@field warn_on_EDITOR_env_var boolean
+---@type yarepl.extensions.CodexConfig
 M.config = {
     show_winbar_in_float_window = true,
     wincmd = default_wincmd,
@@ -61,14 +70,18 @@ end
 M.create_codex_meta = function()
     return {
         cmd = function()
+            ---@type string[]
             local args
             -- build up the command to launch codex based on M.config.codex_args
             -- (the command line options) and the M.config.codex_cmd.
-            if type(M.config.codex_cmd) == 'string' then
+            local cmd = M.config.codex_cmd
+            if type(cmd) == 'string' then
                 args = vim.deepcopy(M.config.codex_args)
-                table.insert(args, 1, M.config.codex_cmd)
-            elseif type(M.config.codex_cmd) == 'table' then
-                args = vim.deepcopy(M.config.codex_cmd)
+                table.insert(args, 1, cmd)
+            elseif type(cmd) == 'table' then
+                ---@type string[]
+                local cmd_args = cmd
+                args = vim.deepcopy(cmd_args)
                 for _, arg in ipairs(M.config.codex_args) do
                     table.insert(args, arg)
                 end

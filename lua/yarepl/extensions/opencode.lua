@@ -63,6 +63,14 @@ local slash_commands = {
     '/unshare',
 }
 
+---@class yarepl.extensions.OpencodeConfig
+---@field show_winbar_in_float_window boolean
+---@field wincmd fun(bufnr: number, name: string)
+---@field formatter string
+---@field opencode_args string[]
+---@field opencode_cmd string|string[]
+---@field warn_on_EDITOR_env_var boolean
+---@type yarepl.extensions.OpencodeConfig
 M.config = {
     show_winbar_in_float_window = true,
     wincmd = default_wincmd,
@@ -79,12 +87,16 @@ end
 M.create_opencode_meta = function()
     return {
         cmd = function()
+            ---@type string[]
             local args
-            if type(M.config.opencode_cmd) == 'string' then
+            local cmd = M.config.opencode_cmd
+            if type(cmd) == 'string' then
                 args = vim.deepcopy(M.config.opencode_args)
-                table.insert(args, 1, M.config.opencode_cmd)
-            elseif type(M.config.opencode_cmd) == 'table' then
-                args = vim.deepcopy(M.config.opencode_cmd)
+                table.insert(args, 1, cmd)
+            elseif type(cmd) == 'table' then
+                ---@type string[]
+                local cmd_args = cmd
+                args = vim.deepcopy(cmd_args)
                 for _, arg in ipairs(M.config.opencode_args) do
                     table.insert(args, arg)
                 end

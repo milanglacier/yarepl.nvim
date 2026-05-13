@@ -195,6 +195,13 @@ end
 local prefix_handler = create_prefix_handler()
 
 M.set_prefix = prefix_handler.set_prefix
+---@class yarepl.extensions.AiderConfig
+---@field show_winbar_in_float_window boolean
+---@field wincmd fun(bufnr: number, name: string)
+---@field formatter string|fun(lines: string[]): string[]
+---@field aider_args string[]
+---@field aider_cmd string|string[]
+---@type yarepl.extensions.AiderConfig
 M.config = {
     show_winbar_in_float_window = true,
     wincmd = default_wincmd,
@@ -210,14 +217,18 @@ end
 M.create_aider_meta = function()
     return {
         cmd = function()
+            ---@type string[]
             local args
             -- build up the command to launch aider based on M.config.aider_args
             -- (the command line options) and the M.config.aider_cmd.
-            if type(M.config.aider_cmd) == 'string' then
+            local cmd = M.config.aider_cmd
+            if type(cmd) == 'string' then
                 args = vim.deepcopy(M.config.aider_args)
-                table.insert(args, 1, M.config.aider_cmd)
-            elseif type(M.config.aider_cmd) == 'table' then
-                args = vim.deepcopy(M.config.aider_cmd)
+                table.insert(args, 1, cmd)
+            elseif type(cmd) == 'table' then
+                ---@type string[]
+                local cmd_args = cmd
+                args = vim.deepcopy(cmd_args)
                 for _, arg in ipairs(M.config.aider_args) do
                     table.insert(args, arg)
                 end

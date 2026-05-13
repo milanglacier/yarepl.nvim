@@ -79,6 +79,14 @@ local slash_commands = {
     '/tree',
 }
 
+---@class yarepl.extensions.PiConfig
+---@field show_winbar_in_float_window boolean
+---@field wincmd fun(bufnr: number, name: string)
+---@field formatter string
+---@field pi_args string[]
+---@field pi_cmd string|string[]
+---@field warn_on_EDITOR_env_var boolean
+---@type yarepl.extensions.PiConfig
 M.config = {
     show_winbar_in_float_window = true,
     wincmd = default_wincmd,
@@ -95,12 +103,16 @@ end
 M.create_pi_meta = function()
     return {
         cmd = function()
+            ---@type string[]
             local args
-            if type(M.config.pi_cmd) == 'string' then
+            local cmd = M.config.pi_cmd
+            if type(cmd) == 'string' then
                 args = vim.deepcopy(M.config.pi_args)
-                table.insert(args, 1, M.config.pi_cmd)
-            elseif type(M.config.pi_cmd) == 'table' then
-                args = vim.deepcopy(M.config.pi_cmd)
+                table.insert(args, 1, cmd)
+            elseif type(cmd) == 'table' then
+                ---@type string[]
+                local cmd_args = cmd
+                args = vim.deepcopy(cmd_args)
                 for _, arg in ipairs(M.config.pi_args) do
                     table.insert(args, arg)
                 end
