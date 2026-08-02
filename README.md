@@ -454,11 +454,8 @@ Additionally, on Windows, sourcing from a file mitigates potential issues with
 stdin processing when the REPL must read substantial input, as the file-based
 approach significantly reduces the data read from the stdin.
 
-However, one notable drawback involves the security implications of temporary
-file creation. Since the REPL executes code from this file, any vulnerability
-in temporary file handling, such as exposure to malicious attack, could pose
-security risks. Thus, while beneficial in certain scenarios, this method
-requires careful consideration of its potential drawbacks.
+Yarepl automatically removes its temporary files when Neovim exits. Since the
+REPL executes their contents, only source code you trust.
 
 Note that the REPL configuration requires a corresponding `source_syntax`
 implementation. For more information, refer to the section [Customizing the
@@ -976,7 +973,7 @@ Here's an example setup using `yarepl` with a source function:
 ```lua
 local yarepl = require 'yarepl'
 local python_source_func = function(str)
-    local file = make_tmp_file(str)
+    local file = yarepl.make_tmp_file(str)
     if not file then
         return
     end

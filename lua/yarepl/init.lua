@@ -1206,7 +1206,7 @@ end
 ---@param keep_file boolean? Whether keep the temporary file after temporary execution
 ---@return string? The file name of the temporary file
 function M.make_tmp_file(content, keep_file)
-    local tmp_file = os.tmpname() .. '_yarepl'
+    local tmp_file = vim.fn.tempname()
 
     local f = io.open(tmp_file, 'w+')
     if f == nil then
@@ -1231,7 +1231,7 @@ end
 ---@param keep_file boolean?
 ---@reutrn string? The syntax to source the file
 function M.source_file_with_source_syntax(content, source_syntax, keep_file)
-    local tmp_file = os.tmpname() .. '_yarepl'
+    local tmp_file = vim.fn.tempname()
 
     local f = io.open(tmp_file, 'w+')
     if f == nil then
